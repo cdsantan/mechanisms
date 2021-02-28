@@ -2,14 +2,14 @@
 
 Paclet[
 	"Name" ->  "Mechanisms",
-	"Version" ->  "0.7.3",
+	"Version" ->  "0.8",
 	"Creator" ->  "cdsantan@syr.edu",
 	"Description" ->  "Mechanisms package",
 	"WolframVersion" ->  "11+",
 	"Extensions"  ->  {
 		{"Kernel", 
 			"Root" -> "Kernel", 
-			"Context" -> {"Mechanisms`"}
+			"Context" -> {"mechanisms`"}
 		},
 		{"Resource",
 			"Root" -> "Resources", 

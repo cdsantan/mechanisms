@@ -2,7 +2,7 @@
 
 Paclet[
 	"Name" ->  "Mechanisms",
-	"Version" ->  "0.8",
+	"Version" ->  "0.85",
 	"Creator" ->  "cdsantan@syr.edu",
 	"Description" ->  "Mechanisms package",
 	"WolframVersion" ->  "11+",

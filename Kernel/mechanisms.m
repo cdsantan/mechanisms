@@ -20,8 +20,15 @@
 
 
 BeginPackage["mechanisms`",{"Developer`"}];
-$mechanismsVersion=0.8;
-$mechanismsVersionText="mechanisms version 0.8";
+$mechanismsVersion=0.85;
+$mechanismsVersionText="mechanisms version 0.85 beta";
+
+
+(* 
+	We use MeshRegion in this package to work so make sure we are using at least version 10 of Mathematica
+*)
+If[ $VersionNumber<10, Print["Mathematica version may be too low."]];
+
 
 
 $mechanismsVersion::usage = "$mechanismsVersion returns the version number of the package.";
@@ -31,11 +38,11 @@ $mechanismsVersionText::usage = "$mechanismsVersionText returns the version numb
 rigidBar::usage="rigidBar[ {v1, v2} ] is a rigid bar. Use defaultData[ rigidBar ] to see its associated data.";
 spring::usage="spring[ {v1, v2} ] is a spring allowing you to set an arbitrary force. Use defaultData[ spring ] to see its associated data.";
 face::usage="face[ {v1,v2,...} ] is a face. Use defaultData[ face ] to see its associated data.";
+elasticFace::usage="elasticFace[ {v1,v2,...} ] is an elastic face. Use defaultData[ face ] to see its associated data.";
 fold::usage="fold[ {v1,v2} ] is a fold with torsional spring controlling its angle. Use defaultData[ fold ] to see its associated data.";
-joint::usage="joint[v1] is a joint. Use defaultData[ joint ] to see its associated data.";
+joint::usage="joint[v1] is a joint.";
 angleJoint::usage="angleJoint[v1] is a torsional joint. Use defaultData[ angleJoint ] to see its associated data.";
-freeJoint::usage="freeJoint[v1] is a free joint ( a joint[] with \"pinningStiffness\" equal to 0).";
-pinnedJoint::usage="pinnedJoint[v1] is a pinned joint ( a joint[] with \"pinningStiffness\" equal to Infinity).";
+pinnedJoint::usage="pinnedJoint[v1] is a pinned joint. Use defaultData[ pinnedJoint ] to see its associated data.";
 
 defaultData::usage="defaultData[ component ] returns the default data associated with a component.";
 
@@ -73,9 +80,12 @@ vertexDisplacement::usage="vertexDisplacement[v, c] represents the displacement 
 SetAttributes[vertexDisplacement,{NHoldAll,Constant}]
 
 
-addLabel::usage="addLabel[ m, {vertex1 -> label1, ...} ] adds the requested labels to the vertices. ";
-removeLabel::usage="removeLabel[ m , pattern ] removes labels where pattern is any pattern of the form label -> vertex";
-mergeLabel::usage="mergeLabel[ m ] merges the labels and keeps the most recent one.";
+labelCell::usage= "labelCell[ m , label , {index1, index2,...} ] labels cells with the string label.";
+
+listCells::usage = "listCells[m] lists all labels and cell types. Labels are all Strings.
+listCells[ m, label ] lists cells with a certain label.
+listCells[ m, celltype ] lists cells of a certain cell type.
+listCells[ m, celltype1, celltype2, ... ] lists all cells of a certain cell type.";
 
 (*cell modifiers*)
 selectCells::usage=
@@ -86,13 +96,13 @@ deleteCells::usage="deleteCells[ m, pattern ] deletes a sub-mechanism with cell 
 
 addCells::usage="addCells[ m, {cell1, cell2, ... } ] adds cells to a mechanism.";
 
-highlightCells::usage="highlightCells[m, pattern -> display properties] changes the display properties of cells that match a pattern.
-highlightCells[m, head, {properties1, ...} ] applies a list of properties to each component of type head.";
+changeCellData::usage = "changeCellData[ m , pattern, { data1 -> value1, ... } ] changes the data of cells matching pattern.
+changeCellData[ m, type, {cell1, cell2, ...}, data1 -> { value1, value2, ...} ] changes the data of one type corresponding to cells.
+changeCellData[ m , type, {cell1, cell2, ...}, data -> value ] changes the data of a number of cells to one value.";
 
-changeCellData::usage="changeCellData[m, pattern, {data1 -> newData,...}] changes the specified data on any cells that match a pattern.
-changeCellData[m, head, datatype, data ] replaces the data of type datatype on components of type head with the data.";
-
-splitEdge::usage="splitEdge[ m, edge, label -> position ] adds a vertex to an edge and places the vertex at position with a label.";
+subdivideCell::usage="subdivideCell[ m, cell list, label ] adds a vertex to a cell at the centroid.";
+divideFace::usage="divideFace[ m, edge list ] divides faces along the listed edges, read from left to right.";
+triangulateFaces::usage="triangulateFaces[m] triangulates all faces along the shortest diagonal recursively.";
 
 (*vertex modifiers*)
 placeVertices::usage="placeVertices[m, {v1 -> new position 1, ...} ] moves vertices to new positions.
@@ -105,33 +115,25 @@ deleteVertices::usage="deleteVertices[ m, {v1, ...} ] deletes a list of vertices
 
 mapCells::usage="mapCells[m, f] applies a map f to a mechanism.";
 
-addVertex::usage="addVertex[m, face, label -> position] adds a vertex to a face at a specified position.
-The new vertex does not have to be on the face.";
-
 (*mechanism modifiers*)
 joinMechanism::usage="joinMechanism[ m1, m2, ... ] joins a list of mechanisms of the same type together.";
 
-
-constrainedComponents::usage="constrainedComponents[m] returns the constrained components of a mechanism.";
-
-componentData::usage = "componentData[ m, data, pattern ]";
-matchFromData::usage = "matchFromData[ m, data -> patt ] returns all components whose data matches the pattern.";
-selectFromData::usage = "selectFromData[ m, data, f ] returns all components such that f applied to specified data returns True.";
 
 mechanismPositions::usage=
 "mechanismPositions[ \!\(\*StyleBox[\"mechanism\",FontSlant->\"Italic\"]\) ] returns the coordinates of the vertices of \!\(\*StyleBox[\"mechanism\",FontSlant->\"Italic\"]\).
 mechanismPositions[ \!\(\*StyleBox[\"mechanism\",FontSlant->\"Italic\"]\) -> \!\(\*StyleBox[\"positions\",FontSlant->\"Italic\"]\) ] returns a new mechanism with coordinates given by \!\(\*StyleBox[\"positions\",FontSlant->\"Italic\"]\).";
 
-mechanismComponents::usage="mechanismComponents[ m ] lists all mechanism components in a mechanism m.
-mechanismComponents[ m, pattern ] lists mechanism components in a mechanism m that match a pattern.
-mechanismComponents[ m, pattern -> { dataType1 -> data1, ...} ] returns a mechanism in which components matching pattern have had their data replaced.";
+mechanismComponents::usage="This has been superceded by mechansimCells[].";
+
+mechanismCells::usage= "mechanismCells[m] returns all the cells in mechanism m.
+mechanismCells[ m , cellSpec ] returns a list of cells matching a certain specification.
+  cellSpec can be either {cellType, {index1, index2, ...}} or a pattern.
+mechanismCells[ m, cellSpec, dataType -> function ] returns a list of cells returning True when function f returns True when applied to dataType. f must be a pure function.
+mechanismCells[ m, cellSpec, dataType -> pattern ] returns a list of cells whose dataType matches pattern.";
 
 
 tesselateMechanism::usage=
 "tesselateMechanism[mechanism, primitive vector, n1 ], tesselateMechanism[mechanism, {vector 1, vector 2}, {n1, n2}],  tesselateMechanism[mechanism, {vector 1, vector 2, vector 3}, {n1, n2, n3}] tesselates a mechanism using a set of 2D or 3D primitive vectors as an n1, n1 x n2 or n1 x n2 x n3 celled mechanism.";
-
-
-meshCells::usage="meshCells[ m ] returns the mesh cells producing a particular mechanism.";
 
 
 listFaces::usage="listFaces[ m ] returns a list of faces in the mechanism.
@@ -140,273 +142,336 @@ listEdges::usage="listEdges[ m ] returns a list of edges in the mechanism.
 listEdges[ m , {edge1, edge2, ...} ] returns an index with the location the specific edge would appear in a list of all edges.";
 listVertices::usage="listVertices[ m ] returns a list of vertices in the mechanism.";
 
+edgeQ::usage="edgeQ[m,{{v1,v2},...}] returns True if all edges are in the mechanism m.";
+faceQ::usage="faceQ[m,{{v1,...},...}] returns True if all faces are in the mechanism m.";
 
-componentDisplayStyle::usage="componentDisplayStyle[ s ] list the style directives for a particular component.";
+validEdgeQ::usage="validEdgeQ[m,{{v1,v2},...}] returns True if all edges could be an edge in mechanism m.";
+validFaceQ::usage="validFaceQ[m,{{v1,...},...}] returns True if all faces could be a face in mechanism m.";
+
+validCellQ::usage="validCellQ[ cellSpec ] returns True if cellSpec is a properly specified cell.
+validCellQ[] returns a pattern that can be used to test if a cell has a valid specification.";
+cellHeadQ::usage="cellHeadQ[ cell ] returns True if cell is a cell type. Use defaultData[] to see a list of cell types.";
 
 
 Begin["`Private`"];
 
 
-$meshRegionProperties={MeshCellStyle,MeshCellLabel,MeshCellShapeFunction};
+$meshRegionProperties={MeshCellStyle -> "style", MeshCellLabel -> "label" , MeshCellShapeFunction -> "shape"};
 
-mechanismPattern = _framework|_origami;
+packedCellPattern = {_[_,_]...};
+labelPattern = {___Rule};
 
 coordinatePattern2D = {{_, _}..};
 coordinatePattern3D = {{_, _, _}..};
 coordinatePattern = coordinatePattern2D | coordinatePattern3D;
 
+
+mechanismPattern = (framework|origami)[ coordinatePattern, _ , packedCellPattern, labelPattern ];
+
 mechanismQ[ mechanismPattern ]:=True
 mechanismQ[_]:=False
 
 
+celltypePattern = rigidBar|spring|face|elasticFace|fold|joint|pinnedJoint|angleJoint;
+inputCellPattern = Alternatives[
+	(rigidBar|spring|fold)[ {Except[_List],Except[_List]} ],
+	(elasticFace|angleJoint)[ {Except[_List],Except[_List],Except[_List]} ],
+	(joint|pinnedJoint)[ Except[_List] ],
+	face[ _?VectorQ ]
+];
+exactInputCellPattern = Alternatives[
+	(rigidBar|spring|fold)[ {_Integer,_Integer} ],
+	(elasticFace|angleJoint)[ {_Integer,_Integer,_Integer} ],
+	(joint|pinnedJoint)[ _Integer ],
+	face[ _?(VectorQ[#,IntegerQ]&) ]
+];
+
+cellHeadQ[ cell_ ] := MatchQ[ cell, celltypePattern ]
+
+validCellQ[ cell_ ] := MatchQ[ cell, exactInputCellPattern ]
+validCellQ[] := MatchQ[ exactInputCellPattern ]
+
+
 (* default data in all cell types *)
+defaultData[] = {rigidBar, spring, face, elasticFace , fold, joint, pinnedJoint,angleJoint};
 defaultData[rigidBar] = {"length" -> Automatic, "stiffness" -> Infinity};
 defaultData[spring] = {"length" -> Automatic, "stiffness" -> Infinity, "strain" -> "linear"};
-defaultData[face] = { "faceStiffness" -> Infinity };
+defaultData[face] = { };
+defaultData[elasticFace] = { "YoungsModulus" -> Infinity , "PoissonRatio" -> 1/3 };
 defaultData[fold] = { "torsionalStiffness" -> Infinity, "angle" -> Automatic};
-defaultData[joint] = { "pinningStiffness" -> Infinity, "constraint" -> Automatic };
+defaultData[joint] = {};
+defaultData[pinnedJoint] = { "pinningStiffness" -> Infinity, "constraint" -> Automatic };
 defaultData[angleJoint] = {"angleStiffness" -> Infinity, "angle" -> Automatic };
 defaultData[_] = {};
 
 
-(*
-	This is the default style information that gets stored in the mechanism structure.
-	see addMeshRegion[] or mechanisms`graphics`defaultGraphicsPrimitive[] to see how Automatic will be interpreted.
-*)
-componentDisplayStyle[rigidBar] = {"style" -> {CapForm["Round"], Black, Thickness[0.005]}, "label" -> None, "shape" -> Automatic};
-componentDisplayStyle[spring] = {"style" -> {Gray, Thickness[0.007]},"label" -> None, "shape" -> Automatic };
-componentDisplayStyle[joint] = {"style" -> {Black, PointSize[0.01]}, "label" -> None, "shape" -> Automatic};
-componentDisplayStyle[face] = {"style" -> {GrayLevel[0.85]}, "label"->None, "shape" -> Automatic};
-componentDisplayStyle[Polygon] = {"style" -> {RGBColor[{0.68,0.77,0.92}]}, "label"->None, "shape" -> Automatic};
-componentDisplayStyle[_] = {"style" -> {}, "label"->None, "shape" -> Automatic};
-
-
-labelPattern = {Rule[_, _Integer]...};
-$mechanismComponents={rigidBar,spring,fold,face,joint,angleJoint};
-
-
-unpackedCellPattern = { _Symbol, _, _, _ };
-
-
-(*lists of cells in either packed or unpacked form*)
-packedCellPattern = {_Symbol[ _ , _List, _List ]...};
-
-
 (*data that will be stored for each of these components and in what order*)
-dataForm[rigidBar]:={"length","stiffness"}
-dataForm[spring]:={"length","stiffness","strain"}
-dataForm[face]:={"faceStiffness"}
-dataForm[fold]:={"torsionalStiffness","angle"}
-dataForm[joint]:={ "pinningStiffness", "constraint" }
-dataForm[angleJoint] := {"angleStiffness", "angle" }
-dataForm[_]:={}
+dataForm[rigidBar] = {"stiffness","length","shape","label","style"};
+dataForm[spring] = {"stiffness","length","strain","shape","label","style"};
+dataForm[face] = {"faceStiffness","shape","label","style"};
+dataForm[elasticFace] = {"YoungsModulus","PoissonRatio","shape","label","style"};
+dataForm[fold] = {"torsionalStiffness","angle","shape","label","style"};
+dataForm[joint] = { "shape","label","style" };
+dataForm[pinnedJoint] = { "pinningStiffness", "constraint","shape","label","style" };
+dataForm[angleJoint] = {"angleStiffness", "angle","shape","label","style" };
+dataForm[_] := {};
 
 
-packComponentCells[ data : {unpackedCellPattern...} ] := deleteDuplicateCells[packGroupedComponentCells[#]]& /@ GatherBy[ data, First ]
+packCells[ cells : {_[_,_]...} ] :=
+	With[ { groupedCells = GatherBy[ Flatten[pullTags /@ cells], Head ] },
+		packCellType[  Head[#[[1]]] , #[[All,1]], #[[All,2]] ]& /@ groupedCells
+	]
 
-packGroupedComponentCells[ data : {unpackedCellPattern...} ] :=
-Module[ { heads, indices, groupedData, unpackedData, displayData },
-	{heads, indices, groupedData, displayData} = Transpose[ data ];
-	heads = First[heads];
-	unpackedData = ReplaceAll[ ReplaceAll[ dataForm[heads] ,  groupedData ] , defaultData[heads] ];
-
-	compressCells[ heads[
-		ToPackedArray[ indices ],
-		ToPackedArray /@ Transpose[ unpackedData ],
-		compressDisplayCells[heads, displayData]
-	]]
-]
+packCellType[ s_String, indices_, data_ ] := s[ToPackedArray[indices],{}]
+packCellType[ head_Symbol, indices_, data_ ] := 
+	head[
+		ToPackedArray[indices] , 
+		compressCellData[ head, data ]
+	]
 
 
-unpackComponentCells[ {} ] := {}
-unpackComponentCells[ cells : {_Symbol[_,_,_]..} ] := Flatten[ unpackComponentCells /@ cells, 1 ]
-
-unpackComponentCells[ head_Symbol[ indices_, data_, display_ ] ] :=
-	Transpose[ {
-		ConstantArray[ head, Length[indices] ], 
-		indices , 
-		Thread /@ Thread[ ConstantArray[dataForm[head], Length[indices] ] -> Transpose[data] ], 
-		Thread[$meshRegionProperties -> # ]& /@ display
-	} ]
-
-
-(*
-	compressCells[] takes a set of cells of the form cellType[ indices, data, display properties ] and puts the data into a more compact form.
-*)
-compressCells[ h_[ indices_, data_, display_ ] ] := h[ 
-	ToPackedArray[ indices ], 
-	compressCellData[ h, indices, data ],
-	display
-]
-
-(* how to store data in a mechanism in a compact way *)
-compressCellData[ rigidBar, indices_, {length_, stiffness_} ] :=
-	{
-		SparseArray[ length /. Automatic -> "Automatic", Length[indices], "Automatic" ],
-		SparseArray[ stiffness, Length[indices], Infinity ]
-	}
-
-compressCellData[ spring, indices_, {length_, stiffness_, strain_} ] :=
-	{
-	SparseArray[ length /. Automatic -> "Automatic", Length[indices], "Automatic" ],
-	SparseArray[ stiffness, Length[indices], Infinity ],
-	SparseArray[ strain, Length[indices], "linear" ]
-	}
-
-compressCellData[ fold, indices_, {torsionalStiffness_, angle_} ] :=
-	{
-		SparseArray[ torsionalStiffness, Length[indices], Infinity ],
-		SparseArray[ angle /. Automatic -> "Automatic", Length[indices], "Automatic" ]
-	}
-
-compressCellData[ face , indices_, {stiffness_} ] :=
-	{
-	SparseArray[ stiffness , Length[indices], Infinity ]
-	}
-
-compressCellData[ joint , indices_, {stiffness_, constraint_} ] :=
-	{
-	SparseArray[ stiffness , Length[indices], Infinity ],
-	SparseArray[ constraint /. Automatic -> "Automatic", Length[indices], "Automatic" ]
-	}
-
-compressCellData[ angleJoint , indices_, {stiffness_, angle_} ] :=
-	{
-	SparseArray[ stiffness , Length[indices], Infinity ],
-	SparseArray[ angle /. Automatic -> "Automatic", Length[indices], "Automatic" ]
-	}
-
-compressCellData[ _, _, data_ ] := data
-
-
-$displayProperties = Join[$meshRegionProperties, { "style", "shape", "label" }];
-
-blankMeshRules = {MeshCellStyle -> {}, MeshCellLabel -> Missing[], MeshCellShapeFunction -> Missing[]};
-blankDisplayRules = {"style" -> {}, "label" -> Missing[], "shape" -> Missing[]};
-cleanupDisplayFunction = {Flatten[{#[[1]]}], #[[2]], #[[3]]}&;
-
-
-compressDisplayCells[ head_, ruleList : {{___Rule}...} ] := compressDisplayCell[head,#]& /@ ruleList
-
-compressDisplayCell[ head_, ruleSpec : _Rule|{___Rule} ] := With[
-{
-	meshDisplayData = {{MeshCellStyle}, MeshCellLabel, MeshCellShapeFunction} /. ruleSpec /. blankMeshRules,
-	cellDisplayData = {{"style"},"label","shape"} /. ruleSpec /. blankDisplayRules,
-	defaultDisplayData = {{"style"},"label","shape"} /. componentDisplayStyle[head]
+pullTags[ head_[ indices_, properties_ ] ] := With[ 
+{ 
+rules = (# -> _ &) /@ dataForm[head], 
+untagged = DeleteCases[ Flatten @ {properties}, _String ]
 },
-	joinDisplayCells[ cleanupDisplayFunction /@ {meshDisplayData, defaultDisplayData, cellDisplayData} ]
-]
-
-
-joinDisplayCells[ data_ ] :=
-With[{ test = Transpose @ data },
 	{
-		Last /@ GatherBy[ Flatten @ test[[1]] , directiveQ],
-		Last @ DeleteMissing[test[[2]]],
-		Last @ DeleteMissing[test[[3]]]
+		#[indices,{}]& /@ Cases[ Flatten@{properties}, _String ],
+		head[indices, FilterRules[ untagged, rules ] ]
 	}
 ]
 
+mechanism::badprop = "Properties `1` do not exist for cell `2`.";
+
+
+combineDataList[ default_ , data_  ] := (Last /@ GatherBy[ Flatten[{default, #} ], directiveQ ])& /@ data
 directiveQ[ _?ColorQ ] := "color"
 directiveQ[ x_ ] := Head[x]
 
-
-expandDisplayCell[ {style_, label_, shape_} ] := 
-	{
-	MeshCellStyle -> style,
-	MeshCellLabel -> label,
-	MeshCellShapeFunction -> shape
-	}
-expandDisplayCells[ displayDataList_ ] := expandDisplayCell /@ displayDataList
-
-
-componentPattern[x_Blank] := {x, _, _ } /; Length[x] == 0
-componentPattern[x_Blank] := {x[[1]],_,_}
-
-componentPattern[r_Alternatives] := Map[ componentPattern ,  r ]
-componentPattern[h_[r_Alternatives]] := componentPattern[ Map[ h , r ] ]
-componentPattern[h_[n_List]]:= With[ { numbers=Range[Length[n]] } , {h , Alternatives @@ Map[RotateRight[n,#]& , numbers ], _ } ]
-componentPattern[h_[n : Except[_Alternatives|_List]]] := {h, n, _}
-
-
-cellPattern[ r_Alternatives ] := 
-With[ { groupedByHead = GatherBy[ List@@r, Head ] },
-	Head[#[[1]]][ indexPattern /@ Alternatives @@ #[[All,1]] ]& /@ groupedByHead
-]
-cellPattern[ x_Blank ] := {_[_]} /; Length[x]==0
-cellPattern[ x_Blank ] := {x[[1]][ _ ]}
-cellPattern[ head_[ ind_ ] ] := {head[ indexPattern[ind] ]}
-
-indexPattern[ x_Blank ] := x
-indexPattern[ r_Alternatives ] := indexPattern /@ r
-indexPattern[ n_List ] := With[ { numbers = Range[Length[n]] }, Alternatives @@ Map[ RotateRight[n,#]&, numbers ] ]
-indexPattern[ n : Except[_Alternatives|_List] ] := n
-
-
-deleteDuplicateCells[ cells : {unpackedCellPattern...} ] := DeleteDuplicatesBy[ cells, {#[[1]], Sort[Flatten[#[[2]]]]}& ]
-
-deleteDuplicateCells[ cells : packedCellPattern ] := deleteDuplicateCells /@ cells
-deleteDuplicateCells[ head_[ indices_, data_, display_ ] ] := Module[
-{
-indexList = DeleteDuplicatesBy[ Transpose[ { Range[ Length[indices] ], indices } ], Sort[Flatten[{Last[#]}]]& ][[All,1]] 
-},
-	head[ indices[[ indexList ]], #[[ indexList ]]& /@ data, display[[ indexList ]] ]
-]
-
-
-deleteDegenerateCells[ cells : {unpackedCellPattern...} ] := Select[
-		DeleteDuplicatesBy[cells, {#[[1]],Sort[Flatten[{#[[2]]}]]}& ],
-		DuplicateFreeQ[Flatten[{#[[2]]}]]&
+combineData[ dataType_, defaultData_, data_ , f_ ] := 
+	SparseArray[
+		f /@ (dataType /. data /. {dataType -> {defaultData}} /. Automatic -> "Automatic"),
+		Length[data],
+		defaultData
 	]
-	
-deleteDegenerateCells[ cells : packedCellPattern ] := deleteDegenerateCells /@ cells
-deleteDegenerateCells[ head_[ indices_, data_, display_ ] ] :=
-With[ { id = Pick[Range[Length[indices]],DuplicateFreeQ[Flatten[{#}]]& /@ indices] },
-	head[ indices[[id]], #[[id]]&/@data, display[[ id ]] ]
+
+
+compressCellData[ rigidBar, data_ ] :=
+With[ 
+{ 
+	mergedData = Merge[#, Flatten[#]&]& /@ data,
+	default = Dispatch @ defaultData[rigidBar]
+},
+	{
+	combineData[ "stiffness", Infinity, mergedData , Last],
+	combineData[ "length", "Automatic", mergedData , Last],
+	combineData[ "shape", "Automatic", mergedData , Last],
+	combineData[ "label", None, mergedData , Last],
+	combineDataList[ {}, "style" /. mergedData /. default /. "style"->{} ]
+	}
+]
+
+compressCellData[ spring, data_ ] :=
+With[ 
+{ 
+	mergedData = Merge[#, Reverse[Flatten[#]]&]& /@ data,
+	default = Dispatch @ defaultData[spring]
+},
+	{
+	combineData[ "stiffness", Infinity, mergedData , Last],
+	combineData[ "length", "Automatic", mergedData , Last],
+	combineData[ "strain", ((#1-#2)/#2)&, mergedData, Last],
+	combineData[ "shape", "Automatic", mergedData , Last],
+	combineData[ "label", None, mergedData , Last],
+	combineDataList[ {}, "style" /. mergedData /. default /. "style"->{} ]
+	}
+]
+
+compressCellData[ joint, data_ ] :=
+With[ 
+{ 
+	mergedData = Merge[#, Reverse[Flatten[#]]&]& /@ data,
+	default = Dispatch @ defaultData[joint]
+},
+	{
+	combineData[ "shape", "Automatic", mergedData , Last],
+	combineData[ "label", None, mergedData , Last],
+	combineDataList[ {}, "style" /. mergedData /. default /. "style"->{} ]
+	}
+]
+
+compressCellData[ pinnedJoint, data_ ] :=
+With[ 
+{ 
+	mergedData = Merge[#, Reverse[Flatten[#]]&]& /@ data,
+	default = Dispatch @ defaultData[pinnedJoint]
+},
+	{
+	combineData[ "pinningStiffness", Infinity, mergedData , Last],
+	combineData[ "constraint", "Automatic", mergedData , Last],
+	combineData[ "shape", "Automatic", mergedData , Last],
+	combineData[ "label", None, mergedData , Last],
+	combineDataList[ {}, "style" /. mergedData /. default /. "style"->{} ]
+	}
+]
+
+compressCellData[ fold, data_ ] :=
+With[ 
+{ 
+	mergedData = Merge[#, Reverse[Flatten[#]]&]& /@ data,
+	default = Dispatch @ defaultData[fold]
+},
+	{
+	combineData[ "torsionalStiffness", Infinity, mergedData , Last],
+	combineData[ "angle", "Automatic", mergedData , Last],
+	combineData[ "shape", "Automatic", mergedData , Last],
+	combineData[ "label", None, mergedData , Last],
+	combineDataList[ {}, "style" /. mergedData /. default /. "style"->{} ]
+	}
+]
+
+compressCellData[ angleJoint, data_ ] :=
+With[ 
+{ 
+	mergedData = Merge[#, Reverse[Flatten[#]]&]& /@ data,
+	default = Dispatch @ defaultData[fold]
+},
+	{
+	combineData[ "angleStiffness", Infinity, mergedData , Last],
+	combineData[ "angle", "Automatic", mergedData , Last],
+	combineData[ "shape", "Automatic", mergedData , Last],
+	combineData[ "label", None, mergedData , Last],
+	combineDataList[ {}, "style" /. mergedData /. default /. "style"->{} ]
+	}
+]
+
+compressCellData[ face, data_ ] :=
+With[ 
+{ 
+	mergedData = Merge[#, Reverse[Flatten[#]]&]& /@ data,
+	default = Dispatch @ defaultData[face]
+},
+	{
+	combineData[ "shape", 0 , mergedData , Last ],
+	combineData[ "shape", "Automatic", mergedData , Last],
+	combineData[ "label", None, mergedData , Last],
+	combineDataList[ {}, "style" /. mergedData /. default /. "style"->{} ]
+	}
+]
+
+compressCellData[ elasticFace, data_ ] :=
+With[ 
+{ 
+	mergedData = Merge[#, Reverse[Flatten[#]]&]& /@ data,
+	default = Dispatch @ defaultData[elasticFace]
+},
+	{
+	combineData[ "YoungsModulus", Infinity, mergedData , Last],
+	combineData[ "PoissonRatio", 1/3, mergedData , Last],
+
+	combineData[ "shape", "Automatic", mergedData , Last],
+	combineData[ "label", None, mergedData , Last],
+	combineDataList[ {}, "style" /. mergedData /. default /. "style"->{} ]
+	}
 ]
 
 
-sortCells[ head_[ indices_, data_, display_ ], sortingFunction_ : Identity ]:=With[
-{ order = OrderingBy[ indices, sortingFunction ] },
-	head[ indices[[ order ]], #[[ order ]]& /@ data, display[[ order ]] ]
+unpackCells[ cells : packedCellPattern ] := Flatten[unpackCellType /@ cells]
+
+unpackCellType[ s_String[ indices_ ] ] := s /@ indices
+
+unpackCellType[ head_Symbol[ indices_, data_ ] ] :=
+	MapThread[
+		head,
+			{
+			indices,
+			Transpose @ uncompressCellData[ head, indices, data ]
+			}
+	]
+
+uncompressCellData[ head_ , indices_, data_ ] :=
+With[ { dataNames=dataForm[head] , length = Length[indices] },
+	MapThread[ Thread[ ConstantArray[#1, length] -> #2 ] &, {dataNames , data}]
 ]
 
 
-orderCells[ head_[indices_,data_,display_], ordering : {___Integer} ] :=
-	head[ indices[[ ordering ]], #[[ ordering ]]& /@ data, display[[ ordering ]] ]
-
-
-replaceCellIndices[ {}, rules_ ] := {}
-
-replaceCellIndices[ cells : {unpackedCellPattern..}, rules_ ] := 
-With[{flipCells = Transpose[ cells ]},
-	Transpose[ { flipCells[[1]], ReplaceAll[ flipCells[[2]], rules ], flipCells[[3]], flipCells[[4]] } ]
+(*uncompressCellData[ rigidBar , indices_ , data_ ] :=
+With[ {length = Length[indices]},
+	{
+		Thread[ ConstantArray[ "stiffness", length ] \[Rule] data[[1]] ],
+		Thread[ ConstantArray[ "length", length ] \[Rule] data[[2]] ],
+		Thread[ ConstantArray["shape", length ]  \[Rule] data[[3]] ],
+		Thread[ ConstantArray["label", length ]  \[Rule] data[[4]] ],
+		Thread[ ConstantArray["style", length ]  \[Rule] data[[5]] ]
+	}
 ]
-
-replaceCellIndices[ cells : packedCellPattern, rules_ ] := Map[ replaceCellIndices[#, rules]&, cells ]
-replaceCellIndices[ head_[indices_, data_, display_ ], rules_ ] := head[ ReplaceAll[indices, rules], data, display ]
-
-replaceRepeatedCellIndices[ {}, rules_ ] := {}
-
-replaceRepeatedCellIndices[ cells : {unpackedCellPattern..}, rules_ ] := 
-With[{flipCells = Transpose[ cells ]},
-	Transpose[ { flipCells[[1]], ReplaceRepeated[ flipCells[[2]], rules ], flipCells[[3]], flipCells[[4]] } ]
+uncompressCellData[ spring , indices_ , data_ ] :=
+With[{length = Length[indices]},
+	{
+		Thread[ ConstantArray[ "stiffness", length ] \[Rule] data[[1]] ],
+		Thread[ ConstantArray[ "length", length ] \[Rule] data[[2]] ],
+		Thread[ ConstantArray[ "strain", length ] \[Rule] data[[3]] ],
+		Thread[ ConstantArray["shape", length ]  \[Rule] data[[4]] ],
+		Thread[ ConstantArray["label", length ]  \[Rule] data[[5]] ],
+		Thread[ ConstantArray["style", length ]  \[Rule] data[[6]] ]
+	}
 ]
-
-replaceRepeatedCellIndices[ cells : packedCellPattern, rules_ ] := Map[ replaceCellIndices[#, rules]&, cells ]
-replaceRepeatedCellIndices[ head_[indices_, data_, display_ ], rules_ ] := head[ ReplaceRepeated[indices, rules], data, display ]
-
-
-replaceCellData[ {}, rules_ ] := {}
-
-replaceCellData[ cells : {unpackedCellPattern..}, rules_ ] :=
-With[{flipCells = Transpose[ cells ]},
-	Transpose[ { flipCells[[1]], flipCells[[2]], ReplaceAll[ flipCells[[3]], rules ], flippedCells[[4]] } ]
+uncompressCellData[ fold , indices_ , data_ ] :=
+With[ {length = Length[indices]},
+	{
+		Thread[ ConstantArray[ "torsionalStiffness", length ] \[Rule] data[[1]] ],
+		Thread[ ConstantArray[ "angle", length ] \[Rule] data[[2]] ],
+		Thread[ ConstantArray["shape", length ]  \[Rule] data[[3]] ],
+		Thread[ ConstantArray["label", length ]  \[Rule] data[[4]] ],
+		Thread[ ConstantArray["style", length ]  \[Rule] data[[5]] ]
+	}
 ]
+uncompressCellData[ joint , indices_ , data_ ] :=
+With[ {length = Length[indices]},
+	{
+		Thread[ ConstantArray["shape", length ]  \[Rule] data[[1]] ],
+		Thread[ ConstantArray["label", length ]  \[Rule] data[[2]] ],
+		Thread[ ConstantArray["style", length ]  \[Rule] data[[3]] ]
+	}
+]
+uncompressCellData[ angleJoint , indices_ , data_ ] :=
+With[ {length = Length[indices]},
+	{
+		Thread[ ConstantArray[ "angleStiffness", length ] \[Rule] data[[1]] ],
+		Thread[ ConstantArray[ "angle", length ] \[Rule] data[[2]] ],
+		Thread[ ConstantArray["shape", length ]  \[Rule] data[[3]] ],
+		Thread[ ConstantArray["label", length ]  \[Rule] data[[4]] ],
+		Thread[ ConstantArray["style", length ]  \[Rule] data[[5]] ]
+	}
+]
+uncompressCellData[ face, indices_ , data_ ] :=
+With[ {length = Length[indices]},
+	{
+		Thread[ ConstantArray["shape", length ]  \[Rule] data[[2]] ],
+		Thread[ ConstantArray["label", length ]  \[Rule] data[[3]] ],
+		Thread[ ConstantArray["style", length ]  \[Rule] data[[4]] ]
+	}
+]
+uncompressCellData[ elasticFace , indices_ , data_ ] :=
+With[ {length = Length[indices]},
+	{
+		Thread[ ConstantArray[ "YoungsModulus", length ] \[Rule] data[[1]] ],
+		Thread[ ConstantArray[ "PoissonRatio", length ] \[Rule] data[[2]] ],
+		Thread[ ConstantArray["shape", length ]  \[Rule] data[[3]] ],
+		Thread[ ConstantArray["label", length ]  \[Rule] data[[4]] ],
+		Thread[ ConstantArray["style", length ]  \[Rule] data[[5]] ]
+	}
+]*)
 
-replaceCellData[ cells : packedCellPattern, rules_ ] := replaceCellData[#,rules]& /@ cells
 
-replaceCellData[ head_[indices_, data_, display_], rule_ ] := head[indices, replaceElement[# , rule]& /@ data, display ]
+replaceCellIndices[ cells : packedCellPattern , rules_ ] := Head[#][ ReplaceAll[ #[[1]], rules ], #[[2]] ]& /@ cells
+
+
+replaceRepeatedCellIndices[ cells : packedCellPattern , rules_ ] := Head[#][ ReplaceRepeated[ #[[1]], rules ], #[[2]] ]& /@ cells
+
+
+replaceCellData[ cells : packedCellPattern, rules_ ] := Head[#][ #[[1]], replaceElement[ #, rules ] & /@ #[[2]] ]& /@ cells
+
 (*
 from: https://mathematica.stackexchange.com/questions/13790/using-replaceall-on-sparsearray
 *)
@@ -427,65 +492,158 @@ if the data isn't a SparseArray
 replaceElement[ s_, rule_ ] := ReplaceAll[ s, rule ]
 
 
-identifyComponents[ pattern_, head_[ indices_, data_, display_ ] ] :=
-With[ { validPatterns = matchingPattern[ pattern, head ] },
-	If[Length[validPatterns] == 0,
-		{},
-		Cases[ Transpose[ {Range[Length[indices]], indices} ], { _ , validPatterns[[1,1]] } ][[All,1]]
-	]
+sortCellType[ head_[ indices_, data_ ], sortingFunction_ : Identity ]:=With[
+{ order = OrderingBy[ indices, sortingFunction ] },
+	head[ indices[[ order ]], #[[ order ]]& /@ data ]
 ]
 
-matchingPattern[ patternList_, head_ ] := Pick[ patternList, MatchQ[ head, Head[#] ]& /@ patternList ]
+
+(*ordering is a list of integers*)
+orderCellType[ head_[indices_,data_ ], ordering_ ] :=
+	head[ indices[[ ordering ]], #[[ ordering ]]& /@ data ]
 
 
-selectComponents[ headSpec_, dataSpec_, dataSelector_, head_[indices_,data_,display_] ] :=
-If[ MatchQ[ head, headSpec ],
-	With[ { dataLocation = FirstPosition[ dataForm[head], dataSpec ] },
-		If[ MissingQ[dataLocation],
-			{},
-			selectIndices[ dataSelector, indices, data[[ dataLocation[[1]] ]] ]
-		]
-	],
-	{}
+(*this function unpacked arrays*)
+deleteDuplicateCells[ cells : packedCellPattern ] := deleteDuplicateCells /@ cells
+deleteDuplicateCells[ head_[ indices_, data_ ] ] := Module[
+{
+indexList = DeleteDuplicatesBy[
+		Transpose[ { Range[ Length[indices] ], indices } ], 
+		Sort[Flatten[{Last[#]}]]& 
+	][[All,1]] 
+},
+	head[ ToPackedArray @ indices[[ indexList ]], #[[ indexList ]]& /@ data ]
 ]
 
-selectIndices[ dataSelector_, indices_, data_List ] :=
-	Select[
-		Transpose[ Range[Length[indices]], data /. "Automatic" -> Automatic ], 
-		dataSelector[#[[2]]]& 
-	][[All,1]]
 
-selectIndices[ dataSelector_, indices_, data_SparseArray ] :=
-With[ {specifiedIndices = Flatten[ data["NonzeroPositions"] ]},
-	Join[
-		Select[ Transpose[ {specifiedIndices, data["NonzeroValues"] /. "Automatic" -> Automatic } ], dataSelector[ #[[2]] ]& ][[All,1]],
-		If[ TrueQ[dataSelector[ data["Background"] /. "Automatic" -> Automatic ]], Complement[ Range[Length[indices]], specifiedIndices ], {}]
-	]
-] /; Length[Dimensions[data]]==1
-
-
-matchComponents[ headSpec_, dataSpec_, dataSelector_, head_[indices_,data_,display_] ] :=
-If[ MatchQ[ head, headSpec ],
-	With[ { dataLocation = FirstPosition[ dataForm[head], dataSpec ] },
-		If[ MissingQ[dataLocation],
-			{},
-			matchIndices[ dataSelector, indices, data[[ First[dataLocation] ]] ]
-		]
-	],
-	{}
+deleteDegenerateCells[ cells : packedCellPattern ] := deleteDegenerateCells /@ cells
+deleteDegenerateCells[ head_[ indices_, data_ ] ] :=
+With[ { id = Pick[ Range[Length[indices]], DuplicateFreeQ[Flatten[{#}]]& /@ indices] },
+	head[ indices[[id]], #[[id]]&/@data ]
 ]
 
-matchIndices[ dataSelector_, indices_, data_List ] := Cases[ Transpose[ Range[Length[indices]], data /. "Automatic" -> Automatic ], {_, dataSelector} ][[All,1]]
-matchIndices[ dataSelector_, indices_, data_SparseArray ] :=
-With[ {specifiedIndices = Flatten[ data["NonzeroPositions"] ]},
-	Join[
-		Cases[ Transpose[ {specifiedIndices, data["NonzeroValues"] /. "Automatic" -> Automatic} ], {_,dataSelector} ][[All,1]],
-		If[MatchQ[ data["Background"] /. "Automatic" -> Automatic, dataSelector ], Complement[ Range[Length[indices]], specifiedIndices ], {}]
+
+joinCells[ cells_ ] := joinCellType /@ GatherBy[ Flatten[cells], Head ]
+
+joinCellType[ cells : packedCellPattern ] :=
+With[ { head = Head[cells[[1]]], indices = cells[[All,1]], data = cells[[All,2]]},
+	sortCellType @ deleteDegenerateCells @ deleteDuplicateCells @ head[ Join @@ indices , Join @@@ Transpose[ data ] ]
+]
+
+
+facePattern = face|elasticFace ;
+edgePattern = rigidBar|fold|angleJoint|spring ;
+vertexPattern = joint|pinnedJoint ;
+cellSpecPattern = facePattern|edgePattern|vertexPattern|_String ;
+
+distributePropertyRules = {
+	(h : cellSpecPattern)[ indices_ ] :> h[indices, {} ],
+	(h : cellSpecPattern)[ indices_, properties_Rule ] :> h[indices, {properties} ],
+	Property[ h_List, properties_ ] :> (Property[ #, properties ]& /@ h),
+	Property[ ( h : cellSpecPattern)[ indices_, properties_ ] , newProperties_ ] :> h[indices, Flatten[ { properties, newProperties } ] ],
+	(h : vertexPattern)[ indices_?VectorQ , properties_ ] :> (  h[ # , properties ]& /@ indices  ),
+	(h : edgePattern|facePattern)[ indices_?MatrixQ , properties_ ] :> (  h[ # , properties ]& /@ indices  ),
+	(h : vertexPattern)[ label_ -> coordinates_ , properties_ ] :> { h[ label, properties ], add[ label , coordinates ] }
+};
+
+expansionRules = {
+	face[ i_ , properties_ ] :> { face[ i , properties ], rigidBar[ #, properties ] & /@ Partition[ i , 2, 1, 1 ] }
+};
+
+
+parseCells[ cells_List ] := parseCells[ {{},{},{}}, cells ]
+parseCells[ {oldcoordinates_, oldcells_ , oldlabels_}, cells_List ] := 
+Module[{ expandedCells , goodCells, badCells, newcoordinates , labels, newlabels, coordinateCells},
+
+	expandedCells = Flatten @ ReplaceAll[ Flatten @ ReplaceRepeated[ Flatten[cells], distributePropertyRules] , expansionRules ] ;
+	coordinateCells = Cases[ expandedCells, add[_,_] ];
+	goodCells = Cases[ expandedCells, cellSpecPattern[_,_] ];
+
+	(*if there are bad cells, report a warning*)
+	badCells = DeleteCases[ expandedCells, cellSpecPattern[_,_]|_add ];
+	If[Length[badCells]>0, Message[mechanism::badcells, DeleteDuplicates[Head/@badCells]] ];
+
+	(*any vertices that got added as cells get taken care of here*)
+	{  labels , newcoordinates } = If[ Length[coordinateCells] > 0,
+		Transpose[ List @@@ coordinateCells] ,
+		{ {}, {} }
+	];
+
+	newlabels = Join[
+		oldlabels,
+		Thread[ labels -> Range[ Length[oldcoordinates] + 1 , Length[oldcoordinates] + Length[newcoordinates] ] ]
+	];
+
+	{
+		(* new coordinates *)
+		ToPackedArray @ PadRight[Join[ oldcoordinates, newcoordinates ]],
+		(* cells *)
+		sortCellType /@ joinCells[ Flatten @ {replaceCellIndices[ packCells[ goodCells ], Dispatch @ newlabels], oldcells } ],
+		newlabels
+	}
+]
+
+
+mechanism::badcells = "Cells of type `1` cannot be parsed and will be ignored.";
+
+
+unparseCells[ cells : packedCellPattern , head : _ ] := Flatten[ unparseCellType /@ Pick[ cells, Head/@cells, head ] ]
+
+unparseCellType[ head_[ indices_ , {} ] ] := head /@ indices
+unparseCellType[ head_[ indices_ , data_ ] ] :=
+With[{
+	dataRules = Thread[ dataForm[head] -> # ]& /@ Transpose[data]
+},
+	MapThread[ head[#1,#2]&, { indices, dataRules } ]
+]
+
+
+cellPattern[ r_Alternatives ] := 
+With[ { groupedByHead = GatherBy[ List@@r, Head ] },
+	Head[#[[1]]][ indexPattern /@ Alternatives @@ #[[All,1]] ]& /@ groupedByHead
+]
+cellPattern[ x_Blank ] := {_[_]} /; Length[x]==0
+cellPattern[ x_Blank ] := {x[[1]][ _ ]}
+cellPattern[ x_String ] := {x[_]}
+cellPattern[ head_[ ind_ ] ] := {head[ indexPattern[ind] ]}
+
+indexPattern[ x_Blank ] := x
+indexPattern[ r_Alternatives ] := indexPattern /@ r
+indexPattern[ n_List ] := With[ { numbers = Range[Length[n]] }, Alternatives @@ Map[ RotateRight[n,#]&, numbers ] ]
+indexPattern[ n : Except[_Alternatives|_List] ] := n
+
+
+casesCellType[ pattern_ , head_[ indices_ , data_ ] ] := Pick[ Range[Length[indices]], head/@indices , Alternatives @@ pattern ]
+selectCellType[ f_ , head_[ indices_ , data_ ] ] := Pick[ Range[Length[indices]], f[head[#]]& /@ indices ]
+
+identifyCellFromList[ headSpec_ , indexList_?VectorQ , head_[ indices_?VectorQ, data_ ] ] :=
+With[ { table = Association @@ Thread[ Rule[indices , Range[Length[indices]] ] ]},
+	DeleteMissing[ table /@ indexList ]
+] /; MatchQ[head, headSpec]
+
+identifyCellFromList[ headSpec_ , indexList : {___List} , head_[ indices : {___List}, data_ ] ] :=
+With[ { table = Association @@ Thread[ Rule[ Sort /@ indices , Range[Length[indices]] ] ]},
+	DeleteMissing[ table /@ (Sort /@ indexList) ]
+]/; MatchQ[head, headSpec]
+identifyCellFromList[ _ , indexList_, head_[ _, _ ] ] := {}
+
+casesCellFromDataType[ dataSpec_ -> dataPattern_ , head_[ indices_, data_ ] ] := With[ { datalist = dataForm[head] },
+With[ { dataIndex = dataSpec /. Thread[datalist -> Range[Length[datalist]]] },
+	If[ IntegerQ[dataIndex], 
+		Pick[ Range[Length[indices]], Normal@data[[ dataIndex ]] , dataPattern ],
+		{}
 	]
-] /; Length[Dimensions[data]]==1
+]]
+selectCellFromDataType[ dataSpec_ -> selector_ , head_[ indices_, data_ ] ] := With[ { datalist = dataForm[head] },
+With[ { dataIndex = datalist /. Thread[datalist -> Range[Length[datalist]]] },
+	If[ IntegerQ[dataIndex], 
+		Pick[ Range[Length[indices]], selector /@ data[[ dataIndex ]] ],
+		{}
+	]
+]]
 
 
-removeCells[ deletedCells : {___Integer}, head_[indices_, data_, display_] ] :=
+removeCells[ deletedCells : {___Integer}, head_[indices_, data_] ] :=
 With[
 {
 	remainingCells = Complement[ Range[ Length[indices] ] , deletedCells ]
@@ -494,236 +652,108 @@ With[
 		{},
 		head[
 			indices[[remainingCells]],
-			data[[All, remainingCells]],
-			display[[remainingCells]]
+			data[[All, remainingCells]]
 		]
 	]
 ]
 
 
-takeCells[ remainingCells : {___Integer}, head_[indices_, data_, display_] ] :=
+takeCells[ remainingCells : {___Integer}, head_[indices_, data_] ] :=
 	If[ Length[remainingCells] == 0,
 		{},
 		head[
 			indices[[remainingCells]],
-			data[[All, remainingCells]],
-			display[[remainingCells]]
+			data[[All, remainingCells]]
 		]
 	]
 
 
-mergeCellGroup[ cells : {_Symbol[ _,_,_]..} ] := 
-Module[ {indices, data, display},
-	{indices, data, display} = Transpose[ List @@@ cells ];
+(*
+changeCellData[ {c1,c2,...}, {head, dataType}, {data1, data2, ...}, cells ] replaces the old data (of type dataType) for cells indexed by c1, ... with data1, ...
+changeCellData[ {c1,c2,...}, {head, dataType}, {data}, cells ] replaces the old data (of type dataType) for cells indexed by c1, ... all with data.
+changeCellData[ {c1,c2,...}, {head, dataType}, dataFunc, cells ] replaces the old data (of type dataType) for cells indexed by c1, ... by applying dataFunc to the old data.
+*)
 
-	Head[cells[[1]]][
-		Flatten[ indices, 1 ],
-		MapThread[ Join, data ],
-		Flatten[display,1]
-	]
-]
+changeCellDataInternal[ changingCells : {___Integer}, spec : {_ , _}, specifiedData_List, cells : packedCellPattern ] := 
+	changeCellDataType[ changingCells, spec, specifiedData, # ]& /@ cells
 
-mergeCells[ cells : {_Symbol[_,_,_]...}.. ] :=
-With[ {combined = GatherBy[ Flatten[{cells},1], Head ] },
-	mergeCellGroup/@ combined
-]
-
-
-(*this is the same as compressDisplayCells[] but without the default display settings*)
-parseDisplayCell[ head_, ruleSpec : _Rule|{___Rule} ] := With[
-{
-	meshDisplayData = {{MeshCellStyle}, MeshCellLabel, MeshCellShapeFunction} /. ruleSpec /. blankMeshRules,
-	cellDisplayData = {{"style"},"label","shape"} /. ruleSpec /. blankDisplayRules
+changeCellDataType[ changingCells : {___Integer}, {headSpec_, dataSpec_}, specifiedData_ , headSpec_[ indices_ , data_ ] ] :=
+With[ {
+length = Length[indices],
+newData = If[
+	ListQ[specifiedData] && Length[specifiedData]==1,  ConstantArray[specifiedData,Length[changingCells]], 
+	specifiedData
+	],
+	dataIndex = dataSpec /. Thread[dataForm[headSpec] -> Range[Length[dataForm[headSpec]]]]
 },
-	cleanupDisplayFunction /@ {meshDisplayData, cellDisplayData}
-]
-
-
-changeCellDisplay[ cells : {___Integer}, head_[ indices_, data_, display_ ], ruleSpec : {___Rule}|_Rule ] :=
-With[
-{
-everythingElse = Complement[ Range[Length[indices]], cells ],
-newData = parseDisplayCell[head, Flatten[{ruleSpec}]]
-},
-	orderCells[
-		head[
-			Join[ indices[[ everythingElse]], indices[[ cells ]] ],
-			Join[ #[[everythingElse]], #[[cells]] ]& /@ data,
-			Join[ 
-				display[[everythingElse]],
-				joinDisplayCells[ Join[ { # }, newData ] ]& /@ display[[cells]]
+	If[ IntegerQ[dataIndex],
+		With[ { changedCells = Select[ changingCells, 0 < # <= length&] (*these are the cells within range*)},
+			If[Length[changedCells]>0,
+				headSpec[
+					indices,
+					ReplacePart[ data, dataIndex -> changeData[ 
+							changedCells, 
+							data[[ dataIndex ]], 
+							(*if its a list, use it, if not map it*) If[ListQ[newData], newData, newData /@ data[[ dataIndex ]] ] 
+							] ]
+				],
+				headSpec[ indices, data ]
 			]
 		],
-		Ordering[ Flatten[ {everythingElse, cells} ] ]
+		headSpec[indices,data]
 	]
 ]
 
+changeCellDataType[ changingCells : {___Integer}, {headSpec_, dataSpec_}, newData_ , spec : _[ _ , data_ ] ] := spec
 
-changeCellDisplayFromList[ head_[ indices_, data_, display_ ], head_, newDisplay_ ] :=
-If[ Length[newDisplay] == Length[indices],
-	head[
-		indices,
-		data,
-		Map[ joinDisplayCells, Transpose @ { display, newDisplay } ]
-	],
-	
-	Message[mechanism::bdispl,head];
-	head[indices,data,display]
+
+changeData[ changedCells : {___Integer}, data_SparseArray, newdata_] :=
+Module[ {
+	processedData = newdata /. Automatic -> "Automatic",
+	processedIndices = List /@ changedCells,
+	newRules
+},
+	newRules = Thread[ processedIndices -> processedData ];
+	SparseArray[ Join[ newRules , FilterRules[ArrayRules[ data ], Except[newRules]] ] , Length[ data ] ]
 ]
 
-changeCellDisplayFromList[ head_[ indices_, data_, display_ ], differentHead_, newDisplay_ ] :=
-	head[indices,data,display]
-	
-mechanism::bdispl="The list of display directives is not the same length as the number of components of type `1`.";
+changeData[ changedCells : {___Integer}, data : {__List}, newdata_ ] :=
+Module[ {
+	processedData = ArrayRules[ "data" /@ data ],
+	processedIndices = Thread[ (List /@ changedCells) -> MapThread[ "data"[mergeDataList[#1,#2]]&, {data[[ changedCells ]], newdata /. Automatic -> "Automatic"} ] ]
+},
+	Normal[ SparseArray[ Join[ processedIndices, processedData] , Length[data] ] ][[All,1]]
+]
+
+changeData[ changedCells : {___Integer}, data_List, newdata_ ] :=
+With[ {
+	processedData = ArrayRules[ "data" /@ data ],
+	processedIndices = Thread[ (List /@ changedCells) -> MapThread[ "data"[#2]&, {data[[ changedCells ]], newdata /. Automatic -> "Automatic"} ] ]
+},
+	Normal[ SparseArray[ Join[ processedIndices, FilterRules[processedData, Except[processedIndices]]] , Length[data] ] ][[All,1]]
+]
 
 
-changeDataInCell[ cells : {___Integer}, head_[ indices_, data_, display_ ], ruleSpec_ : {___Rule}|_Rule ] :=
+
+mergeDataList[ data1_ , data2_  ] := Last /@ GatherBy[ Flatten[{data1, data2} ], directiveQ ]
+
+
+mapCellsInternal[ f_, cells : packedCellPattern ] := mapCellType[f, #]& /@ cells
+mapCellType[ f_, celltype : _[_,_] ] := parseCells[ f /@ unparseCells[celltype] ][[2]]
+
+
+outputCells[ pattern_, cells : packedCellPattern ] := outputCellType[pattern, #]& /@ cells
+
+outputCellType[ _ , _String[ indices_, {} ] ] := Nothing
+outputCellType[ _, head_[indices_,{}] ] := head[indices]
+outputCellType[ None, head_[indices_, data_] ] := head[indices]
+outputCellType[ pattern_, head_[indices_, data_] ] :=
 With[
 {
-	newData = Replace[ Replace[ dataForm[head], ruleSpec, {1} ], Thread[dataForm[head] -> "nothing" ] , {1} ],
-	everythingElse = Complement[ Range[Length[indices]], cells ]
+	dataRules = Transpose[ Thread /@ FilterRules[ Thread[ dataForm[head] -> data ], pattern] ] /. "Automatic"->Automatic
 },
-	orderCells[compressCells @ head[
-		Join[ indices[[everythingElse]], indices[[cells]] ],
-		MapThread[ changeData[ everythingElse, cells, #1, #2 ]&, { newData, data } ],
-		Join[ display[[everythingElse]], display[[cells]] ]
-	],
-	Ordering[Flatten[ {everythingElse, cells} ]]
-	]
+	head[indices] -> dataRules
 ]
-
-changeData[ everythingElse_, cells_, func_, data_ ] := Join[ data[[ everythingElse ]], ConstantArray[ func, Length[data[[cells]]] ]  ]
-changeData[ everythingElse_, cells_, "nothing" , data_ ] := Join[ data[[ everythingElse ]] , data[[cells]] ]
-
-
-changeDataFromList[ head_[indices_,data_,display_], head_, dataType_, newData_ ]:=
-With[ { place = PositionIndex[dataForm[head]][ dataType ] }, 
-	If[ Head[place]===Missing,
-		Message[mechanism::bdtype, dataForm[head], head];
-		head[indices,data,display],
-		compressCells @ head[ indices, ReplacePart[ data, place[[1]] -> newData], display ]
-	]
-] /; Length[newData] == Length[indices]
-changeDataFromList[ head_[indices_,data_,display_], head_, dataType_, newData_ ] :=
-	(Message[mechanism::bdl, head]; head[indices, data, display])
-changeDataFromList[ head_[indices_,data_,display_], differentHead_, dataType_, newData_ ] :=
-	head[indices,data,display]
-
-mechanism::bdl = "The list of data is not the same length as the number of components of type `1`.";
-mechanism::bdtype = "The data type is not one of `1` for `2`.";
-
-
-mapComponents[ f_, cells : head_Symbol[ _, _, _ ] ] := packComponentCells[ f /@ unpackComponentCells[ cells ] ]
-mapComponents[ f_, cells : {_Symbol[_,_,_]...} ] := packComponentCells[ f /@ unpackComponentCells[ cells ] ]
-
-
-distributePropertyRules = {
-	Property[ h_List , properties_ ] :> (Property[#, properties]& /@ h),
-	Property[ Property[ h_Symbol[i_], properties1_ ], properties2_ ] :> Property[ h[i], Flatten[{properties1,properties2}] ],
-	Property[ (h : rigidBar|fold|Line|Polygon|angleJoint|spring)[ i_?MatrixQ ] , properties_ ] :> (Property[ h[#], properties] & /@ i),
-	Property[ (h : Point|joint|freeJoint|pinnedJoint)[ i_?VectorQ ] , properties_ ] :> (Property[ h[#], properties]& /@ i),
-	Property[ (h : Except[Property])[i_, properties1_], properties2_ ] :> Property[ h[i], Flatten[ {properties1,properties2} ] ]
-} ;
-
-expansionRules = {
-	Property[ face[ i_ ], properties_ ] :> {
-		Property[ face[i], properties ],
-		Property[ rigidBar[#], properties ] & /@ Partition[ i, 2, 1, 1 ]
-	},
-	
-	Property[ fold[ i_ ], properties_ ] :> {
-		Property[ fold[i], properties ],
-		Property[ rigidBar[i], properties ]
-	},
-	
-	Property[ freeJoint[i_], properties_ ] :> Property[ joint[i], Flatten[{"pinningStiffness"->0,properties}] ],
-	Property[ pinnedJoint[i_], properties_ ] :> Property[ joint[i], Flatten[{"pinningStiffness"->Infinity,properties,"shape"->mechanisms`graphics`pinnedJointShape[]}] ]
-};
-
-interpretComponentCellsRule = {
-	Property[ Point[ label_ -> pos_ ], properties_ ] :> {
-		Point, 
-		label -> pos, 
-		{},
-		FilterRules[ Flatten[{properties}], $displayProperties]
-	},
-	Property[ joint[ label_ -> pos_ ], properties_ ] :> {
-		joint, 
-		label -> pos,
-		FilterRules[ Flatten[{properties}], Except[$displayProperties]], 
-		FilterRules[ Flatten[{properties}], $displayProperties]
-	},
-	Property[ h_[ i : Except[_Rule] ], properties_ ] :> {
-		h, 
-		i, 
-		FilterRules[ Flatten[{properties}], Except[$displayProperties]], 
-		FilterRules[ Flatten[{properties}], $displayProperties]
-	}
-};
-
-
-parseCells[ {coordinates_, componentCells_, labels_}, cellList_ ] :=
-Module[{expandedCells,newComponentCells, newDisplayCells, newVertices, newCoordinates, newLabels},
-	(*the first pass distributes Property[] tags, expands cells, and flattens the list of cells*)
-	expandedCells = Flatten[ReplaceAll[ Flatten[ ReplaceRepeated[ Property[ {cellList}, {} ], distributePropertyRules] ], expansionRules ]];
-	
-	(*turn specified cells into the unpackedCell structure. Note that indices may not be in the correct form because of labels*)
-	newComponentCells = Replace[ expandedCells, interpretComponentCellsRule, {1} ];
-
-	(*extract any new coordinates that were specified by Point[] or joint[]*)
-	newVertices = Cases[ newComponentCells, { Point, _Rule, _, _ }|{ joint, _Rule, _, _ } ];
-	newCoordinates = Join[ coordinates, If[ Length[newVertices] > 0, Last /@ Transpose[ newVertices ][[2]], {} ] ];
-	newLabels = If[ Length[newVertices] > 0, Rule @@@ Transpose[ {newVertices[[All,2,1]], Range[ Length[coordinates]+1, Length[coordinates]+Length[newVertices] ]} ], {}];
-
-	{
-		(*list of all coordinates*)
-		PadRight[ newCoordinates ],
-		
-		(*list of cells that were created*)
-		packComponentCells[ replaceCellIndices[ Join[ componentCells, Join[ {#[[1]], #[[2,1]], #[[3]], #[[4]] }& /@ newVertices, DeleteCases[ newComponentCells, {Point,_Rule,_,_}|{joint,_Rule,_,_} ] ] ], Join[ labels, newLabels ] ]  ],
-		
-		(*list of all labels that can be used to refer to coordinates*)
-		Join[labels, newLabels]
-	}
-]
-
-
-defaultJoints[coords_,cells_]:=With[{num=Length[coords]},mergeCells@Join[
-	cells,
-	{compressCells@joint[
-		Range[num],
-		{ConstantArray[0,num], ConstantArray["Automatic",num]},
-		ConstantArray[{"style","label","shape"}/.componentDisplayStyle[joint], num]
-	]}
-]]
-
-
-removeOverlappingCoordinates[ head_[coordinateList_, mr_, cells_, labels_], precision : _?(NumericQ[N[#]] && N[#]>0 &) : 10^(-12)]:=
-Module[
-{
-	numberedVertices=Transpose[{ Range @ Length @ coordinateList, coordinateList }],
-	gatheredVertices,rules
-},
-	gatheredVertices=GatherBy[
-		numberedVertices,
-		(*they are the same if they are the same within the specified precision.*)
-		Rationalize[N[#[[2]]], precision]&
-	];
-	rules=Dispatch @ Flatten[ (*two levels to thread through*)
-		Thread /@ Thread[gatheredVertices[[All,All,1]] -> Range[Length[gatheredVertices]] ]
-	];
-
-	head[
-		#[[1,2]]& /@ gatheredVertices,
-		mr,
-		deleteDuplicateCells /@ replaceCellIndices[cells,rules],
-		replaceRules[ labels, rules, 2 ]
-	]
-]
-
-
-deleteDegenerateCellsFromMechanism[ head_[coordinates_, mr_, cells_, labels_] ] :=
-	head[ coordinates, mr, deleteDegenerateCells[cells], DeleteDuplicates[Reverse[labels]] ]
 
 
 replaceRules[ {}, appliedRules__ ] := {}
@@ -741,133 +771,187 @@ With[ { flippedRules = Transpose[ List @@@ rules ] },
 ]
 
 
-Options[addMeshRegion] = Options[MeshRegion];
-addMeshRegion[ head_[ coordinates_, oldMesh_, cells : {_Symbol[_,_,_]...}, labels_ ], dim : _?dimSpecQ, opt : OptionsPattern[] ]:=
+removeOverlappingCoordinates[ head_[coordinateList_, mr_, cells_, labels_], None|0]:=
 	head[
-		coordinates,
-		If[ coordinateQ[ coordinates ] && MatrixQ[ coordinates, NumericQ ],
-			toMeshRegion[ head[ coordinates, {}, cells, labels ] , dim, opt ],
-			oldMesh
-		],
-		cells,
+		ToPackedArray[coordinateList],
+		mr,
+		deleteDuplicateCells @ cells,
 		labels
 	]
 
-
-Options[toMeshRegion] = Options[MeshRegion];
-
-toMeshRegion[ o : mechanismPattern, pos_?MatrixQ, d__] := toMeshRegion[ ReplacePart[o, 1->pos], d ]
-
-toMeshRegion[ framework[ coordinates_, _, cells : {_Symbol[_,_,_]...}, labels_ ], dim : _?dimSpecQ, opt : OptionsPattern[] ] :=
-With[ { d = If[dim===Automatic, Last[Dimensions[coordinates]], dim ] },
-	Quiet[ MeshRegion[
-		PadRight[ coordinates, { Length[coordinates], d } ],
-		meshRegionCells[ framework, coordinates, cells ],
-		Flatten[{Method->{"CoplanarityTolerance"->100}, opt}]
-	], MeshRegion::dupcell]
-] /; coordinateQ[ coordinates ] && MatrixQ[ coordinates, NumericQ ]
-
-toMeshRegion[ origami[ coordinates_, _, cells : {_Symbol[_,_,_]...}, labels_ ], dim : _?dimSpecQ, opt : OptionsPattern[] ] :=
-With[ { 
-	d = Which[ 
-		dim === Automatic,
-			If[ coordinates[[All,3]] . coordinates[[All,3]] < 10^(-12), 2, 3 ],
-		True, dim
-	]
+removeOverlappingCoordinates[ head_[coordinateList_, mr_, cells_, labels_], precision : _?(NumericQ[N[#]] && N[#]>0 &) : 10^(-12)]:=
+Module[
+{
+	numberedVertices=Transpose[{ Range @ Length @ coordinateList, coordinateList }],
+	gatheredVertices,rules
 },
-	Quiet[ MeshRegion[
-		PadRight[ coordinates, {Length[coordinates], d } ],
-		meshRegionCells[ origami, coordinates,cells ],
-		Flatten[{Method->{"CoplanarityTolerance"->100}, opt}]
-	], MeshRegion::dupcell ]
-] /; coordinateQ[ coordinates ] && MatrixQ[ coordinates, NumericQ ]
+	gatheredVertices=GatherBy[
+		numberedVertices,
+		(*they are the same if they are the same within the specified precision.*)
+		Rationalize[N[#[[2]]], precision]&
+	];
+	rules=Dispatch @ Flatten[ (*two levels to thread through*)
+		Thread /@ Thread[gatheredVertices[[All,All,1]] -> Range[Length[gatheredVertices]] ]
+	];
 
-mechanism::coord = "Coordinates are not valid 2D or 3D coordinates.";
-coordinateQ[ coord : coordinatePattern ] := True
-coordinateQ[ _ ] := (Message[mechanism::coord]; False)
-
-mechanism::dim = "Dimension specification `1` is not 2 or 3 or Automatic.";
-dimSpecQ[ 2|3|Automatic ] := True
-dimSpecQ[ dim_ ] := (Message[ mechanism::dim, dim ]; False)
-
-
-meshRegionCells[ head_, coordinates_, cells_ ] := Join[ 
-	Flatten[toDisplayCells[head] /@ cells], 
-	Point/@ Range[ Length[coordinates] ]
-]
-
-toDisplayCells[mechanismHead_][ head_[ indices_, data_, display_ ] ] :=
-With[ {dir = meshDirective[head]},
-	If[ dir =!= None,
-	MapThread[
-		Property[
-			dir[#1],
-			Flatten[{
-				displayStyle[#2[[1]], head, mechanismHead],
-				displayLabel[#2[[2]], head, mechanismHead],
-				displayShape[#2[[3]], head, mechanismHead]
-			}]
-		]&,
-		{
-			indices,
-			display
-		}
-	],
-	{}
+	head[
+		ToPackedArray[#[[1,2]]& /@ gatheredVertices],
+		mr,
+		deleteDuplicateCells @ replaceCellIndices[cells,rules],
+		replaceRules[ labels, rules, 2 ]
 	]
 ]
 
-meshDirective[rigidBar] := Line
-meshDirective[spring] := Line
-meshDirective[joint] := Point
-meshDirective[face] := Polygon
-meshDirective[dir : Polygon|Line|Point] := dir
-meshDirective[_] := None
 
-displayStyle[ {}, rigidBar, _ ] := MeshCellStyle -> {CapForm["Round"], Black, Thickness[0.005]}
-displayStyle[ {}, spring, _ ] := MeshCellStyle -> {CapForm["Round"], Gray, Thickness[0.01]}
-displayStyle[ {}, joint, _]:= MeshCellStyle -> {Black, PointSize[0.01]}
-displayStyle[ {}, face , _] := MeshCellStyle -> GrayLevel[0.8]
-displayStyle[ {} , _, _] := {}
-displayStyle[ style_List, head_ , _ ] := MeshCellStyle -> style
-
-displayLabel[ None, _ , _] := {}
-displayLabel[ label_Text, _ , _] := MeshCellLabel -> label[[1]]
-displayLabel[ label_, _ , _] := MeshCellLabel -> label
-
-displayShape[ None, _ , _] := MeshCellShapeFunction -> None
-displayShape[ Automatic, spring ,_] := MeshCellShapeFunction -> (mechanisms`graphics`springShape[][#1,#2,#3]&)
-displayShape[ Automatic, rigidBar , framework] := MeshCellShapeFunction -> (mechanisms`graphics`rigidBarShape[][#1,#2,#3]&)
-displayShape[ Automatic, rigidBar , origami] := MeshCellShapeFunction -> (mechanisms`graphics`rigidBarShape["width" -> 0.01][#1,#2,#3]&)
-displayShape[ Automatic, face , _] := MeshCellShapeFunction -> (mechanisms`graphics`faceShape[][#1,#2,#3]&)
-displayShape[ Automatic, joint , framework] := MeshCellShapeFunction -> (mechanisms`graphics`jointShape[][#1,#2,#3]&)
-displayShape[ Automatic, joint , origami] := {}
-displayShape[ Automatic, _ , _] := {}
-displayShape[ shape_Function, _ , _ ] := MeshCellShapeFunction -> shape
-displayShape[ shape_, _ , _] := MeshCellShapeFunction -> (shape[#1,#2,#3]&)
+deleteDegenerateCellsFromMechanism[ head_[coordinates_, mr_, cells_, labels_] ] :=
+	head[ coordinates, mr, deleteDegenerateCells[cells], DeleteDuplicates[Reverse[labels]] ]
 
 
-Format[f : framework[ _?(MatrixQ[#,NumericQ]&), mr_, packedCellPattern, labelPattern ] , StandardForm ] := 
-	If[ MeshRegionQ[mr], mr, toMeshRegion[f, Automatic ] ]
+missingVertices[ numberOfVertices_ , cells_ ] := With[ 
+{
+	joints = Cases[ cells, _joint ]
+},
+	If[ Length[ joints ] == 0, 
+		Range[numberOfVertices],
+		Complement[ Range[numberOfVertices], cells[[1,1]] ]
+	]
+]
+
+
+(*choose your own dimension*)
+addMeshRegion[ head_[ coordinates_?(MatrixQ[#,NumericQ]&) , _ , cells : packedCellPattern , labels_ ], Automatic, options_ ] :=
+With[ {dim = chooseDimension[ coordinates ] },
+	head[
+		coordinates , 
+		createMeshRegion[ head, PadRight[ coordinates, {Length[coordinates] , dim} ], cells , options], 
+		cells,
+		labels
+	]
+]
+
+addMeshRegion[ head_[ coordinates_?(MatrixQ[#,NumericQ]&) , _ , cells : packedCellPattern , labels_ ], dimSpec_, options_ ] :=
+	head[
+		coordinates ,
+		createMeshRegion[ head, PadRight[ coordinates, {Length[coordinates], dimSpec} ], cells , options], 
+		cells, 
+		labels
+	]
+
+chooseDimension[ coordinates_ ] := If[ coordinates[[All,3]] . coordinates[[All,3]] < 10^(-12), 2, 3 ] /; Length[ coordinates[[1]] ] == 3
+chooseDimension[ coordinates_ ] := Length[ coordinates[[1]] ]
+
+
+createMeshRegion[ head_, coordinates_ , cells : packedCellPattern, options_ ] := With[ {
+ displayCells = toDisplayCells[head, #]& /@ cells
+},
+	MeshRegion[ coordinates , Flatten[ displayCells[[All,1]] ],
+		Flatten @ Join[{
+		MeshCellLabel ->  Flatten[ displayCells[[All,4]] , 1 ],
+		MeshCellStyle ->  Flatten[ displayCells[[All,2]] , 1 ],
+		MeshCellShapeFunction ->  Flatten[ displayCells[[All,3]] , 1 ],
+		Method->{CoplanarityTolerance->100, DeleteDuplicateCoordinates->False},
+		options
+		}]
+	]
+]
+
+
+cellMeshPrimitive[ rigidBar|spring|fold, _ ] := Line
+cellMeshPrimitive[ joint | pinnedJoint ,_] := Point
+cellMeshPrimitive[ face | elasticFace ,_] := Polygon
+cellMeshPrimitive[ _ ,_] := None
+
+toDisplayCells[mechType_, head_[ indices_, data_ ] ]:=
+Module[ {
+dataLocations = PositionIndex[dataForm[head]] , 
+primitive = cellMeshPrimitive[ head, mechType ], primitives
+},
+	If[ primitive =!= None,
+		primitives = primitive /@ indices;
+		{
+			primitives,
+			toMeshCellStyle[ mechType, head, primitives, data , dataLocations["style"] ],
+			toMeshCellShapeFunction[ mechType, head, primitives, data , dataLocations["shape"] ],
+			toMeshCellLabel[ mechType, head, primitives, data , dataLocations["label"] ]
+		},
+			
+		{{},{},{},{}}
+	]
+]
+
+
+defaultMeshStyle[ rigidBar|fold, _ ] := {CapForm["Round"],Black}
+defaultMeshStyle[ spring ,_] := {Black}
+defaultMeshStyle[ joint | pinnedJoint ,_] := {Black}
+defaultMeshStyle[ face ,_] := {GrayLevel[0.85]}
+defaultMeshStyle[ elasticFace ,_] := {RGBColor[{0.85,0.85,0.95}]}
+defaultMeshStyle[ _ ,_] := {}
+
+toMeshCellStyle[ mechType_, head_, prims_, data_ , {index_}]:= With[
+{
+	styles = data[[ index ]],
+	defaultStyle = defaultMeshStyle[ head, mechType ]
+},
+	DeleteCases[ MapThread[ #1 -> Directive@@Flatten[ {defaultStyle , #2} ]& , {prims, styles} ] , _ -> _?(Length[#]==0&) ]
+]
+
+
+toMeshCellLabel[ mechType_, head_, prims_, data_, {index_} ] := With[
+{
+	labels = data[[ index ]]
+},
+	DeleteCases[ Thread[prims -> labels] , _ -> None ]
+]
+
+
+defaultMeshShapeFunction[ spring , _] := mechanisms`graphics`springShape[]
+defaultMeshShapeFunction[ pinnedJoint , framework] := mechanisms`graphics`pinnedJointShape[]
+defaultMeshShapeFunction[ _ ,_] := "Automatic"
+
+toMeshCellShapeFunction[ mechType_, head_, prims_, data_, {index_} ] := With[
+{
+	labels = Normal[data[[ index ]]] /. "Automatic" -> defaultMeshShapeFunction[ head, mechType ]
+},
+	cleanupShapeFunction /@ DeleteCases[ Thread[prims -> labels] , _ -> "Automatic" ]
+]
+
+cleanupShapeFunction[ cell_ -> None ] := cell -> None
+cleanupShapeFunction[ rule : _ -> _Function ] := rule
+cleanupShapeFunction[ cell_ -> shape_ ] := cell -> (shape[#1,#2,#3]&)
+
+
+Format[f : framework[ coordinates_?(MatrixQ[#,NumericQ]&), mr_, cells : packedCellPattern, labelPattern ] , StandardForm ] := 
+	If[ MeshRegionQ[mr], mr, createMeshRegion[ framework, coordinates, cells, {} ] ]
+
 
 SetAttributes[framework,{NHoldAll}]
 
 
 Options[framework] = Flatten[{"overlapPrecision" -> 10^(-12) , Options[MeshRegion]}];
 
-framework[ coordinates : {__?VectorQ}, cells : Except[ packedCellPattern ] , opt : OptionsPattern[] ] :=
+framework[ f : framework[ _?MatrixQ, _, packedCellPattern, labelPattern ] , opt : OptionsPattern[] ] :=
+With[ {meshOptions = FilterRules[{opt}, Options[MeshRegion] ]},
+	addMeshRegion[
+		deleteDegenerateCellsFromMechanism @ removeOverlappingCoordinates[ f, OptionValue["overlapPrecision"] ],
+		Automatic,
+		meshOptions
+	]
+]
+
+framework[ coordinateSpec_, cellSpec_ , opt : OptionsPattern[] ] :=
 Module[
 {
 meshOptions = FilterRules[ {opt}, Options[MeshRegion] ],
-newCoordinates = PadRight[coordinates],
-parsedCoordinates, parsedCells, parsedLabels
+intermediateParsing = parseCells[ {coordinateSpec, {}, {} }, {cellSpec} ],
+numberOfCoordinates, coordinates, cells, labels
 },
-	{parsedCoordinates, parsedCells, parsedLabels} = parseCells[ {newCoordinates, {}, {} }, {cells} ];
+	numberOfCoordinates = Length[intermediateParsing[[1]]];
+	{coordinates, cells, labels} = parseCells[ intermediateParsing, joint /@ missingVertices[numberOfCoordinates, intermediateParsing[[2]]] ];
 
 	addMeshRegion[
 		deleteDegenerateCellsFromMechanism[
 			removeOverlappingCoordinates[
-				framework[ parsedCoordinates, {}, defaultJoints[parsedCoordinates,parsedCells], parsedLabels ],
+				framework[ coordinates, {}, cells, labels ],
 				OptionValue["overlapPrecision"]
 			]
 		],
@@ -876,16 +960,8 @@ parsedCoordinates, parsedCells, parsedLabels
 	]
 ] /; frameworkPrecisionQ[ OptionValue[ "overlapPrecision" ] ]
 
-framework[ f : framework[ _?MatrixQ, _, packedCellPattern, labelPattern ] , opt : OptionsPattern[] ] :=
-With[ {meshOptions = FilterRules[{opt}, Options[MeshRegion] ]},
-	addMeshRegion[
-		deleteDegenerateCellsFromMechanism[ removeOverlappingCoordinates[ f, OptionValue["overlapPrecision"] ] ],
-		Automatic,
-		meshOptions
-	]
-]
-
-mechanism::precision = "Precision `1` must be a positive, nonzero number.";
+mechanism::precision = "Precision `1` must be a non-negative number or None.";
+frameworkPrecisionQ[ None|0 ] := True
 frameworkPrecisionQ[ prec_?(NumericQ[#]&&#>0 &) ] := True
 frameworkPrecisionQ[ prec_ ] := (Message[mechanism::precision, prec]; False)
 
@@ -910,29 +986,32 @@ framework[ coordinates_?MatrixQ, _, packedCellPattern, labelPattern ]["type"] :=
 framework[ coordinates_?MatrixQ, _, packedCellPattern, labelPattern ]["positions"] := coordinates
 
 framework[ coordinates_?MatrixQ, mr_MeshRegion, packedCellPattern, labelPattern ]["mesh"] := mr
-framework[ coordinates_?MatrixQ, {}, cells : packedCellPattern, labels : labelPattern ]["mesh"] := toMeshRegion[ framework[ coordinates, {}, cells, labels ], Automatic ]
+framework[ coordinates_?MatrixQ, {}, cells : packedCellPattern, labels : labelPattern ]["mesh"] := createMeshRegion[ framework, coordinates, cells, {} ]
 
 framework[ coordinates_?MatrixQ, _, cells : packedCellPattern, labelPattern ]["components"] := cells
 
 framework[ coordinates_?MatrixQ, _, packedCellPattern, labels : labelPattern ]["labels"] := labels
-framework[ coordinates_?MatrixQ, _, packedCellPattern, labels : labelPattern ]["labeledVertices"] := Thread[ "label" -> ReplacePart[ ConstantArray[None , Length[coordinates]], Reverse/@labels] ]
+framework[ coordinates_?MatrixQ, _, packedCellPattern, labels : labelPattern ]["labeledVertices"] := ReplacePart[ ConstantArray[None , Length[coordinates]], Reverse/@labels]
 
-framework[ coordinates_?MatrixQ, _, packedCellPattern, labelPattern ]["EmbeddingDimension"] := Last[Dimensions[coordinates]]
+framework[ coordinates_?MatrixQ, _, packedCellPattern, labelPattern ]["EmbeddingDimension"] := Length[coordinates[[1]]]
 
 framework[ coordinates_?MatrixQ, mr_MeshRegion, packedCellPattern, labelPattern ]["DisplayDimension"] := Last[Dimensions[MeshCoordinates[mr]]]
-framework[ coordinates_?MatrixQ, {}, cells : packedCellPattern, labels : labelPattern ]["DisplayDimension"] := Last[Dimensions[MeshCoordinates[coordinates]]]
+framework[ coordinates_?MatrixQ, {}, cells : packedCellPattern, labels : labelPattern ]["DisplayDimension"] := Length[coordinates[[1]]]
 
 framework[ coordinates_?MatrixQ, _, packedCellPattern, labelPattern ]["VertexNumber"] := Length[coordinates]
 
-framework[ coordinates_?MatrixQ, {}, cells : packedCellPattern, labelPattern ]["edges"] := DeleteDuplicatesBy[ Flatten[Select[ cells[[All,1]], MatrixQ[#] && Last[Dimensions[#]]==2 & ],1], Sort ]
-framework[ coordinates_?MatrixQ, m_MeshRegion, packedCellPattern, labelPattern ]["edges"] := MeshCells[m,1][[All,1]]
+(*framework[ coordinates_?MatrixQ, {}, cells : packedCellPattern, labelPattern ]["edges"] := DeleteDuplicatesBy[ Flatten[Select[ cells[[All,1]], MatrixQ[#] && Last[Dimensions[#]]\[Equal]2 & ],1], Sort ]*)
 
-framework[ coordinates_?MatrixQ, {}, cells : packedCellPattern, labels : labelPattern ]["faces"] := MeshCells[ toMeshRegion[ framework[ coordinates, {}, cells, labels ], Automatic ] ,2][[All,1]]
-framework[ coordinates_?MatrixQ, m_MeshRegion, packedCellPattern, labelPattern ]["faces"] := MeshCells[m,2][[All,1]]
+framework[ coordinates_?MatrixQ, {}, cells : packedCellPattern, labelPattern ]["edges"] := ToPackedArray @ MeshCells[ createMeshRegion[ origami, PadRight[ coordinates, {Length[coordinates] , chooseDimension[ coordinates ]} ], cells, {} ] ,1][[All,1]]
+framework[ coordinates_?MatrixQ, m_MeshRegion, packedCellPattern, labelPattern ]["edges"] := ToPackedArray @ MeshCells[m,1][[All,1]]
+
+framework[ coordinates_?MatrixQ, {}, cells : packedCellPattern, labels : labelPattern ]["faces"] := ToPackedArray @ MeshCells[ createMeshRegion[ framework, coordinates, cells ,{}] ,2][[All,1]]
+framework[ coordinates_?MatrixQ, m_MeshRegion, packedCellPattern, labelPattern ]["faces"] := ToPackedArray @ MeshCells[m,2][[All,1]]
 
 
-Format[f : origami[ _?(MatrixQ[#,NumericQ]&), mr_, packedCellPattern, labelPattern ] , StandardForm ] :=
-	If[ MeshRegionQ[mr], mr, toMeshRegion[f, Automatic ] ]
+Format[f : origami[ coordinates_?(MatrixQ[#,NumericQ]&), mr_, cells : packedCellPattern, labelPattern ] , StandardForm ] := 
+	If[ MeshRegionQ[mr], mr, createMeshRegion[ origami, PadRight[ coordinates, {Length[coordinates] , chooseDimension[ coordinates ]} ], cells, {} ] ]
+
 
 SetAttributes[origami,{NHoldAll}]
 
@@ -946,19 +1025,29 @@ mypad[ c_, {n1_?(#>0&), n2_} ] := PadRight[c, {n1,n2}]
 mypad[ c_, _ ] := c
 (******)
 
-origami[ coordinates : {__?VectorQ}, cells : Except[ packedCellPattern ] , opt : OptionsPattern[] ] :=
+origami[ f : origami[ _?MatrixQ, _, packedCellPattern, labelPattern ] , opt : OptionsPattern[] ] :=
+With[ {meshOptions = FilterRules[{opt}, Options[MeshRegion] ]},
+	addMeshRegion[
+		deleteDegenerateCellsFromMechanism @ removeOverlappingCoordinates[ f, OptionValue["overlapPrecision"] ],
+		Automatic,
+		meshOptions
+	]
+]
+
+origami[ coordinateSpec_, cellSpec_ , opt : OptionsPattern[] ] :=
 Module[
 {
 meshOptions = FilterRules[ {opt}, Options[MeshRegion] ],
-newCoordinates = PadRight[coordinates],
-parsedCoordinates, parsedCells, parsedLabels
+intermediateParsing = parseCells[ {coordinateSpec, {}, {} }, {cellSpec} ],
+numberOfCoordinates, coordinates, cells, labels
 },
-	{parsedCoordinates, parsedCells, parsedLabels} = parseCells[ {newCoordinates, {}, {} }, {cells} ];
+	numberOfCoordinates = Length[intermediateParsing[[1]]];
+	{coordinates, cells, labels} = parseCells[ intermediateParsing, joint /@ missingVertices[numberOfCoordinates, intermediateParsing[[2]]] ];
 
 	addMeshRegion[
 		deleteDegenerateCellsFromMechanism[
 			removeOverlappingCoordinates[
-				origami[ mypad[ parsedCoordinates , {Length[parsedCoordinates] , 3} ], {}, defaultJoints[parsedCoordinates,parsedCells], parsedLabels ],
+				origami[ mypad[ coordinates , {Length[coordinates] , 3} ], {}, cells, labels ],
 				OptionValue["overlapPrecision"]
 			]
 		],
@@ -966,15 +1055,6 @@ parsedCoordinates, parsedCells, parsedLabels
 		meshOptions
 	]
 ] /; frameworkPrecisionQ[ OptionValue[ "overlapPrecision" ] ]
-
-origami[ f : origami[_?MatrixQ, _, packedCellPattern, labelPattern ] , opt : OptionsPattern[] ] :=
-With[ {meshOptions = FilterRules[{opt}, Options[MeshRegion] ]},
-	addMeshRegion[
-		deleteDegenerateCellsFromMechanism[ removeOverlappingCoordinates[ f, OptionValue["overlapPrecision"] ] ],
-		Automatic,
-		meshOptions
-	]
-]
 
 
 origami[coordinates_?MatrixQ, mr : _MeshRegion|{}, packedCellPattern, labelPattern ]["Methods"] := 
@@ -996,45 +1076,120 @@ origami[ coordinates_?MatrixQ, _, packedCellPattern, labelPattern ]["type"] := o
 origami[ coordinates_?MatrixQ, _, packedCellPattern, labelPattern ]["positions"] := coordinates
 
 origami[ coordinates_?MatrixQ, mr_MeshRegion, packedCellPattern, labelPattern ]["mesh"] := mr
-origami[ coordinates_?MatrixQ, {}, cells : packedCellPattern, labels : labelPattern ]["mesh"] := toMeshRegion[ origami[ coordinates, {}, cells, labels ], Automatic ]
+origami[ coordinates_?MatrixQ, {}, cells : packedCellPattern, labels : labelPattern ]["mesh"] := 
+	createMeshRegion[ origami, PadRight[ coordinates, {Length[coordinates] , chooseDimension[ coordinates ]} ], cells, {} ]
 
 origami[ coordinates_?MatrixQ, _, cells : packedCellPattern, labelPattern ]["components"] := cells
 
 origami[ coordinates_?MatrixQ, _, packedCellPattern, labels : labelPattern ]["labels"] := labels
-origami[ coordinates_?MatrixQ, _, packedCellPattern, labels : labelPattern ]["labeledVertices"] := Thread[ "label" -> ReplacePart[ ConstantArray[None , Length[coordinates]], Reverse/@labels] ]
+origami[ coordinates_?MatrixQ, _, packedCellPattern, labels : labelPattern ]["labeledVertices"] :=  ReplacePart[ ConstantArray[None , Length[coordinates]], Reverse/@labels]
 
-origami[ coordinates_?MatrixQ, _, packedCellPattern, labelPattern ]["EmbeddingDimension"] := Last[Dimensions[coordinates]]
+origami[ coordinates_?MatrixQ, _, packedCellPattern, labelPattern ]["EmbeddingDimension"] := Length[coordinates[[1]]]
 
 origami[ coordinates_?MatrixQ, mr_MeshRegion, packedCellPattern, labelPattern ]["DisplayDimension"] := Last[Dimensions[MeshCoordinates[mr]]]
-origami[ coordinates_?MatrixQ, {}, cells : packedCellPattern, labels : labelPattern ]["DisplayDimension"] := Last[Dimensions[ MeshCoordinates[ toMeshRegion[ origami[coordinates,{},cells,labels], Automatic ] ] ] ]
+origami[ coordinates_?MatrixQ, {}, cells : packedCellPattern, labels : labelPattern ]["DisplayDimension"] := Last[Dimensions[ MeshCoordinates[ createMeshRegion[ origami, PadRight[ coordinates, {Length[coordinates] , chooseDimension[ coordinates ]} ], cells, {} ] ] ] ]
 
 origami[ coordinates_?MatrixQ, _, packedCellPattern, labelPattern ]["VertexNumber"] := Length[coordinates]
 
-origami[ coordinates_?MatrixQ, {}, cells : packedCellPattern, labelPattern ]["edges"] := DeleteDuplicatesBy[ Flatten[Select[ cells[[All,1]], MatrixQ[#] && Last[Dimensions[#]]==2 & ],1], Sort ]
-origami[ coordinates_?MatrixQ, m_MeshRegion, packedCellPattern, labelPattern ]["edges"] := MeshCells[m,1][[All,1]]
+origami[ coordinates_?MatrixQ, {}, cells : packedCellPattern, labelPattern ]["edges"] := ToPackedArray @ MeshCells[ createMeshRegion[ origami, PadRight[ coordinates, {Length[coordinates] , chooseDimension[ coordinates ]} ], cells, {} ] ,1][[All,1]]
+origami[ coordinates_?MatrixQ, m_MeshRegion, packedCellPattern, labelPattern ]["edges"] := ToPackedArray @ MeshCells[m,1][[All,1]]
 
-origami[ coordinates_?MatrixQ, {}, cells : packedCellPattern, labels : labelPattern ]["faces"] := MeshCells[ toMeshRegion[ origami[ coordinates, {}, cells, labels ], Automatic ] ,2][[All,1]]
-origami[ coordinates_?MatrixQ, m_MeshRegion, packedCellPattern, labelPattern ]["faces"] := MeshCells[m,2][[All,1]]
+origami[ coordinates_?MatrixQ, {}, cells : packedCellPattern, labels : labelPattern ]["faces"] := ToPackedArray @ MeshCells[ createMeshRegion[ origami, PadRight[ coordinates, {Length[coordinates] , chooseDimension[ coordinates ]} ], cells, {} ] ,2][[All,1]]
+origami[ coordinates_?MatrixQ, m_MeshRegion, packedCellPattern, labelPattern ]["faces"] := ToPackedArray @ MeshCells[m,2][[All,1]]
 
 
-addLabel[ requestedLabels : {Rule[_,_]...}|Rule[_,_] ][m : mechanismPattern] := 
-Module[
-{
-	vertices, newLabels, labelRules = Flatten[{requestedLabels}]
-},
-	{vertices, newLabels} = Transpose[List @@@ labelRules];
-	
-	Head[m][ m[[1]], m[[2]], m[[3]], Join[ Thread[ newLabels -> (vertices /. m[[4]])] , m[[4]] ] ]
+mechanismComponents[ m : mechanismPattern, patt_, dataPattern_ : _ ]:= mechanismCells[ m, patt, dataPattern ]
+mechanismComponents[ m : mechanismPattern, dataPattern_ : _ ]:= mechanismCells[ m, _, dataPattern ]
+
+
+dataSpecPattern = Blank[]|Alternatives[__String]|_String;
+
+mechanismCells[ m : mechanismPattern ] := outputCells[ _ , m[[3]] ]
+
+mechanismCells[ m : mechanismPattern, indexSpec_ : _ , dataSpec : _Rule : None, outputSpec_ : _ ] := 
+	outputCells[  outputSpec , filterByData[m , dataSpec ] @ filterByCells[ m, indexSpec] @ m[[3]] ]
+
+filterByCells[ m_ , {head_ , indices_List}][cells_] := Flatten[takeCells[ identifyCellFromList[ head, indices, # ], # ] & /@ cells]
+filterByCells[ m_ , patt : Except[_List] ][cells_] := With[
+{ pattern = cellPattern[patt] },
+	Flatten[takeCells[ casesCellType[ pattern, # ], # ] & /@ cells]
 ]
 
-addLabel[ m : mechanismPattern, labels_ ] := addLabel[ labels ] @ m
+filterByData[ m_ , None ][cells_] := cells
+filterByData[ m_, dataSpec_ -> f_Function ][cells_] := Flatten[takeCells[ selectCellFromDataType[ dataSpec -> f, # ], # ]& /@ cells]
+filterByData[ m_, dataSpec_ -> patt_ ][ cells_ ] := Flatten[ takeCells[ casesCellFromDataType[ dataSpec -> patt , # ], # ] & /@ cells ]
 
 
-removeLabel[ pattern_ ][m : mechanismPattern ]:= Head[m][ m[[1]], m[[2]], m[[3]], DeleteCases[ m[[4]], pattern ] ]
-removeLabel[ m : mechanismPattern, pattern_ ] := removeLabel[pattern] @ m
+mechanismPositions[ m : mechanismPattern ] := m[[1]]
+mechanismPositions[ Rule[ m : mechanismPattern, coords_?(MatrixQ[#,NumericQ]&) ] ] :=
+	addMeshRegion[ Head[m][coords, m[[2]],m[[3]],m[[4]]] , Automatic , {}] /; Length[ coords ] == Length[ m[[1]] ]
+
+mechanismPositions::coords = "Coordinates must be numerical and of the same dimension as mechanism.";
+mechanismPositions[ Rule[ m : mechanismPattern, _ ] ] := "nothing" /; Message[ mechanismPositions::coords ]
 
 
-mergeLabel[ m : mechanismPattern ] := Head[m][ m[[1]], m[[2]], m[[3]], Reverse /@ Normal@Merge[ Reverse/@m[[4]] , First] ]
+listEdges[ m : mechanismPattern ] := m["edges"]
+listFaces[ m : mechanismPattern ] := m["faces"]
+listVertices[ m : mechanismPattern ] := Range[ m["VertexNumber"] ]
+
+listEdges[ m : mechanismPattern, edgeList : {{_Integer,_Integer}...} ] :=
+With[{indexedEdges=PositionIndex[Sort/@m["edges"]], sortedEdges = Sort/@edgeList}, 
+	ToPackedArray @ Flatten[indexedEdges /@ sortedEdges]
+]
+
+listFaces[ m : mechanismPattern, faceList : {{__Integer}...} ] :=
+With[ {indexedFaces = PositionIndex[Sort/@m["faces"]], sortedFaces = Sort /@ faceList},
+	ToPackedArray @ Flatten[ indexedFaces /@ sortedFaces , 1 ]
+]
+
+
+listCells[ m : mechanismPattern ] := Sort[Head /@ m[[3]]]
+listCells[ m : mechanismPattern , s : _String ] := FirstCase[ m[[3]], s[__] ][[1]]
+listCells[ m : mechanismPattern , s : Alternatives[ __String ] ] := Cases[ m[[3]], s[__] ][[All,1]]
+
+listCells[ m : mechanismPattern , s : celltypePattern ] := FirstCase[ m[[3]], s[__] ][[1]]
+listCells[ m : mechanismPattern , s : celltypePattern.. ] := Head[#][#[[1]]]& /@ Cases[ m[[3]], (Alternatives@@{s})[__] ]
+
+
+edgeQ[m : mechanismPattern , edgelist_ ] := AllTrue[{MatrixQ[edgelist], Length[edgelist[[1]]]==2,ContainsAll[ Sort/@m["edges"],Sort/@edgelist]},TrueQ]
+faceQ[m : mechanismPattern , facelist_ ] := AllTrue[{ListQ[facelist],ContainsAll[ Sort/@m["faces"],Sort/@facelist ]},TrueQ]
+
+validEdgeQ[m : mechanismPattern , edgelist_ ] := AllTrue[{MatrixQ[edgelist], Length[edgelist[[1]]]==2,Min[edgelist]>0,Max[edgelist]<=m["VertexNumber"]},TrueQ]
+validEdgeQ[pos_?MatrixQ , edgelist_ ] := AllTrue[{MatrixQ[edgelist], Length[edgelist[[1]]]==2,Min[edgelist]>0,Max[edgelist]<=Length[pos]},TrueQ]
+
+validFaceQ[m : mechanismPattern , facelist_ ] := AllTrue[{ ListQ[facelist], Min[facelist]>0,Max[facelist]<=m["VertexNumber"]},TrueQ]
+validFaceQ[pos_?MatrixQ , facelist_ ] := AllTrue[{ListQ[facelist],Min[facelist]>0,Max[facelist]<=Length[pos]},TrueQ]
+
+
+labelCell[ s : _String , indexList_ ][ m : mechanismPattern ] := Head[m][ m[[1]], m[[2]], joinCells[ {packCells[ {s[indexList, {} ]} ], m[[3]] } ], m[[4]] ]
+labelCell[ m : mechanismPattern, s : _String , indexList_ ] := labelCell[s,indexList][m]
+
+
+Options[joinMechanism] = Flatten[{"overlapPrecision" -> 10^(-12), Options[MeshRegion]}];
+
+joinMechanism[ meshes : __?mechanismQ|{__?mechanismQ}, opt : OptionsPattern[] ] :=
+Module[{n, m = Flatten[{meshes}], meshOptions = FilterRules[{opt}, Options[MeshRegion]] },
+	With[{ num = Drop[ Flatten[{{1}, #+1& /@ Accumulate[ Length /@ m[[All,1]] ] }, 1 ], -1] },
+		addMeshRegion[
+			deleteDegenerateCellsFromMechanism[
+				removeOverlappingCoordinates[
+					Head[m[[1]]][
+						Flatten[m[[All,1]],1],
+						{},
+						joinCells[ Flatten @ MapThread[ replaceCellIndices[#1, n_Integer -> n + #2 - 1]&, { m[[All,3]], num }] ],
+						Flatten @ MapThread[ replaceRules[ #1, n_Integer -> n + #2 - 1, 2 ]&, { m[[All,4]], num } ]
+					],
+					OptionValue["overlapPrecision"]
+				]
+			],
+			Automatic,
+			meshOptions
+		]
+	] /; frameworkPrecisionQ[ OptionValue["overlapPrecision"] ] && sameHeadsQ[ m ]
+]
+
+mechanism::comb = "Cannot combine mechanisms of different types.";
+sameHeadsQ[ expr_List ] := If[ SameQ[ Head /@ expr ], True, Message[mechanism::comb]; False ]
 
 
 selectCells[ patt_ ][ m : mechanismPattern ] := 
@@ -1042,152 +1197,138 @@ With[ { pattern = cellPattern[ patt ]},
 	Head[m][
 		m[[1]],
 		{},
-		Flatten[takeCells[ identifyComponents[ pattern, #], # ]& /@ m[[3]]],
+		Flatten[takeCells[ casesCellType[ pattern, #], # ]& /@ m[[3]]],
 		m[[4]]
 	]
 ]
 
-selectCells[ patt_, dataSpec_, f_ ][m : mechanismPattern ] :=
-With[ { pattern = cellPattern[ patt ] },
-	With[ { cells = Flatten[ takeCells[ identifyComponents[ pattern , # ], # ]& /@ m[[3]] ] },
-		With[ {remainingCells = Flatten[ takeCells[ selectComponents[ Head[#], dataSpec, f, # ] , # ]& /@ cells ]},
-			Head[m][ m[[1]], {}, remainingCells, m[[4]] ]
-		]
-	]
-]
-
-
-selectCells[m : mechanismPattern, patt_ ] := addMeshRegion[ selectCells[patt][m], Automatic ]
-selectCells[m : mechanismPattern, patt_, dataSpec_, f_ ] := addMeshRegion[ selectCells[patt, dataSpec, f][m], Automatic ]
-
-
-changeCellData[ Rule[patt_ , dataSpec : {___Rule}|_Rule] ][ m : mechanismPattern ] :=
-With[ {pattern = cellPattern[patt], data = Flatten[{dataSpec}] },
-	Head[m][
-		m[[1]],
-		m[[2]],
-		changeDataInCell[ identifyComponents[ pattern, # ], # , data]& /@ m[[3]],
-		m[[4]]
-	]
-]
-changeCellData[ ruleList : {__Rule} ][ m : mechanismPattern ] := Fold[changeCellData[#2]@#1&, m, ruleList]
-
-changeCellData[ dataHead_, dataType_, dataList_List ][ m : mechanismPattern ] :=
-	Head[m][
-		m[[1]],
-		m[[2]],
-		changeDataFromList[ #, dataHead, dataType, dataList ] & /@ m[[3]],
-		m[[4]]
-	]
-
-
-changeCellData[ m : mechanismPattern, ruleList : {___Rule}|_Rule ] := changeCellData[ruleList][m]
-changeCellData[ m : mechanismPattern, dataHead_, dataType_, dataList_ ] := changeCellData[ dataHead, dataType, dataList ][m]
-
-
-highlightCells[ Rule[patt_, displaySpec : {___Rule}|_Rule ] ][ m : mechanismPattern ] :=
-With[ {pattern = cellPattern[patt], display = Flatten[{displaySpec}] },
+selectCells[ head_ , cellList_List ][ m : mechanismPattern ] :=
 	Head[m][
 		m[[1]],
 		{},
-		changeCellDisplay[ identifyComponents[ pattern, # ], #, display ]& /@ m[[3]],
+		Flatten[takeCells[ identifyCellFromList[ head, cellList, #], # ]& /@ m[[3]]],
 		m[[4]]
 	]
-]
-highlightCells[ ruleList : {___Rule} ][ m : mechanismPattern ] := Fold[ highlightCells[#2]@#1&, m, ruleList ]
 
-highlightRulePattern = {___Rule}|_Rule;
-highlightCells[ componentHead_, displayRules : {highlightRulePattern..} ][ m : mechanismPattern] :=
-With[{ cellDisplays = compressDisplayCells[ componentHead, Flatten /@ List /@ displayRules ] },
-	Head[m][
-		m[[1]], 
-		{}, 
-		changeCellDisplayFromList[ # , componentHead, cellDisplays ]& /@ m[[3]], 
-		m[[4]]
-	]
-]
+selectCells[m : mechanismPattern, patt_ ] := addMeshRegion[ selectCells[patt][m], Automatic , {} ]
+selectCells[m : mechanismPattern, head_, cellList_ ] := addMeshRegion[ selectCells[head, cellList][m], Automatic , {} ]
 
 
-highlightCells[m : mechanismPattern, ruleList : {___Rule}|_Rule ] := addMeshRegion[ highlightCells[ ruleList ][m], Automatic ]
-highlightCells[m : mechanismPattern, componentHead_, displayList_ ] := addMeshRegion[ highlightCells[ componentHead, displayList][m], Automatic ]
+deleteCells[ pattList_List ][ m : mechanismPattern ] := Fold[deleteCells, m , pattList ]
 
-
-existingEdgeQ[ m_, edgeSpec_ ] := MemberQ[ m["edges"], edgeSpec|Reverse[edgeSpec] ]
-
-splitEdge[ edgeSpec : {_,_}, label_ -> pos_?(VectorQ[#,NumericQ]&) ][ m : mechanismPattern ] := With[
-{ edge = edgeSpec /. m[[4]] },
-	addCells[ {
-			Point[ label -> pos ],
-			rigidBar[ {edge[[1]], label} ],
-			rigidBar[ {label, edge[[2]]} ]
-		} ] @ deleteCells[ _[edge] ] @ m  /; existingEdgeQ[m, edge ]
-] /; Length[pos] == m["EmbeddingDimension"]
-
-splitEdge[ m : mechanismPattern, edgeSpec_, label_ -> pos_ ] := addMeshRegion[ splitEdge[ edgeSpec, label -> pos ][m] , Automatic ]
-
-
-existingFaceQ[ m_, faceSpec_ ] := MemberQ[ Sort /@ m["faces"], Sort[faceSpec] ]
-
-addVertex[ faceSpec : {__}, Rule[label_ , posSpec_?(VectorQ[#,NumericQ]&) ] ][ m : mechanismPattern ] :=
-With[ {faces = faceSpec /. m[[4]], pos = PadRight[posSpec, m["EmbeddingDimension"] ]},
-	(
-		addCells[{
-			Point[ label -> pos ],
-			Map[ face[{label, #[[1]], #[[2]]}]&, Partition[faces,2,1,1] ]
-		}
-		] @ deleteCells[ _[faceSpec] ] @ m 
-	) /; existingFaceQ[m, faces]
-]
-
-addVertex[ m : mechanismPattern, faceSpec_, label_ -> posSpec_ ] :=
-	addMeshRegion[ addVertex[ faceSpec, label -> posSpec ][m] , Automatic ]
-
-
-deleteCells[ patt_ ][ m : mechanismPattern ] := With[
-{ pattern = cellPattern[ patt ]},
+deleteCells[ patt : Except[ _List ]][ m : mechanismPattern ] := 
+With[ { pattern = cellPattern[ patt ]},
 	Head[m][
 		m[[1]],
 		{},
-		Flatten[removeCells[ identifyComponents[ pattern, #], # ]& /@ m[[3]]],
+		Flatten[removeCells[ casesCellType[ pattern, #], # ]& /@ m[[3]]],
 		m[[4]]
 	]
 ]
 
-
-deleteCells[ m : mechanismPattern, patt_ ] := addMeshRegion[ deleteCells[patt][m], Automatic ]
-
-
-Options[addCells] = {"overlapPrecision" -> 10^(-12)};
-
-addCells[ cells_, OptionsPattern[] ][ m : mechanismPattern ] :=
-With[ { newMech = parseCells[ {m[[1]], {}, m[[4]]}, cells ] },
-		deleteDegenerateCellsFromMechanism[ removeOverlappingCoordinates[
-			Head[m][
-				newMech[[1]] /. makePositionsIntoRules[ m[[1]] /. m[[4]] ],
-				{},
-				sortCells[#,Identity]& /@ mergeCells[ newMech[[2]], m[[3]] ],
-				newMech[[3]]
-			],
-			OptionValue[ "overlapPrecision" ]
-		]
+deleteCells[ head_ , cellList_List ][ m : mechanismPattern ] :=
+	Head[m][
+		m[[1]],
+		{},
+		Flatten[removeCells[ identifyCellFromList[ head, cellList, #], # ]& /@ m[[3]]],
+		m[[4]]
 	]
+
+deleteCells[m : mechanismPattern, patt_ ] := addMeshRegion[ deleteCells[patt][m], Automatic , {} ]
+deleteCells[m : mechanismPattern, head_, cellList_ ] := addMeshRegion[ deleteCells[head, cellList][m], Automatic , {} ]
+
+
+Options[ addCells] = Options[framework];
+
+addCells[ cells_ , opt : OptionsPattern[] ][ m : mechanismPattern ] := With[
+{ parsed = parseCells[ { m[[1]], m[[3]], m[[4]] } , Flatten[{cells}]] },
+	deleteDegenerateCellsFromMechanism[ removeOverlappingCoordinates[
+		Head[m][parsed[[1]], {}, parsed[[2]], parsed[[3]]],
+		OptionValue["overlapPrecision"]
+	] ]
 ] /; frameworkPrecisionQ[ OptionValue["overlapPrecision"] ]
 
+addCells[ m : mechanismPattern, cells_, opt : OptionsPattern[] ] := addMeshRegion[ addCells[ cells, opt ][m], Automatic, FilterRules[ {opt}, Options[MeshRegion]]]
 
-addCells[ m : mechanismPattern, cells_, opt : OptionsPattern[] ] := addMeshRegion[ addCells[cells, opt ][m], Automatic ]
+
+deleteVertices[ vertices_?VectorQ ][m : mechanismPattern] :=
+With[ { pattern = Alternatives @@ ( {___,#,___}|#& /@ vertices ) },
+With[ { remainingCells = Flatten[ removeCells[ casesCellType[ {Head[#][pattern]} , # ], # ]& /@ m[[3]] ] },
+With[ { remainingVertices = Complement[ Range[Length[m[[1]]]], vertices /. m[[4]] ] },
+With[ { remappingRules = Thread[ remainingVertices -> Range[Length[remainingVertices]]] },
+	Head[m][
+		m[[1, remainingVertices]],
+		{},
+		replaceCellIndices[ remainingCells, remappingRules ],
+		replaceRules[ m[[4]], remappingRules, 2 ]
+	]
+]]]]
 
 
-makePositionsIntoRules[coordinates_] := { 
-	vertexPosition[n_Integer,"x"] :> coordinates[[n,1]], 
-	vertexPosition[n_Integer,"y"] :> coordinates[[n,2]], 
-	vertexPosition[n_Integer,"z"] :> coordinates[[n,3]]
-	}
+deleteVertices[ m : mechanismPattern, vertices_ ] := addMeshRegion[ deleteVertices[vertices][m], Automatic , {}]
+
+
+changeCellData[ patt_, {} ][ m : mechanismPattern ] := m
+changeCellData[ patt_, {dataRule : _Rule} ][ m : mechanismPattern ] := changeCellData[ patt, dataRule ][m]
+changeCellData[ patt_ , dataRules : {__Rule} ][ m : mechanismPattern ] := changeCellData[ patt, Rest[dataRules] ][ changeCellData[patt, First[dataRules] ][m] ]
+
+changeCellData[ patt_ , dataSpec_ -> data_ ][ m : mechanismPattern ] :=
+With[ { pattern = cellPattern[patt] },
+	Head[m][
+		m[[1]],
+		{},
+		changeCellDataType[ casesCellType[ pattern, # ] , {Head[#], dataSpec} , {data}, # ] & /@ m[[3]] ,
+		m[[4]]
+	]
+]
+
+changeCellData[ headSpec_Symbol , cellList_List, Rule[ dataSpec_ , data : Except[_List] ] ][ m : mechanismPattern ] :=
+	changeCellData[ headSpec, cellList, dataSpec -> ConstantArray[ data, Length[cellList] ]][m]
+
+changeCellData[ headSpec : rigidBar|spring|angleJoint|fold , cellList_?MatrixQ, dataSpec_ -> data_List ][ m : mechanismPattern ] :=
+	Head[m][
+		m[[1]],
+		{},
+		changeCellDataType[ identifyCellFromList[ headSpec , cellList, #] , {Head[#], dataSpec}, data , # ] & /@ m[[3]],
+		m[[4]]
+	] /; Length[data] == Length[cellList]
+
+changeCellData[ headSpec : face , cellList_List , dataSpec_ -> data_List ][ m : mechanismPattern ] :=
+	Head[m][
+		m[[1]],
+		{},
+		changeCellDataType[ identifyCellFromList[ headSpec , cellList, #] , {Head[#], dataSpec}, data , # ] & /@ m[[3]],
+		m[[4]]
+	] /; Length[data] == Length[cellList]
+
+changeCellData[ headSpec : joint , cellList_?VectorQ, dataSpec_ -> data_List ][ m : mechanismPattern ] :=
+	Head[m][
+		m[[1]],
+		{},
+		changeCellDataType[ identifyCellFromList[ headSpec , cellList, #] , {Head[#], dataSpec}, data , # ] & /@ m[[3]],
+		m[[4]]
+	] /; Length[data] == Length[cellList]
+
+changeCellData[ headSpec_Symbol, cellList_List, dataSpec_ -> data_List ][ m : mechanismPattern ] := ( Message[changeCellData::head, headSpec]; m ) /; Length[data]==Length[cellList]
+changeCellData[ joint, cellList_?(Not[VectorQ[#]]&), _][m : mechanismPattern ] := ( Message[changeCellData::joint, joint]; m)
+changeCellData[ face, _, _ ][ m : mechanismPattern ] := (Message[changeCellData::cell, face]; m)
+changeCellData[ cellSpec: rigidBar|spring|angleJoint|fold, cellList_?(Not[MatrixQ[#]]&), _][m : mechanismPattern ] := ( Message[changeCellData::cell, cellSpec]; m)
+changeCellData[ headSpec_Symbol , cellList_List, dataSpec_ -> data_List ][ m : mechanismPattern ] := ( Message[changeCellData::data]; m )
+
+changeCellData::data = "Data list must be the same length as the number of cells.";
+changeCellData::joint= "Cells of type `1` are specified as a single list.";
+changeCellData::cell = "Cells of type `1` are specified as a list of lists.";
+changeCellData::head= "Bad cell type, `1`.";
+
+
+changeCellData[ m : mechanismPattern, patt_, ruleList : {___Rule}|_Rule ] := addMeshRegion[ changeCellData[patt,ruleList][m], Automatic, {} ]
+changeCellData[ m : mechanismPattern, headSpec_, cellList_, dataSpec_ -> data_ ] := addMeshRegion[ changeCellData[headSpec, cellList, dataSpec -> data][m], Automatic, {} ]
 
 
 placeVertices[ moveSpec : {___Rule}|_Rule ][ m : mechanismPattern ] :=
 With[ { vertexMoves = Transpose[ List @@@ Flatten[{moveSpec}] ] },
 	Head[m][
-		newVertexPositions[ m[[1]], vertexMoves[[1]] /. m[[4]], vertexMoves[[2]] ],
+		newVertexPositions[ m[[1]], vertexMoves[[1]] /. m[[4]] , vertexMoves[[2]] ],
 		{},
 		m[[3]],
 		m[[4]]
@@ -1206,7 +1347,7 @@ placeVertices::vert = "Some vertices are not valid.";
 placeVertices::pos = "All positions are not of the same dimension as coordinates.";
 
 newVertexPositions[ coordinates_, vertices_?(VectorQ[#,IntegerQ]&), pos_?(MatrixQ[#, NumericQ]&) ] :=
-	ReplacePart[ coordinates, Thread[ vertices -> pos ] ] /; Dimensions[coordinates] == Dimensions[pos]
+	ReplacePart[ coordinates, Thread[ vertices -> pos ] ] /; Last@Dimensions[coordinates] == Last@Dimensions[pos]
 newVertexPositions[ coordinates_, _, pos_?(MatrixQ[#, NumericQ]&)] := (Message[placeVertices::vert]; coordinates )
 newVertexPositions[ coordinates_, _ , _ ] := (Message[placeVertices::pos]; coordinates )
 
@@ -1242,79 +1383,32 @@ moveVertexPositions[ coordinates_, vertices_, pos_ ] := (
 )
 
 
-placeVertices[m : mechanismPattern, moveSpec_ ] := addMeshRegion[ placeVertices[moveSpec][m], Automatic ]
-displaceVertices[m : mechanismPattern, moveSpec_ ] := addMeshRegion[ displaceVertices[moveSpec][m], Automatic ]
+placeVertices[m : mechanismPattern, moveSpec_ ] := addMeshRegion[ placeVertices[moveSpec][m], Automatic, {} ]
+displaceVertices[m : mechanismPattern, moveSpec_ ] := addMeshRegion[ displaceVertices[moveSpec][m], Automatic, {} ]
 
 
-deleteVertices[ vertices_?VectorQ ][m : mechanismPattern] :=
-With[ { pattern = Alternatives @@ ( {___,#,___}|#& /@ vertices ) },
-With[ { remainingCells = Flatten[ removeCells[ identifyComponents[ {Head[#][pattern]} , # ], # ]& /@ m[[3]] ] },
-With[ { remainingVertices = Complement[ Range[Length[m[[1]]]], vertices /. m[[4]] ] },
-With[ { remappingRules = Thread[ remainingVertices -> Range[Length[remainingVertices]]] },
-	Head[m][
-		m[[1, remainingVertices]],
-		{},
-		replaceCellIndices[ remainingCells, remappingRules ],
-		replaceRules[ m[[4]], remappingRules, 2 ]
-	]
-]]]]
-
-
-deleteVertices[ m : mechanismPattern, vertices_ ] := addMeshRegion[ deleteVertices[vertices][m], Automatic ]
-
-
-mapCells::err="Mapping function did not produce a viable mechanism.";
-
-mapCells[ f_ ][m : mechanismPattern] :=
-With[{
-	newComponents = mapComponents[ f, m[[3]] ]
-},
-	If[ Head[newComponents] =!= List ,
-		Message[mapCells::err]; m,
-		Head[m][ m[[1]], {}, DeleteCases[ newComponents, _packComponentCells ], m[[4]] ]
-	]
-]
-
-mapCells[ f_, m : mechanismPattern ] := addMeshRegion[ mapCells[f][m], Automatic ]
-
-
-Options[joinMechanism] = Flatten[{"overlapPrecision" -> 10^(-12), Options[MeshRegion]}];
-
-joinMechanism[ meshes : __?mechanismQ|{__?mechanismQ}, opt : OptionsPattern[] ] :=
-Module[{n, m = Flatten[{meshes}], meshOptions = FilterRules[{opt}, Options[MeshRegion]] },
-	With[{ num = Drop[ Flatten[{{1}, #+1& /@ Accumulate[ Length /@ m[[All,1]] ] }, 1 ], -1] },
-		addMeshRegion[
-			deleteDegenerateCellsFromMechanism[
-				removeOverlappingCoordinates[
-					Head[m[[1]]][
-						Flatten[m[[All,1]],1],
-						{},
-						mergeCells @@ MapThread[ replaceCellIndices[#1, n_Integer -> n + #2 - 1]&, { m[[All,3]], num }],
-						Flatten @ MapThread[ replaceRules[ #1, n_Integer -> n + #2 - 1, 2 ]&, { m[[All,4]], num } ]
-					],
-					OptionValue["overlapPrecision"]
-				]
-			],
-			Automatic,
-			meshOptions
-		]
-	] /; frameworkPrecisionQ[ OptionValue["overlapPrecision"] ] && sameHeadsQ[ m ]
-]
-
-mechanism::comb = "Cannot combine mechanisms of different types.";
-sameHeadsQ[ expr_List ] := If[ SameQ[ Head /@ expr ], True, Message[mechanism::comb]; False ]
-
-
-framework /: Map[ f_, m : framework[ coordinates_, _, cells : {_Symbol[_,_,_]...}, labels_ ] ] := With[ { newCoordinates = f /@ coordinates},
+framework /: Map[ f_, m : framework[ coordinates_, _, cells : packedCellPattern,  labels_ ] ] := With[ { newCoordinates = f /@ coordinates},
 	framework[ newCoordinates, {}, cells, labels ] /; mapTestCoordinatesQ[ newCoordinates, coordinates ]
 ]
 
-origami /: Map[ f_, m : origami[ coordinates_, _, cells : {_Symbol[_,_,_]...}, labels_ ] ] := With[ { newCoordinates = f /@ coordinates},
+origami /: Map[ f_, m : origami[ coordinates_, _, cells : packedCellPattern, labels_ ] ] := With[ { newCoordinates = f /@ coordinates},
 	origami[ newCoordinates, {}, cells, labels ] /; mapTestCoordinatesQ[ newCoordinates, coordinates ]
 ]
 
 mechanism::match ="New coordinates are not numeric and of the same dimension as old coordinates.";
 mapTestCoordinatesQ[ new_, old_ ] := If[ MatrixQ[ new, NumericQ ] && Dimensions[new] == Dimensions[old], True, Message[mechanism::match]; False ]
+
+
+mapCells[ f_ ][ m : mechanismPattern ] := 
+Module[
+{
+	cells = unparseCells[m[[3]],_],
+	newCells
+},
+	newCells = parseCells[ {m[[1]], {}, m[[4]]} , f /@ cells ];
+	Head[m][ newCells[[1]], {}, newCells[[2]], newCells[[3]] ]
+]
+mapCells[ m : mechanismPattern , f_ ] := addMeshRegion[ mapCells[f][m], Automatic, {} ]
 
 
 Options[tesselateMechanism]={"overlapPrecision"->10^(-6)};
@@ -1388,7 +1482,7 @@ Module[
 ] /; tesselationBasisQ[m, 3, basis] && tesselationCellCountsQ[n1,n2,n3]
 
 
-replaceElement[ f : mechanismPattern, rule_ ] := Head[f][ ReplaceAll[f[[1]],rule] ,f[[2]], replaceCellData[ #, rule ]& /@ f[[3]],f[[4]]]
+replaceElement[ f : mechanismPattern, rule_ ] := Head[f][ ReplaceAll[f[[1]],rule] ,f[[2]], replaceCellData[ f[[3]], rule ],f[[4]]]
 
 ReplaceAll[ f_framework, rule_ ] ^:= replaceElement[ f, rule ]
 ReplaceAll[ o_origami, rule_] ^:= replaceElement[o, rule]
@@ -1398,99 +1492,98 @@ Precision[ f_framework ] ^:= Precision[ f["positions"] ]
 Precision[ o_origami ] ^:= Precision[ o["positions"] ]
 
 
-Rationalize[ f_framework, dx___ ] ^:= ReplacePart[ f, 1 -> Rationalize[ f[[1]], dx ] ]
-Rationalize[ o_origami, dx___ ] ^:= ReplacePart[ o, 1 -> Rationalize[ o[[1]], dx ] ]
+Rationalize[ f_framework, dx___ ] ^:= ReplacePart[ f, 1 -> ToPackedArray[Rationalize[ f[[1]], dx ]] ]
+Rationalize[ o_origami, dx___ ] ^:= ReplacePart[ o, 1 -> ToPackedArray[Rationalize[ o[[1]], dx ]] ]
 
 
-N[ f_framework, dx___ ] ^:= ReplacePart[ f, 1 -> N[ f[[1]], dx ] ]
-N[ o_origami, dx___ ] ^:= ReplacePart[ o, 1 -> N[ o[[1]], dx ] ]
+N[ f_framework, dx___ ] ^:= ReplacePart[ f, 1 -> ToPackedArray[N[ f[[1]], dx ]] ]
+N[ o_origami, dx___ ] ^:= ReplacePart[ o, 1 -> ToPackedArray[N[ o[[1]], dx ]] ]
 
 
-meshCells[ m : mechanismPattern ] := Module[{i},With[ {mr = m["mesh"]},
-	Table[
-		Property[ MeshCells[ mr, {i, #} ], getProperties[ mr, i, # ] ]& /@ Range[ MeshCellCount[ mr, i ] ],
-		{i,0,2}
-	]
-]]
-
-meshCells[ mr_MeshRegion ] := Module[{i},
-	Table[
-		Property[ MeshCells[ mr, {i, #} ], getProperties[ mr, i, # ] ]& /@ Range[ MeshCellCount[ mr, i ] ],
-		{i,0,2}
-	]
+subdivideCell[ indices_?VectorQ , label_ : Unique[] ][ m : mechanismPattern ] :=
+With[ {tmp = subdivideCell[ {indices},label][m]},
+	Head[tmp][ tmp[[1]], tmp[[2]],tmp[[3]], replaceRules[ tmp[[4]], {label[indices] -> label}] ]
 ]
 
-getProperties[ mr_MeshRegion, d_, cell_ ] := # -> PropertyValue[ {mr, {d, cell}}, # ] & /@ $meshRegionProperties
+subdivideCell[ indices : {{_,__}...} , label_ : Unique[] ][ m : mechanismPattern ] := 
+Module[
+{
+	cells = mechanismCells[ m, {_ , indices} , _ ]
+},
+	addCells[ subdivideCellInternal[ m[[1]], # , label] & /@ cells ] @ deleteCells[ deletedCells[cells[[All,1]]] ] @ m
+]
+
+deletedCells[ cells_ ] := Flatten[patternTheCells /@ cells]
+patternTheCells[ head_[ indices : {{_,__}..} ] ] := head /@ indices
+patternTheCells[ fine : _[ {_,__} ] ] := fine
+
+subdivideCell[ m : mechanismPattern, indices_, label_ : Unique[] ] := addMeshRegion[subdivideCell[indices, label][m], Automatic, {} ]
+
+subdivideCellInternal[ coordinates_ , Rule[ head_[indices : {{_,_}...} ], data_ ] , label_] := With[
+{ newVertices = If[Length[indices]>1,label/@indices,{label}], newVertexCoordinates = Mean[coordinates[[#]]]&/@indices},
+	{
+		MapThread[joint[ #1 -> #2 ]& , {newVertices, newVertexCoordinates} ],
+		(*new edges*)
+		MapThread[ head[ {{#1[[1]],#2},{#2, #1[[2]]}}, #3]&, { indices, newVertices, data } ]
+	}
+]
+
+subdivideCellInternal[ coordinates_, Rule[ head_[ indices : {{_,_,__}...} ], data_ ] , label_] := With[
+{
+	newVertices = label/@indices, newVertexCoordinates = Mean[ coordinates[[#]] ]&/@indices
+},
+	{
+		MapThread[ joint[ #1 -> #2 ]&, {newVertices, newVertexCoordinates} ],
+		(*new faces*)
+		MapThread[ head[ splitFace[ #1, #2 ] , #3]&  , { indices , newVertices , data } ]
+	}
+]
+splitFace[ indices_ , newVertex_ ] := {newVertex, #[[1]], #[[2]] } & /@ Partition[ indices , 2, 1, 1]
 
 
-matchFromData[ m : mechanismPattern, data_ -> patt_ ] := Flatten[ takeCells[ matchComponents[ Head[#], data, patt, # ], # ]& /@ m[[3]] ]
-selectFromData[ m : mechanismPattern, data_, f_ ] := Flatten[ takeCells[ selectComponents[ Head[#], data, f, # ], #] & /@ m[[3]] ]
+divideFace[ edge : {_,_} ][m : mechanismPattern ] := divideFace[ {edge} ][m]
+divideFace[ edgeList_?MatrixQ ][m : mechanismPattern ] := 
+Module[
+{
+	cells = unparseCells[ m[[3]] , face],
+	facelessM = deleteCells[_face] @ m,
+	newCells
+},
+	newCells = parseCells[ {facelessM[[1]], facelessM[[3]], facelessM[[4]]}, Fold[ (cutFace[#2] /@ #1) &, cells, edgeList /. m[[4]] ] ];
+	Head[m][ newCells[[1]], {}, newCells[[2]], newCells[[3]] ]
+]
+divideFace[ m : mechanismPattern, edgeList_ ] := addMeshRegion[ divideFace[edgeList][m], Automatic, {} ]
+
+cutFace[ {v1_,v2_}][face[{a___,v1_,b__,v2_,c___}, prop_] ] := {face[{v1,b,v2},prop],face[{v2,c,a,v1},prop]}
+cutFace[ {v2_,v1_}][face[{a___,v1_,b__,v2_,c___}, prop_] ] := {face[{v1,b,v2},prop],face[{v2,c,a,v1},prop]}
+cutFace[ _ ][f_] := f
 
 
-componentData[ m : mechanismPattern, s_, patt_ ] := Module[
-{ pattern = cellPattern[patt], cells },
-	cells = Flatten[ takeCells[ identifyComponents[ pattern, # ] , # ]& /@ m[[3]] ];
-
-	componentDataInternal[ s, # ] & /@ cells
+triangulateFaces[ m : mechanismPattern ] :=
+Module[
+{
+	cells = unparseCells[ m[[3]] , face],
+	newm = deleteCells[ _face ] @ m,
+	coordinates = m[[1]],
+	newcells
+},
+	newcells = parseCells[ {newm[[1]],newm[[3]],newm[[4]]}, decomposeFace[ coordinates, # ]& /@ cells ];
+	addMeshRegion[ Head[m][newcells[[1]], {}, newcells[[2]], newcells[[3]]], Automatic, {} ]
 ]
 
 
-componentDataInternal[ All, head_[ indices_ , data_, _ ] ] := head[indices] -> Thread[dataForm[head] -> data]
-componentDataInternal[ s_String, head_[indices_,data_,_] ] := With[
-{ location = s /. Thread[dataForm[head] -> Range[Length[dataForm[head]]]] },
-	If[IntegerQ[location], head[indices] -> data[[ location ]], Missing[s] ]
+decomposeFace[ coordinates_, face[{i_,j_,k_}, prop_] ] := face[{i,j,k}, prop]
+decomposeFace[ coordinates_, face[ i_ , prop_] ] := With[{diag = findShortestDiagonal[ coordinates, i ]},
+	{fold[diag],decomposeFace[ coordinates, # ] & /@ cutFace[diag][face[i, prop]]}
 ]
+decomposeFace[ coordinates_, other_ ] := other
 
-componentDataInternal[ "style", head_[ indices_, data_, display_] ] := head[indices] -> display[[All,1]]
-componentDataInternal[ "label", head_[ indices_, data_, display_] ] := head[indices]-> display[[All,2]]
-componentDataInternal[ "shape", head_[ indices_, data_, display_] ] := head[indices] -> display[[All,3]]
-componentDataInternal[ "display" , head_[ indices_, data_, display_ ] ] := head[indices] ->display
-
-
-mechanismPositions[ m : mechanismPattern ] := m[[1]]
-mechanismPositions[ Rule[ m : mechanismPattern, coords_?(MatrixQ[#,NumericQ]&) ] ] :=
-	addMeshRegion[ Head[m][coords, m[[2]],m[[3]],m[[4]]] , Automatic ] /; Dimensions[ coords ] == Dimensions[ m[[1]] ]
-
-mechanismPositions::coords = "Coordinates must be numerical and of the same dimension as mechanism.";
-mechanismPositions[ Rule[ m : mechanismPattern, _ ] ] := "nothing" /; Message[ mechanismPositions::coords ]
-
-
-constrainedComponents[ m : mechanismPattern, patt_ ] :=
-With[ {cellBase = Flatten[takeCells[ identifyComponents[ cellPattern[patt], # ], # ]& /@ m[[3]]] },
-	mechanismComponentsCell /@ Flatten[{
-		takeCells[ matchComponents[ rigidBar, "stiffness", Infinity, # ], # ]& /@ cellBase,
-		takeCells[ matchComponents[ spring, "stiffness", Infinity, # ], # ]& /@ cellBase,
-		takeCells[ matchComponents[ joint, "pinningStiffness", Infinity, # ], #]& /@ cellBase,
-		takeCells[ matchComponents[ fold, "torsionalStiffness", Infinity, # ], #]& /@ cellBase
-	}]
+findShortestDiagonal[ coordinates_, vertices : {__Integer} ] :=
+With[ {diagonals = polygonDiagonals[ vertices ]},
+	MinimalBy[ Transpose[ { diagonals , mechanisms`geometry`displacementLength[ coordinates, diagonals ] } ] , N[Last[#]]& ][[1,1]]
 ]
-
-
-mechanismComponents[ m : mechanismPattern ] := mechanismComponentsCell /@ m[[3]]
-
-mechanismComponentsCell[ head_[ indices_, data_, display_ ]] := head[indices, Association @@ Join[Thread[dataForm[head] -> data],{"display"-> display}] ]
-
-mechanismComponents[ m : mechanismPattern, patt_] := 
-With[ {pattern = cellPattern[patt]},
-With[ {cells = Flatten[takeCells[ identifyComponents[ pattern, # ], # ]& /@ m[[3]]]},
-	mechanismComponentsCell /@ cells
-]]
-
-mechanismComponents[ m : mechanismPattern, Rule[ patt_, data_ ] ] := changeCellData[ patt, data ][m]
-
-
-listEdges[ m : mechanismPattern ] := m["edges"]
-listFaces[ m : mechanismPattern ] := m["faces"]
-listVertices[ m : mechanismPattern ] := Range[ m["VertexNumber"] ]
-
-listEdges[ m : mechanismPattern, edgeList : {{_Integer,_Integer}...} ] :=
-With[{indexedEdges=PositionIndex[Sort/@m["edges"]], sortedEdges = Sort/@edgeList}, 
-	Flatten[indexedEdges /@ sortedEdges]
-]
-
-listFaces[ m : mechanismPattern, faceList : {{__Integer}...} ] :=
-With[ {indexedFaces = PositionIndex[Sort/@m["faces"]], sortedFaces = Sort /@ faceList},
-	Flatten[ indexedFaces /@ sortedFaces , 1 ]
+polygonDiagonals[ vertices_ ] := With[ {guesses = Tuples[ Range[Length[vertices]], 2 ], l = Length[vertices]},
+	DeleteDuplicatesBy[ Map[ vertices[[#]]&, Select[ guesses, Between[ Abs[ #[[1]] - #[[2]] ],  {2, Length[vertices]-2} ] & ], {2} ], Sort]
 ]
 
 
@@ -1503,17 +1596,11 @@ BeginPackage["mechanisms`geometry`"];
 
 
 (* 
-	We need MeshRegion to work for this package to work so make sure we are using at least version 10 of Mathematica
-*)
-If[ $VersionNumber<10, Print["Mathematica version may be too low."]];
-
-(* 
 	A snippet of code to test or a working C compiler, modified from
 	https://mathematica.stackexchange.com/questions/39837/check-whether-a-working-ccompiler-is-installed
 *)
 If[Quiet[Check[TrueQ[Compile[{}, 0, CompilationTarget -> "C"][] == 0], False]],
   $compilationTarget = "C",
-  Print["C compilation failed. Using MVM code instead."];
   $compilationTarget = "MVM"
 ];
 
@@ -1565,12 +1652,22 @@ loadFromFOLD::usage=
 
 
 periodicIdentification::usage=
-"periodicIdentification[m, {f1, func1},..] applies transformation functions func1, func2, ... and creates a list of vertices identified via those transformations.
-periodicIdentification[m, {z1,z2,...}, {vector1, vector2, ...}] identifies vertices under translation vectors {vector1, vector2,...} and returns rules identifying vertexDisplacement objects up to corresponding factors of {z1, z2,...}.";
+"periodicIdentification[m, {f1 -> func1,..} ] applies transformation functions func1, func2, ... and creates a list of vertices identified via those transformations.
+periodicIdentification[m, {z1,z2,...}, {vector1, vector2, ...}] identifies vertices under translation vectors {vector1, vector2,...} and returns rules identifying vertexDisplacement objects up to corresponding factors of {z1, z2,...}.
+periodicIdentification[m, {vector1, vector2, ...}] identifies vertices under translation vectors {vector1, vector2,...} and returns rules identifying vertexDisplacement objects.";
+
+periodicIdentificationData::usage="periodicIdentificationData is a structure for periodic mechanisms.";
+periodicIdentificationDataQ::usage="periodicIdentificationDataQ[ pi ] returns True if pi is a periodicIdentificationData structure.
+periodicIdentificationDataQ[ m, pi ] returns True if pi is a periodicIdentificationData structure that can correspond to mechanism m.";
+
 
 minimalMechanism::usage=
 "minimalMechanism[m, {vector1, vector2, ...}] reduces a mechanism to the smallest unit cell that can be tesselated periodically according to the basis of vectors provided.
 It relies on periodicIdentification[] but unfortunately renumbers vertices.";
+
+labelPeriodicVertices::usage="labelPeriodicVertices[ m, rules ] labels a mechanism according to a set of periodicity rules.";
+
+periodicPositionRules::usage="periodicPositionRules[positions , rules ] returns a list of identifications betweeen vertex positions associated with a periodic mechanism.";
 
 
 displacementVector::usage=
@@ -1602,31 +1699,67 @@ normalVector[ positions, { triple 1, triple 2, ...} ] returns vectors normal to 
 normalVector[ positions, polygon ] returns the vector normal to a polygon.
 normalVector[ positions, {polygon 1, polygon 2, ...} ] returns the vectors normal to a list of polygons.";
 
+faceArea::usage=
+"faceArea[ positions, {vertex 1, vertex 2, vertex 3} ] returns the area of the face spanned by the three points.
+faceArea[ positions, { triple 1, triple 2, ...} ] returns the area of the face spanned by the list of triples.
+faceArea[ positions, polygon ] returns area of a polygon.
+faceArea[ positions, {polygon 1, polygon 2, ...} ] returns the areas of a list of polygons.";
+
 planarAngle::usage=
 "planarAngle[positions, {v1, v2, v3}] returns the oriented angle at vertex v2 spanned by the other two vertices.
 planarAngle[positions, {triple 1, triple 2, ...}] returns the oriented angles at for each triple of verticles.";
 
 foldAngle::usage=
-"foldAngle[ mesh, positions, edge ] returns the fold angle along an edge.
-foldAngle[ mesh, positions,{edge 1, edge 2,...} ] returns the fold angle of a list of edges.";
+"foldAngle[ mechanism, positions, edge ] returns the fold angle along an edge.
+foldAngle[ mechanism, positions,{edge 1, edge 2,...} ] returns the fold angle of a list of edges.";
 
 gaussianCurvature::usage=
-"gaussianCurvature[ mesh, positions,vertex ] returns the discrete Gaussian curvature of vertex.
-gaussianCurvature[ mesh, positions,{vertex 1, vertex 2, ...} ] returns the discrete Gaussian curvature of a list of vertices.
-gaussianCurvature[ mesh, metric,{vertex 1, vertex 2, ...} uses a metric to explicitly compute the Gaussian curvature at each vertex.";
+"gaussianCurvature[ mechanism, positions,vertex ] returns the discrete Gaussian curvature of vertex.
+gaussianCurvature[ mechanism, positions,{vertex 1, vertex 2, ...} ] returns the discrete Gaussian curvature of a list of vertices.
+gaussianCurvature[ mechanism, metric,{vertex 1, vertex 2, ...} uses a metric to explicitly compute the Gaussian curvature at each vertex.";
 
-alignMechanism::usage="alignMechanism[\!\(\*StyleBox[\"point\",FontSlant->\"Italic\"]\)\!\(\*StyleBox[\" \",FontSlant->\"Italic\"]\)\!\(\*StyleBox[\"list\",FontSlant->\"Italic\"]\)\!\(\*StyleBox[\" \",FontSlant->\"Italic\"]\)\!\(\*StyleBox[\"1\",FontSlant->\"Italic\"]\)\!\(\*StyleBox[\",\",FontSlant->\"Italic\"]\)\!\(\*StyleBox[\" \",FontSlant->\"Italic\"]\)\!\(\*StyleBox[\"point\",FontSlant->\"Italic\"]\)\!\(\*StyleBox[\" \",FontSlant->\"Italic\"]\)\!\(\*StyleBox[\"list\",FontSlant->\"Italic\"]\)\!\(\*StyleBox[\" \",FontSlant->\"Italic\"]\)\!\(\*StyleBox[\"2\",FontSlant->\"Italic\"]\)] aligns \!\(\*StyleBox[\"point\",FontSlant->\"Italic\"]\)\!\(\*StyleBox[\" \",FontSlant->\"Italic\"]\)\!\(\*StyleBox[\"list\",FontSlant->\"Italic\"]\)\!\(\*StyleBox[\" \",FontSlant->\"Italic\"]\)\!\(\*StyleBox[\"2\",FontSlant->\"Italic\"]\) with \!\(\*StyleBox[\"point\",FontSlant->\"Italic\"]\)\!\(\*StyleBox[\" \",FontSlant->\"Italic\"]\)\!\(\*StyleBox[\"list\",FontSlant->\"Italic\"]\)\!\(\*StyleBox[\" \",FontSlant->\"Italic\"]\)\!\(\*StyleBox[\"1\",FontSlant->\"Italic\"]\) using only Euclidean motions.
-alignMechanism[\!\(\*StyleBox[\"point\",FontSlant->\"Italic\"]\)\!\(\*StyleBox[\" \",FontSlant->\"Italic\"]\)\!\(\*StyleBox[\"list\",FontSlant->\"Italic\"]\)\!\(\*StyleBox[\" \",FontSlant->\"Italic\"]\)\!\(\*StyleBox[\"1\",FontSlant->\"Italic\"]\), \!\(\*StyleBox[\"mechanism\",FontSlant->\"Italic\"]\)] aligns a mechanical with \!\(\*StyleBox[\"point\",FontSlant->\"Italic\"]\)\!\(\*StyleBox[\" \",FontSlant->\"Italic\"]\)\!\(\*StyleBox[\"list\",FontSlant->\"Italic\"]\)\!\(\*StyleBox[\" \",FontSlant->\"Italic\"]\)\!\(\*StyleBox[\"1\",FontSlant->\"Italic\"]\) using Euclidean motions.
-alignMechanism[\!\(\*StyleBox[\"mechanism\",FontSlant->\"Italic\"]\)\!\(\*StyleBox[\" \",FontSlant->\"Italic\"]\)\!\(\*StyleBox[\"1\",FontSlant->\"Italic\"]\), \!\(\*StyleBox[\"mechanism\",FontSlant->\"Italic\"]\)\!\(\*StyleBox[\" \",FontSlant->\"Italic\"]\)\!\(\*StyleBox[\"2\",FontSlant->\"Italic\"]\)] aligns \!\(\*StyleBox[\"mechanism\",FontSlant->\"Italic\"]\)\!\(\*StyleBox[\" \",FontSlant->\"Italic\"]\)\!\(\*StyleBox[\"2\",FontSlant->\"Italic\"]\) to \!\(\*StyleBox[\"mechanism\",FontSlant->\"Italic\"]\)\!\(\*StyleBox[\" \",FontSlant->\"Italic\"]\)\!\(\*StyleBox[\"1\",FontSlant->\"Italic\"]\) using Euclidean motions.";
+alignMechanism::usage="alignMechanism[ m1Spec, m2Spec ] returns a list of positions that best align the second mechanism to the first.
+m1Spec and m2Spec can be either be a mechanism, a list of positions, { mechanism, vertices }, or {positions, vertices}.
+If vertices are included, only the specified vertices will be used to determine the transformation.";
 
-congruentQ::usage="congruentQ[p1,p2] tests whether the two vectorPositions are related by a rigid transformation.
-congruentQ[p1,p2,tolerance] tests whether the two vectorPositions are related by a rigid transformation.
-congruentQ[tolerance] is a function that can check the positions between two vertexPosition configurations.";
+congruentQ::usage="congruentQ[ tol_ ][ m1Spec, m2Spec ] returns True if the first and second mechsnisms are congruent up to a given tolerance.
+m1Spec and m2Spec can be either be a mechanism, a list of positions, { mechanism, vertices }, or {positions, vertices}.
+If vertices are included, only the specified vertices will be used to determine the transformation.";
 
 
 Begin["`Private`"];
 
 Needs["mechanisms`"];
+
+
+reportError[ msgHead_, msgName_ ] := ToExpression["Message["<>msgHead<>"::"<>msgName<>"]"]
+
+reportError[ msgHead_, msgName_, arguments__ ] := With[
+{ args = StringJoin@@(ToString/@{arguments}) },
+	ToExpression["Message["<>msgHead<>"::"<>msgName<>","<>args<>"]"]
+]
+
+
+checkForError[ test_ , name_String, error__ ] := If[ TrueQ[test] , True, reportError[name, Evaluate[error] ]; False]
+SetAttributes[checkForError, HoldRest ];
+
+
+listParameters[expr_]:=DeleteDuplicates[(Extract[expr,#]&)/@Position[List@@expr,infinitesimal[_,_]]]
+
+
+(*
+	This basically does what Series[] does in a somewhat dumber way.
+	It won't handle limits as nicely as Series[] but it typically presents results that look
+	more useful for analytic expressions.
+*)
+expandExpression[expr_,param_]:=Module[
+{i,tmp},
+	Total[Table[(tmp@@param)^i D[expr,{param,i}]/(i!),{i,0,param[[2]]}]/.param->0]/.tmp->infinitesimal
+]
+expandExpression[expr_?NumericQ]:=expr
+expandExpression[expr_]:=With[{params=listParameters[expr]},
+	Fold[expandExpression,expr,Reverse@params]
+]
 
 
 orderPairs[{}]:={}
@@ -1663,8 +1796,8 @@ connectivity[ m_?mechanismQ, "edges" -> "vertices" ] := m["edges"]
 
 connectivity[ m_?mechanismQ, "vertices" -> "faces" ] := With[
 { faces = rotateThroughFaces[ connectivity[m, "faces" -> "vertices" ] ] },
-	GatherBy[
-		Join[
+	GatherBy[(*unpacks*)
+		Join[(*unpacks*)
 			Transpose[{Range[Length[ m["positions"] ] ]}], (*make a list of vertices in order of the form {{1},{2},...}*)
 			faces
 		],
@@ -1681,6 +1814,7 @@ With[{cells=Transpose[ connectivity[ m, "faces" -> "vertices" ] ]},
 ]
 
 
+(*unpacks*)
 connectivity[m_?mechanismQ, "edges" -> "faces" ]:=With[
 { edges = connectivity[ m, "edges" -> "vertices" ], faces = connectivity[ m, "faces" -> "vertices" ] },
 	GatherBy[Flatten[{edges,rotateCells[faces]},1],Sort[#[[1;;2]]]&][[All,2;;]]
@@ -1822,7 +1956,7 @@ embeddingDimension[ Rule[ m_?mechanismQ, d_] ] := embeddingDimension[d][m]
 displayDimension[ m_?mechanismQ ] := m["DisplayDimension"]
 
 displayDimension [ d: 2|3 ][m_?mechanismQ] := 
-With[ {res = mechanisms`Private`addMeshRegion[m,d]}, res /; mechanismQ[res] ]
+With[ {res = mechanisms`Private`addMeshRegion[m,d,{}]}, res /; mechanismQ[res] ]
 
 displayDimension::dim = "Dimension `1` should be 2 or 3.";
 displayDimension[ d_ ][ m_?mechanismQ ] := "nothing" /; Message[ displayDimension::dim, d ]
@@ -1860,40 +1994,16 @@ MeshCellCount[ o_framework, d___ ] ^:= MeshCellCount[ o["mesh"], d ]
 MeshCellCount[ o_origami, d___ ] ^:= MeshCellCount[ o["mesh"], d ]
 
 
-listParameters[expr_]:=DeleteDuplicates[(Extract[expr,#]&)/@Position[List@@expr,infinitesimal[_,_]]]
+vertexCoordinatesQ[ coord_ ] := AllTrue[ {MatrixQ[coord], Length[coord[[1]]]==2 || Length[coord[[1]]]==3}, TrueQ ]
+vertexCoordinatesQ[ m_?mechanismQ, coord_ ] := AllTrue[ {MatrixQ[coord], Length[coord] == m["VertexNumber"]}, TrueQ ]
 
 
-(*
-	This basically does what Series[] does in a somewhat dumber way.
-	It won't handle limits as nicely as Series[] but it typically presents results that look
-	more useful for analytic expressions.
-*)
-expandExpression[expr_,param_]:=Module[
-{i,tmp},
-	Total[Table[(tmp@@param)^i D[expr,{param,i}]/(i!),{i,0,param[[2]]}]/.param->0]/.tmp->infinitesimal
-]
-expandExpression[expr_?NumericQ]:=expr
-expandExpression[expr_]:=With[{params=listParameters[expr]},
-	Fold[expandExpression,expr,Reverse@params]
-]
+numericCoordinatesQ[ coord_ ] := AllTrue[ {MatrixQ[coord, NumericQ], Length[coord[[1]]]==2 || Length[coord[[1]]]==3},TrueQ ]
+numericCoordinatesQ[ m_?mechanismQ, coord_ ] := AllTrue[ {MatrixQ[coord,NumericQ], Length[coord] == m["VertexNumber"]}, TrueQ ]
 
 
-vertexCoordinatesQ[ coord_?MatrixQ ] := (#==2||#==3 &)[Last[Dimensions[coord]]]
-vertexCoordinatesQ[ m_?mechanismQ, coord_?MatrixQ ] := Dimensions[coord] == Dimensions[m["positions"]]
-vertexCoordinatesQ[ _ ]:=False
-vertexCoordinatesQ[ m_?mechanismQ, _ ]:=False
-
-
-numericCoordinatesQ[ coord_?(MatrixQ[#,NumericQ]&) ] := (#==2||#==3 &)[Dimensions[coord][[2]]]
-numericCoordinatesQ[ _ ]:=False
-numericCoordinatesQ[ m_?mechanismQ, coord_?(MatrixQ[#,NumericQ]&) ] := Dimensions[coord] == Dimensions[m["positions"]]
-numericCoordinatesQ[ m_?mechanismQ, _ ]:=False
-
-
-numericMachinePrecisionCoordinatesQ[ coord_?(MatrixQ[#,MachineRealQ]&) ] := (#==2||#==3 &)[Dimensions[coord]]
-numericMachinePrecisionCoordinatesQ[ m_?mechanismQ, coord_?(MatrixQ[#,MachineRealQ]&) ] := Dimensions[coord] == Dimensions[m["positions"]]
-numericMachinePrecisionCoordinatesQ[ _ ]:=False
-numericMachinePrecisionCoordinatesQ[ m_?mechanismQ, _ ]:=False
+numericMachinePrecisionCoordinatesQ[ coord_ ] := AllTrue[ {MatrixQ[coord, MachineRealQ], Length[coord[[1]]]==2 || Length[coord[[1]]]==3},TrueQ ]
+numericMachinePrecisionCoordinatesQ[ m_?mechanismQ, coord_ ] := AllTrue[ {MatrixQ[coord,MachineRealQ], Length[coord] == m["VertexNumber"]}, TrueQ ]
 
 
 orthogonalizeDisplacements[ displacements : {__?vertexCoordinatesQ}, tol : _?NumericQ : 10^(-8) ] :=
@@ -1919,8 +2029,9 @@ vertexPosition[n : {__Integer}, d_] := vertexPosition[#,d]& /@ n
 vertexPosition[n_Integer, d : {__String}|{__Integer}] := vertexPosition[n,#]&/@d
 vertexPosition[n_Integer, All[ d_Integer ] ] := vertexPosition[n,#]& /@ $coordinateSymbols[d]
 vertexPosition[n_Integer, m_Integer] := vertexPosition[n, $coordinateSymbols[3][[m]]]
-vertexPosition[m_?mechanismQ, d_] := vertexPosition[#,d]& /@ Range[MeshCellCount[m["mesh"],0]]
+vertexPosition[m_?mechanismQ, d_] := vertexPosition[#,d]& /@ Range[m["VertexNumber"]]
 vertexPosition[m_?mechanismQ] := vertexPosition[m, All[ m["EmbeddingDimension"] ] ]
+vertexPosition[m_?mechanismQ, n : {__Integer} ] := vertexPosition[ n, All[ m["EmbeddingDimension"] ] ]
 
 vertexDisplacement[n : {__Integer},d_]:=vertexDisplacement[#,d]&/@n
 vertexDisplacement[n_Integer,d : {__String}|{__Integer}]:=vertexDisplacement[n,#]&/@d
@@ -1928,6 +2039,7 @@ vertexDisplacement[n_Integer,All[d_Integer]]:=vertexDisplacement[n,#]&/@$coordin
 vertexDisplacement[n_Integer,m_Integer]:=vertexDisplacement[n,$coordinateSymbols[3][[m]]]
 vertexDisplacement[m_?mechanismQ,d_]:=vertexDisplacement[#,d]&/@Range[MeshCellCount[m["mesh"],0]]
 vertexDisplacement[m_?mechanismQ]:=vertexDisplacement[m,All[m["EmbeddingDimension"]]]
+vertexDisplacement[m_?mechanismQ, n : {__Integer} ] := vertexDisplacement[ n, All[ m["EmbeddingDimension"] ] ]
 
 (*
 	Convert vertex positions and displacements in various ways.
@@ -1947,7 +2059,7 @@ positionRules[ positions_?vertexCoordinatesQ ] := With[{
 	Flatten[MapThread[Rule, {arbitraryPositions, positions}, 2]]
 ]
 positionRules[ positions : {__?vertexCoordinatesQ} ] := With[{
-	arbitraryPositions = Array[vertexPosition, Dimensions[positions][[2;;]]]
+	arbitraryPositions = Array[vertexPosition, Dimensions[positions][[2;;]] ]
 },
 	Flatten /@ MapThread[ Rule, { ConstantArray[ arbitraryPositions, Length[positions] ], positions } , 3 ]
 ] /; ArrayQ[positions]
@@ -1955,13 +2067,14 @@ positionRules[ positions : {__?vertexCoordinatesQ} ] := With[{
 positionRules[ pos_ ] := "nothing" /; Message[positionRules::pos]
 positionRules::pos = "Positions are not of valid form.";
 
+
 displacementRules[ positions_?vertexCoordinatesQ ] := With[{
 	arbitraryPositions = Array[ vertexDisplacement, Dimensions[positions] ]
 },
 	Flatten[MapThread[Rule, {arbitraryPositions, positions}, 2]]
 ]
 displacementRules[ positions : {__?vertexCoordinatesQ} ] := With[{
-	arbitraryPositions = Array[vertexDisplacement, Dimensions[positions][[2;;]]]
+	arbitraryPositions = Array[vertexDisplacement, Dimensions[positions][[2;;]] ]
 },
 	Flatten /@ MapThread[ Rule, { ConstantArray[ arbitraryPositions, Length[positions] ], positions } , 3 ]
 ] /; ArrayQ[positions]
@@ -1970,7 +2083,7 @@ displacementRules[ pos_ ] := "nothing" /; Message[displacementRules::pos]
 displacementRules::pos = "Displacements are not of valid form.";
 
 
-randomDisplacementsInternal[ positions_, distribution_, precision_?(NumericQ[#] && #>0 &), {}, numDisplacements_Integer?(#>0&) ] :=
+randomDisplacementsInternal[ positions_, distribution_, precision_?(NumericQ[#] && #>0 &), {}, numDisplacements_Integer?Positive ] :=
 Module[{
 	numberOfVertices, dim, randomNumbers
 },
@@ -1982,7 +2095,7 @@ Module[{
 	]
 ]
 
-randomDisplacementsInternal[ positions_, distribution_, precision_?(NumericQ[#] && #>0 &), rules : {Rule[vertexDisplacement[_,_],_]..}, numDisplacements_Integer?(#>0&) ] :=
+randomDisplacementsInternal[ positions_, distribution_, precision_?(NumericQ[#] && #>0 &), rules : {Rule[_vertexDisplacement,_]..}, numDisplacements_Integer?Positive ] :=
 Module[
 {
 	numberOfVertices, dim, displacements, arbitraryDisplacements
@@ -2064,10 +2177,95 @@ randomDisplacements[numVertices_, dim_ , ___ ] := "nothing" /; Which[
 ]
 
 
-mapQ[{f_, map:_Function}]:=True
-maoQ[_]:=False
+periodicIdentificationData[dim_, f_, maps_,vertices_]["Methods"] := 
+	{"identification","vertices","labels","EmbeddingDimension","maps","constraints","positions","positionRules","displacements","displacementRules"}
 
-periodicIdentificationData[m_?mechanismQ, f : {__?mapQ}]:=Module[{x},With[
+periodicIdentificationData[dim_, f_, maps_,vertices_]["identification"] :=
+	Module[{n},
+		With[{ rules = Thread[f -> ConstantArray[Identity,Length[f]]] },
+			DeleteCases[ Thread[Range[Length[vertices]] -> (vertices /. rules)], n_ -> n_ ]
+		]
+	]
+
+periodicIdentificationData[dim_, f_, maps_,vertices_]["vertices"] := Cases[vertices, _Integer]
+periodicIdentificationData[dim_, f_, maps_, vertices_]["labels"] := f
+periodicIdentificationData[dim_,f_,maps_,vertices_]["EmbeddingDimension"]:=dim
+periodicIdentificationData[dim_,f_,maps_,vertices_]["maps"]:=maps
+
+periodicIdentificationData[dim_,f_,maps_,vertices_]["EmbeddingDimension" -> d : 2|3]:=periodicIdentificationData[d,f,maps,vertices]
+periodicIdentificationData[dim_,f_,maps_,vertices_]["EmbeddingDimension" -> d_]:=
+	(
+	Message[periodicIdentification::dim,d];
+	periodicIdentificationData[dim,f,maps,vertices]
+	)
+periodicIdentification::dim="Dimension `1` must be either 2 or 3.";
+
+periodicIdentificationData[dim_,f_,maps_,vertices_]["labels" -> l_List] /; Length[l]==Length[maps] :=
+	periodicIdentificationData[dim,l,maps,vertices]
+periodicIdentificationData[dim_,f_,maps_,vertices_]["labels" -> l_] :=
+	(
+	Message[periodicIdentification::label,Length[f]];
+	periodicIdentificationData[dim,f,maps,vertices]
+	)
+periodicIdentification::label="There must be `1` labels.";
+
+periodicIdentificationData[dim_,f_,maps_,vertices_]["maps" -> m_] /; Length[m]==Length[maps] := periodicIdentificationData[dim,f,m,vertices]
+periodicIdentificationData[dim_,f_,maps_,vertices_]["maps" -> m_] := 
+	(
+	Message[periodicIdentification::maps,Length[maps]];
+	periodicIdentificationData[dim,f,maps,vertices]
+	)
+periodicIdentification::maps="There must be `1` maps.";
+
+periodicIdentificationData[dim_,f_,maps_,vertices_]["positions"] :=
+	Module[{x}, With[ { cleanupRules = Thread[f -> maps] },
+		vertices /. x_Integer :> vertexPosition[x,All[dim]] /. cleanupRules
+	]]
+periodicIdentificationData[dim_,f_,maps_,vertices_]["positionRules"] :=
+	Module[{x}, DeleteCases[ With[ { cleanupRules = Thread[f -> maps] },
+		Thread[
+			Flatten[vertexPosition[Range[Length[vertices]], All[dim] ]] -> Flatten[vertices /. x_Integer :> vertexPosition[x,All[dim]] /. cleanupRules ]
+		]] , x_ -> x_ ]
+	]
+periodicIdentificationData[dim_,f_,maps_,vertices_]["constraints"] :=
+	Module[{x}, DeleteCases[ With[ { cleanupRules = Thread[f -> maps] },
+		Thread[
+			Flatten[vertexPosition[Range[Length[vertices]], All[dim] ]] == Flatten[vertices /. x_Integer :> vertexPosition[x,All[dim]] /. cleanupRules ]
+		]] , True ]
+	]
+
+periodicIdentificationData[dim_,f_,maps_,vertices_]["displacements"] := 
+Module[{x},With[{ cleanupRules = (#[x_] :> # x & /@ f) },
+	vertices /. x_Integer :> vertexDisplacement[x,All[dim]] /. cleanupRules
+]]
+periodicIdentificationData[dim_,f_,maps_,vertices_]["displacementRules"] := 
+Module[{x},
+	DeleteCases[ With[{ cleanupRules = (#[x_] :> # x & /@ f) },
+		Thread[
+			Flatten[vertexDisplacement[Range[Length[vertices]], All[dim] ]] -> Flatten[vertices /. x_Integer :> vertexDisplacement[x,All[dim]] /. cleanupRules]
+		]
+	], x_ -> x_ ]
+]
+
+Format[periodicIdentificationData[dim_,f_,maps_,vertices_]] :=
+	"periodicIdentificationData"[Style[ periodicIdentificationData[dim,f,maps,vertices]["maps"], Italic ]]
+
+
+mapQ[f_ ->  _Function]:=True
+mapQ[_]:=False
+
+periodicIdentification[m_?mechanismQ, basis_?(MatrixQ[#,NumericQ]&) ] :=
+Module[{x}, With[ {f = ToString/@Array[Unique[],Length[basis]]},
+	periodicIdentificationInternal[ m, Thread[ f -> (Function[{x},x + #]&/@basis) ] ]
+]]
+
+periodicIdentification[m_?mechanismQ, f_, basis_?(MatrixQ[#,NumericQ]&) ] /; Length[f] == Length[basis] :=
+Module[{x},
+	periodicIdentificationInternal[ m, Thread[ f -> (Function[{x},x + #]&/@basis) ] ]
+]
+periodicIdentification[m_?mechanismQ, f : {__?mapQ}]:= periodicIdentificationInternal[m,f]
+
+periodicIdentificationInternal[m_?mechanismQ, f : {__?mapQ}]:=Module[{x},With[
 {
 	labels = f[[All,1]],
 	maps = f[[All,2]],
@@ -2075,49 +2273,16 @@ periodicIdentificationData[m_?mechanismQ, f : {__?mapQ}]:=Module[{x},With[
 	ruleFunction=Function[{x}, #[[1]]->x[#[[2]]]& ],
 	vertices=Range[m["VertexNumber"]]
 },
-	{
+	periodicIdentificationData[
+		m["EmbeddingDimension"],
 		labels,
+		maps,
 		vertices //. Flatten[MapThread[
 			ruleFunction[#1] /@ overlappingVertices[pos, #2 /@ pos]&,
 			{labels,maps}
 		]]
-	}
-]]
-
-
-periodicIdentification[m_?mechanismQ, transf : {__Function}]:=Module[{x, f=Array[Unique[]&,Length[transf] ]},With[
-{
-dim=embeddingDimension[m],
-data = periodicIdentificationData[m, Transpose[ {f, transf} ] ],
-cleanupRule = Thread[f->Identity]
-},
-	data[[2]] /. x_Integer :> vertexPosition[x,All[dim]] /. cleanupRule
-]]
-
-periodicIdentification[m_?mechanismQ, func_List, transf : {__Function}]:=Module[{x, y, f=Array[Unique[]&,Length[transf] ]},With[
-{
-dim=embeddingDimension[m],
-data = periodicIdentificationData[m, Transpose[ {f, transf} ] ],
-cleanupRule = Thread[f->func]
-},
-	DeleteCases[
-		Thread[ Flatten[vertexPosition[m]] -> Flatten[ data[[2]] /. x_Integer :> vertexPosition[x,All[dim]] /. cleanupRule ] ],
-		y_ -> y_
 	]
-]] /; Length[func] == Length[transf]
-
-
-periodicIdentification[m_?mechanismQ, vars_?VectorQ, latticeVectors_?MatrixQ] := Module[{x, y, z, f=Array[Unique[]&,Length[vars]]}, With[
-{
-dim=embeddingDimension[m],
-data = periodicIdentificationData[m, Transpose[ {f, Function[{z},z + #]& /@ latticeVectors} ] ],
-cleanupRule = Thread[ f -> (Function[{y}, # y]&/@vars) ]
-},
-	DeleteCases[
-		Thread[ Flatten[vertexDisplacement[m]] -> Flatten[ data[[2]] /. x_Integer :> vertexDisplacement[x,All[dim]] /. cleanupRule ] ],
-		z_ -> z_
-	]
-]] /; Length[vars]==Length[latticeVectors] && Last[ Dimensions[latticeVectors] ] == m["EmbeddingDimension"]
+]]
 
 
 (* 
@@ -2135,17 +2300,23 @@ Module[
 	nearestList = Nearest[ Thread[positions1 -> Range[ Length[positions1] ]], positions2 ][[All,1]] ;
 
 	(*get the actual overlapping points according to the provided tolerance*)
-	selectorList = (#.#<tol^2&) /@ ( positions2-positions1[[ nearestList ]] ) ;
+	selectorList = (# . #<tol^2&) /@ ( positions2-positions1[[ nearestList ]] ) ;
 
 	Pick[ Thread[nearestList -> Range[ Length @ positions1] ], selectorList ]
 
 ] /; Dimensions[positions1] == Dimensions[positions2]
 
 
-minimalMechanism[m_?mechanismQ, basis_?(MatrixQ[N[#],NumericQ]&)]:=Module[
-{
-badVertices=Check[DeleteDuplicates[ periodicIdentification[m,ConstantArray[1,Length[basis]],basis][[All,1,1]]],$Failed]
-},
+periodicIdentificationDataQ[ periodicIdentificationData[_Integer,_,_,_] ] := True
+periodicIdentificationDataQ[ m_?mechanismQ, periodicIdentificationData[d_Integer,_,_,vertices_] ] :=
+	AllTrue[ {m["EmbeddingDimension"] == d , Length[vertices] == m["VertexNumber"] }, TrueQ ]
+periodicIdentificationDataQ[ m_?mechanismQ, _ ] := False
+
+
+minimalMechanism[m_?mechanismQ, basis_?(MatrixQ[N[#],NumericQ]&)]:=
+Module[
+{ pi = periodicIdentification[m,basis],badVertices },
+	badVertices=pi["identification"][[All,1]];
 	With[{
 		badEdges= Select[connectivity[m,"edges"->"vertices"],ContainsAll[badVertices,#]&],
 		badFaces = Select[connectivity[m,"faces"->"vertices"],ContainsAll[badVertices,#]&]
@@ -2153,7 +2324,7 @@ badVertices=Check[DeleteDuplicates[ periodicIdentification[m,ConstantArray[1,Len
 		deleteDanglingVertices[
 			deleteCells[m, Alternatives @@ Join[_/@badEdges,_/@badFaces] ]
 		]
-	] /; badVertices =!= $Failed
+	]
 ] /; If[Dimensions[basis]=={embeddingDimension[m],embeddingDimension[m]},True,Message[minimalMechanism::dim]; False]
 
 minimalMechanism[m_?mechanismQ, basis_?MatrixQ]:="nothing" /; Message[minimalMechanism::num]
@@ -2165,16 +2336,106 @@ minimalMechanism::dim="Dimension of basis must match embedding dimension of mech
 minimalMechanism::num="Second argument should be a numeric basis.";
 
 
+Options[labelPeriodicVertices] = {"style"->Red};
+
+labelPeriodicVertices[ m_?mechanismQ , pi_, OptionsPattern[]] := With[{
+	map = pi["map"], style = If[ OptionValue["style"] === None, #&, Style[#,OptionValue["style"]]& ]
+},
+	changeCellData[
+		changeCellData[joint, map[[All,1]], "label" -> (style/@ map[[All,2]]) ] @ m,
+		joint, map[[All,2]], "label" -> map[[All,2]]
+	]
+] /; periodicIdentificationDataQ[m,pi]
+
+
+vertexArgumentsQ[ name_, vertices_ ] := checkForError[ VectorQ[vertices, IntegerQ] && Min[vertices]>0, name, "vertices"]
+vertexArgumentsQ[ name_, pos_?vertexCoordinatesQ, vertices_ ] :=
+	checkForError[ VectorQ[vertices, IntegerQ] && Min[vertices]>0 && Max[vertices] <= Length[pos], name, "vertices"]
+
+(*only checks for interior vertices*)
+vertexArgumentsQ[ name_, m_?mechanismQ, vertices_ ] :=
+	checkForError[ VectorQ[vertices] && ContainsAll[ interiorVertices[m], vertices ] , name, "vertices"]
+vertexArgumentsQ[ name_, m_?mechanismQ, pos_, vertices_ ] := And[
+	checkForError[ VectorQ[vertices, IntegerQ] && ContainsAll[ interiorVertices[m], vertices ], name, "vertices"],
+	checkForError[ MatrixQ[pos] && Length[pos] == m["VertexNumber"], name, "pos" ]
+]
+
+
+foldArgumentsQ[name_, m_?mechanismQ,edgelist_]:=checkForError[
+	AllTrue[{MatrixQ[edgelist,IntegerQ], Length[edgelist[[1]]]==2,Quiet @ ContainsAll[ Sort/@interiorEdges[m],Sort/@edgelist]},TrueQ],
+	name,
+	"folds"
+]
+foldArgumentsQ[name_, m_?mechanismQ,pos_,edgelist_]:=And[
+	checkForError[
+		AllTrue[{MatrixQ[edgelist,IntegerQ], Length[edgelist[[1]]]==2,Quiet @ ContainsAll[ Sort/@interiorEdges[m],Sort/@edgelist]},TrueQ],
+		name,
+		"folds"
+	],
+	checkForError[ MatrixQ[pos] && Length[pos] == m["VertexNumber"], name, "pos" ]
+]
+
+
+edgeArgumentsQ[ name_ , edgelist_ ] := checkForError[ MatrixQ[edgelist,IntegerQ] && Min[edgelist]>0 , name, "edgeform" ]
+edgeArgumentsQ[ name_ , m_?mechanismQ , edgelist_ ] := checkForError[ edgeQ[m,edgelist], name, "edge" ]
+edgeArgumentsQ[ name_ , pos_?vertexCoordinatesQ , edgelist_ ] := checkForError[ validEdgeQ[pos,edgelist], name, "edge" ]
+edgeArgumentsQ[ name_, m_?mechanismQ, pos_, edgelist_] := And[
+	checkForError[ edgeQ[m,edgelist], name, "edge" ],
+	checkForError[ MatrixQ[pos] && Length[pos] == m["VertexNumber"], name, "pos" ]
+]
+
+
+faceArgumentsQ[ name_ , facelist_ ] := checkForError[ ArrayDepth[facelist]==2 && Min[facelist]>0 , name, "faceform" ]
+faceArgumentsQ[ name_ , m_?mechanismQ , facelist_ ] := checkForError[ faceQ[m,facelist], name, "face" ]
+faceArgumentsQ[ name_ , pos_?vertexCoordinatesQ , facelist_ ] := checkForError[ validFaceQ[pos,facelist], name, "face" ]
+faceArgumentsQ[ name_, m_?mechanismQ, pos_, facelist_] := And[
+	checkForError[ faceQ[m,facelist], name, "face" ],
+	checkForError[ MatrixQ[pos] && Length[pos] == m["VertexNumber"], name, "pos" ]
+]
+
+
+tripleArgumentsQ[ name_ , triplelist_ ] := checkForError[ MatrixQ[triplelist,IntegerQ] && Length[triplelist[[1]]]==3 && Min[triplelist]>0 , name, "tripleform" ]
+
+tripleArgumentsQ[ name_ , m_?mechanismQ , triplelist_ ] := 
+	checkForError[ MatrixQ[triplelist,IntegerQ] && Length[triplelist[[1]]]==3 && Min[triplelist]>0 && Max[triplelist]<=m["VertexNumber"] , name, "triples" ]
+
+tripleArgumentsQ[ name_ , pos_?vertexCoordinatesQ , triplelist_ ] :=
+	checkForError[ MatrixQ[triplelist,IntegerQ] && Length[triplelist[[1]]]==3 && Min[triplelist]>0 && Max[triplelist]<=Length[pos] , name, "triples" ]
+
+tripleArgumentsQ[ name_, m_?mechanismQ, pos_, triplelist_] := And[
+	checkForError[ MatrixQ[triplelist,IntegerQ] && Length[triplelist[[1]]]==3 && Min[triplelist]>0 && Max[triplelist]<=Length[pos] , name, "triples" ],
+	checkForError[ MatrixQ[pos] && Length[pos] == m["VertexNumber"], name, "pos" ]
+]
+
+
+$positionError="Vertex positions do not correspond to mechanism.";
+
+$edgeError="One or more provided edges are not valid.";
+$edgeformError="Edges are not of the form {{v1,v2},...}.";
+
+$tripleError="One or more provided triples involve vertices that are out of bounds.";
+$tripleformError="Triples are not of the form {{v1,v2,v3},...}.";
+
+$faceformError="Faces are not of the form {{v1,...},...}.";
+$faceError="One or more provided faces are not valid.";
+
+$foldError="One or more provided edges are not valid folds.";
+
+$vertexError="One or more vertices are not valid interior vertices.";
+
+
+displacementVector::pos=$positionError;
+displacementVector::edgeform = $edgeformError;
+displacementVector::edges=$edgeError;
+
+
 displacementVector[__, {} ] :={}
-
-displacementVector[positions_?vertexCoordinatesQ, edgeList : {{_Integer,_Integer}..}]:=
-	displacementVectorInternal[positions, edgeList] /; Max[edgeList] <= Length[positions] && Min[edgeList] >= 1
-
-displacementVector[m_?mechanismQ, pos_?vertexCoordinatesQ, edgeList : {{_Integer, _Integer}..}] :=
-	displacementVectorInternal[ pos , edgeList] /; Max[edgeList] <= Length[pos] && Min[edgeList] >= 1
-
-displacementVector[m_?mechanismQ, edgeList : {{_Integer, _Integer}..}] :=
-	displacementVectorInternal[ m["positions"] , edgeList] /; Max[edgeList] <= MeshCellCount[m,0] && Min[edgeList] >= 1
+displacementVector[positions_?vertexCoordinatesQ, edgeList_] /; edgeArgumentsQ["displacementVector",positions,edgeList] :=
+	displacementVectorInternal[positions, edgeList]
+displacementVector[m_?mechanismQ, pos_, edgeList_] /; edgeArgumentsQ["displacementVector",m,pos,edgeList] := 
+	displacementVectorInternal[ pos , edgeList]
+displacementVector[m_?mechanismQ, edgeList_] /; edgeArgumentsQ["displacementVector",m,edgeList] :=
+	displacementVectorInternal[ m["positions"] , edgeList]
 
 
 displacementVectorInternal[positions_?(MatrixQ[#,MachineRealQ]&),edgeList_]:= displacementVectorCompiled[][positions,edgeList]
@@ -2191,16 +2452,18 @@ displacementVectorCompiled[]:=displacementVectorCompiled[]=Compile[{{positions,_
 ]
 
 
+displacementLength::pos=$positionError;
+displacementLength::edgeform = $edgeformError;
+displacementLength::edges=$edgeError;
+
+
 displacementLength[__, {} ] :={}
-
-displacementLength[positions_?vertexCoordinatesQ, edgeList : {{_Integer, _Integer}..}]:=
-	displacementLengthInternal[positions, edgeList] /; Max[edgeList] <= Length[positions] && Min[edgeList] >= 1
-
-displacementLength[m_?mechanismQ, positions_?vertexCoordinatesQ, edgeList : {{_Integer, _Integer}..}]:=
-	displacementLengthInternal[positions, edgeList] /; Max[edgeList] <= Length[positions] && Min[edgeList] >= 1
-
-displacementLength[m_?mechanismQ, edgeList : {{_Integer, _Integer}..}] :=
-	displacementLengthInternal[ m["positions"] , edgeList] /; Max[edgeList] <= MeshCellCount[m,0] && Min[edgeList] >= 1
+displacementLength[positions_?vertexCoordinatesQ, edgeList_] /; edgeArgumentsQ["displacementLength",positions,edgeList] := 
+	displacementLengthInternal[positions, edgeList]
+displacementLength[m_?mechanismQ, positions_?MatrixQ, edgeList_] /; edgeArgumentsQ["displacementLength",m,positions,edgeList]:= 
+	displacementLengthInternal[positions, edgeList]
+displacementLength[m_?mechanismQ, edgeList_] /; edgeArgumentsQ["displacementLength",m,edgeList] :=
+	displacementLengthInternal[ m["positions"] , edgeList]
 
 displacementLengthInternal[positions_?(MatrixQ[#,MachineRealQ]&), edgelist_]:=displacementLengthCompiled[Length[positions[[1]]]][positions,ToPackedArray[edgelist]]
 displacementLengthInternal[positions_,edgelist_]:=displacementLengthAnalytic[positions,ToPackedArray[edgelist]]
@@ -2228,16 +2491,18 @@ displacementLengthAnalytic[positions_,edgeList_]:=
 	expandExpression[Sqrt[(# . #&) /@ displacementVectorInternal[positions,edgeList]]]
 
 
+displacementLengthSquared::pos=$positionError;
+displacementLengthSquared::edgeform = $edgeformError;
+displacementLengthSquared::edges=$edgeError;
+
+
 displacementLengthSquared[__, {} ] :={}
-
-displacementLengthSquared[positions_?vertexCoordinatesQ, edgeList : {{_Integer, _Integer}..}]:=
-	displacementLengthSquaredInternal[positions, edgeList] /; Max[edgeList] <= Length[positions] && Min[edgeList] >= 1
-
-displacementLengthSquared[m_?mechanismQ, positions_?vertexCoordinatesQ, edgeList : {{_Integer, _Integer}..}]:=
-	displacementLengthSquaredInternal[positions, edgeList] /; Max[edgeList] <= Length[positions] && Min[edgeList] >= 1
-
-displacementLengthSquared[m_?mechanismQ, edgeList : {{_Integer, _Integer}..}] :=
-	displacementLengthSquaredInternal[ m["positions"] , edgeList] /; Max[edgeList] <= MeshCellCount[m,0] && Min[edgeList] >= 1
+displacementLengthSquared[positions_?vertexCoordinatesQ, edgeList_] /; edgeArgumentsQ["displacementLengthSquared",positions,edgeList] :=
+	displacementLengthSquaredInternal[positions, edgeList]
+displacementLengthSquared[m_?mechanismQ, positions_, edgeList_] /; edgeArgumentsQ["displacementLengthSquared",m, positions,edgeList] :=
+	displacementLengthSquaredInternal[positions, edgeList]
+displacementLengthSquared[m_?mechanismQ, edgeList_] /; edgeArgumentsQ["displacementLengthSquared",m,edgeList] :=
+	displacementLengthSquaredInternal[ m["positions"] , edgeList]
 
 displacementLengthSquaredInternal[positions_?(MatrixQ[#,MachineRealQ]&), edgelist_]:=displacementLengthSquaredCompiled[Length[positions[[1]]]][positions,ToPackedArray[edgelist]]
 displacementLengthSquaredInternal[positions_,edgelist_]:=displacementLengthSquaredAnalytic[positions,ToPackedArray[edgelist]]
@@ -2264,16 +2529,18 @@ displacementLengthSquaredAnalytic[positions_,edgeList_]:=
 	expandExpression[Map[# . # &,displacementVectorInternal[positions,edgeList]]]
 
 
+turningAngle::pos=$positionError;
+turningAngle::tripleform=$tripleformError;
+turningAngle::triples=$tripleError;
+
+
 turningAngle[p__, {} ] :={}
-
-turningAngle[positions_?vertexCoordinatesQ, tripleList : {{_Integer, _Integer,_Integer}..}]:=
-	turningAngleInternal[positions, tripleList] /; Max[tripleList] <= Length[positions] && Min[tripleList] >= 1
-
-turningAngle[m_?mechanismQ, positions_?vertexCoordinatesQ, tripleList : {{_Integer, _Integer,_Integer}..}] :=
-	turningAngleInternal[positions, tripleList] /; Max[tripleList] <= Length[positions] && Min[tripleList] >= 1
-
-turningAngle[m_?mechanismQ, tripleList : {{_Integer, _Integer,_Integer}..}] :=
-	turningAngleInternal[ m["positions"] , tripleList] /; Max[tripleList] <= MeshCellCount[m,0] && Min[tripleList] >= 1
+turningAngle[positions_?vertexCoordinatesQ, tripleList_] /; tripleArgumentsQ["turningAngle", positions, tripleList ] :=
+	turningAngleInternal[positions, tripleList]
+turningAngle[m_?mechanismQ, positions_?vertexCoordinatesQ, tripleList_] /; tripleArgumentsQ["turningAngle", m, positions, tripleList ] :=
+	turningAngleInternal[positions, tripleList]
+turningAngle[m_?mechanismQ, tripleList_] /; tripleArgumentsQ["turningAngle", m, tripleList ]  :=
+	turningAngleInternal[ m["positions"] , tripleList]
 
 turningAngleInternal[positions_?(MatrixQ[#,MachineRealQ]&), tripleList_] :=
 	turningAngleCompiled[Length[positions[[1]]]][m["positions"],ToPackedArray[tripleList]]
@@ -2354,21 +2621,26 @@ With[
 ]
 
 
+normalVector::pos=$positionError;
+normalVector::faceform=$faceformError;
+normalVector::face=$faceError;
+normalVector::norm="Option \"normalize\" must be either True or False.";
+
+
 Options[normalVector]={"normalize"->True};
 
 normalVector[__, {} ] :={}
+normalVector[positions_?vertexCoordinatesQ, faces_, OptionsPattern[]] /; faceArgumentsQ["normalVector",positions,faces] :=
+	normalVectorInternal[positions, faces, OptionValue["normalize"]] /; checkForError[ BooleanQ[OptionValue["normalize"]] , "turningAngle", "norm" ]
+normalVector[m_?mechanismQ, faces_, OptionsPattern[]] /; faceArgumentsQ["normalVector",m,faces] :=
+	normalVectorInternal[m["positions"], faces, OptionValue["normalize"]] /; checkForError[ BooleanQ[OptionValue["normalize"]] , "turningAngle", "norm" ]
+normalVector[m_?mechanismQ, positions_?vertexCoordinatesQ, faces_, OptionsPattern[]] /; faceArgumentsQ["normalVector",m,positions,faces] :=
+	normalVectorInternal[positions, faces, OptionValue["normalize"]] /; checkForError[ BooleanQ[OptionValue["normalize"]] , "turningAngle", "norm" ]
 
-normalVector[positions_?vertexCoordinatesQ, faces : {{__Integer}..}, OptionsPattern[]]:=
-	normalVectorInternal[positions, faces, OptionValue["normalize"]] /; Max[faces] <= Length[positions] && Min[faces] >= 1 && BooleanQ[OptionValue["normalize"]]
-
-normalVector[m_?mechanismQ, faces : {{__Integer}..}, OptionsPattern[]]:=
-	normalVectorInternal[m["positions"], faces, OptionValue["normalize"]] /; Max[faces] <= Length[m["positions"]] && Min[faces] >= 1 && BooleanQ[OptionValue["normalize"]]
-
-normalVector[m_?mechanismQ, positions_?vertexCoordinatesQ, faces : {{__Integer}..}, OptionsPattern[]]:=
-	normalVectorInternal[positions, faces, OptionValue["normalize"]] /; Max[faces] <= Length[positions] && Min[faces] >= 1 && BooleanQ[OptionValue["normalize"]]
-
-normalVectorInternal[pos_?(MatrixQ[#,MachineRealQ]&),faces_,normalize_ : True]:=normalVectorCompiled[normalize,Length[pos[[1]]]][pos,ToPackedArray[faces]]
-normalVectorInternal[pos_,faces_,normalize_ : True]:=normalVectorAnalytic[normalize,Length[pos[[1]]],pos,faces]
+normalVectorInternal[pos_?(MatrixQ[#,MachineRealQ]&),faces_,normalize_ : True]:=
+	normalVectorCompiled[normalize,Length[pos[[1]]]][pos,ToPackedArray[PadRight[faces,{Length[faces],3}]]]
+normalVectorInternal[pos_,faces_,normalize_ : True]:=
+	normalVectorAnalytic[normalize,Length[pos[[1]]]][pos, ToPackedArray[PadRight[faces,{Length[faces],3}]]]
 
 
 normalVectorCompiled[True,3]:=normalVectorCompiled[True,3]=
@@ -2508,16 +2780,125 @@ With[
 ] 
 
 
+faceArea::pos=$positionError;
+faceArea::faceform=$faceformError;
+faceArea::face=$faceError;
+
+
+tc=Compile[{{face,_Integer,1}},
+	With[{v1=First[face],rest=Rest[face]},
+		Map[ Join[{v1},#]&,Partition[rest,2,1] ]
+	],
+	RuntimeAttributes->{Listable}
+];
+
+
+faceArea[__, {} ] :={}
+faceArea[positions_?vertexCoordinatesQ, faces_] /; faceArgumentsQ["faceArea",positions,faces] :=
+	faceAreaInternal[positions, faces ]
+faceArea[m_?mechanismQ, faces_] /; faceArgumentsQ["faceArea",m,faces] :=
+	faceAreaInternal[m["positions"], faces ]
+faceArea[m_?mechanismQ, positions_?vertexCoordinatesQ, faces_] /; faceArgumentsQ["faceArea",m,positions,faces] :=
+	faceAreaInternal[positions, faces ]
+
+faceAreaInternal[pos_?(MatrixQ[#,MachineRealQ]&),faces_]:=
+	Total@faceAreaCompiled[Length[pos[[1]]]][pos, #]& /@ tc[faces]
+faceAreaInternal[pos_,faces_]:=With[{d=Length[pos[[1]]]},
+	Total@faceAreaAnalytic[d,pos, #]& /@ tc[faces]
+]
+
+
+faceAreaCompiled[3]:=faceAreaCompiled[3]=
+Compile[
+{{pos,_Real,2},{faces,_Integer,2}},
+	Module[{i},
+		Table[
+			With[
+			{
+				x=Compile`GetElement[pos,Compile`GetElement[faces,i,3],1]-Compile`GetElement[pos,Compile`GetElement[faces,i,2],1],
+				y=Compile`GetElement[pos,Compile`GetElement[faces,i,3],2]-Compile`GetElement[pos,Compile`GetElement[faces,i,2],2],
+				z=Compile`GetElement[pos,Compile`GetElement[faces,i,3],3]-Compile`GetElement[pos,Compile`GetElement[faces,i,2],3],
+				xx=Compile`GetElement[pos,Compile`GetElement[faces,i,1],1]-Compile`GetElement[pos,Compile`GetElement[faces,i,2],1],
+				yy=Compile`GetElement[pos,Compile`GetElement[faces,i,1],2]-Compile`GetElement[pos,Compile`GetElement[faces,i,2],2],
+				zz=Compile`GetElement[pos,Compile`GetElement[faces,i,1],3]-Compile`GetElement[pos,Compile`GetElement[faces,i,2],3]
+			},
+				Sqrt[(-yy z+y zz)^2+(xx z-x zz)^2+(-xx y+x yy)^2]
+			],
+			{i,1,Length[faces]}
+		]
+	],
+	RuntimeOptions->"Speed",
+	CompilationTarget->$compilationTarget
+]
+
+faceAreaCompiled[2]:=faceAreaCompiled[2]=
+Compile[
+{{pos,_Real,2},{faces,_Integer,2}},
+	Module[{i},
+		Table[
+			With[
+			{
+				x=Compile`GetElement[pos,Compile`GetElement[faces,i,3],1]-Compile`GetElement[pos,Compile`GetElement[faces,i,2],1],
+				y=Compile`GetElement[pos,Compile`GetElement[faces,i,3],2]-Compile`GetElement[pos,Compile`GetElement[faces,i,2],2],
+				xx=Compile`GetElement[pos,Compile`GetElement[faces,i,1],1]-Compile`GetElement[pos,Compile`GetElement[faces,i,2],1],
+				yy=Compile`GetElement[pos,Compile`GetElement[faces,i,1],2]-Compile`GetElement[pos,Compile`GetElement[faces,i,2],2]
+			},
+				Abs[-xx y+x yy]
+			],
+			{i,1,Length[faces]}
+		]
+	],
+	RuntimeOptions->"Speed",
+	CompilationTarget->$compilationTarget
+]
+
+faceAreaAnalytic[3, positions_, triples_]:=
+With[
+{
+	data=positions,
+	unnormalVector3D=Function[
+		{p1,p2},
+		With[
+			{
+			x=p1[[1]],y=p1[[2]],z=p1[[3]],xx=p2[[1]],yy=p2[[2]],zz=p2[[3]]
+			},
+			Sqrt[(-yy z+y zz)^2+(xx z-x zz)^2+(-xx y+x yy)^2]
+		]
+	]
+},
+	With[{p=data[[#]]},expandExpression@unnormalVector3D[p[[3]]-p[[2]],p[[1]]-p[[2]]]]&/@triples
+] 
+
+faceAreaAnalytic[2, positions_, triples_]:=
+With[
+{
+	data=positions,
+	unnormalVector3D=Function[
+		{p1,p2},
+		With[
+			{
+			x=p1[[1]],y=p1[[2]],xx=p2[[1]],yy=p2[[2]]
+			},
+			Sqrt[(-xx y+x yy)^2]
+		]
+	]
+},
+	With[{p=data[[#]]},expandExpression@unnormalVector3D[p[[3]]-p[[2]],p[[1]]-p[[2]]]]&/@triples
+] 
+
+
+planarAngle::pos=$positionError;
+planarAngle::tripleform=$tripleformError;
+planarAngle::triples=$tripleError;
+
+
 planarAngle[__, {} ] :={}
-
-planarAngle[positions_?vertexCoordinatesQ, tripleList : {{_Integer, _Integer,_Integer}..}]:=
-	planarAngleInternal[positions, tripleList] /; Max[tripleList] <= Length[positions] && Min[tripleList] >= 1
-
-planarAngle[m_?mechanismQ, positions_?vertexCoordinatesQ, tripleList : {{_Integer, _Integer,_Integer}..}]:=
-	planarAngleInternal[positions, tripleList] /; Max[tripleList] <= Length[positions] && Min[tripleList] >= 1
-
-planarAngle[m_?mechanismQ, tripleList : {{_Integer, _Integer, _Integer}..} ]:=
-	planarAngleInternal[m["positions"], tripleList] /; Max[tripleList] <= Length[m["positions"]] && Min[tripleList] >= 1
+planarAngle[positions_?vertexCoordinatesQ, tripleList_] /; tripleArgumentsQ["planarAngle", positions, tripleList] :=
+	planarAngleInternal[positions, tripleList]
+planarAngle[m_?mechanismQ, positions_, tripleList_] /; tripleArgumentsQ["planarAngle", m, positions, tripleList]:=
+	planarAngleInternal[positions, tripleList]
+planarAngle[m_?mechanismQ, tripleList_ ] /; tripleArgumentsQ["planarAngle", m, tripleList] :=
+	planarAngleInternal[m["positions"], tripleList]
 
 
 planarAngleInternal[pos_?(MatrixQ[#,MachineRealQ]&),triples_] := planarAngleCompiled[Length[pos[[1]]]][pos,triples]
@@ -2590,19 +2971,34 @@ With[
 ]
 
 
+foldAngle::pos=$positionError;
+foldAngle::folds=$foldError;
+
+
 foldAngle[m_?mechanismQ, _?vertexCoordinatesQ, {} ] :={}
 foldAngle[m_?mechanismQ, {} ] :={}
-foldAngle[m_?mechanismQ, edgeList : {{_Integer,_Integer}..} ]:=
-	foldAngleInternal[m, m["positions"], listQuadruples[m,edgeList] ] /; Max[edgeList] <= Length[m["positions"]] && Min[edgeList] >= 1
-foldAngle[m_?mechanismQ, positions_?vertexCoordinatesQ, edgeList : {{_Integer,_Integer}..} ]:=
-	foldAngleInternal[m, positions, listQuadruples[m, edgeList] ] /; Max[edgeList] <= Length[positions] && Min[edgeList] >= 1
 
-foldAngle[m_?mechanismQ, positions : {_?vertexCoordinatesQ..}, edgelist : {{_Integer, _Integer}..} ] :=
-	With[{quadruples = listQuadruples[m,edgelist]},
-		foldAngleInternal[m, #, quadruples]& /@ positions
-	] /; Max[edgelist] <= Length[m["positions"]] && Min[edgelist] >= 1
+foldAngle[ m_?mechanismQ, edgeList_ ] /; foldArgumentsQ["foldAngle",m,edgeList] :=
+	If[ embeddingDimension[m]==2,
+		ConstantArray[0,Length[edgeList]],
+		foldAngleInternal[m, m["positions"], listQuadruples[m,edgeList] ]
+	]
 
-listQuadruples[m_,edgelist_]:=
+foldAngle[ m_?mechanismQ, pos_?MatrixQ, edgeList_ ] /; foldArgumentsQ["foldAngle",m, pos, edgeList] :=
+	If[ Length[pos[[1]]]==2,
+		ConstantArray[0,Length[edgeList]],
+		foldAngleInternal[m, pos, listQuadruples[m,edgeList] ]
+	]
+
+foldAngle[ m_?mechanismQ, positions : {__?vertexCoordinatesQ}, edgeList_ ] /; foldArgumentsQ["foldAngle",m,edgeList] :=
+	With[{quadruples = listQuadruples[m,edgeList]},
+		If[ vertexCoordinatesQ[m,#],
+			If[Length[#[[1]]]==2,ConstantArray[0,Length[edgeList]], foldAngleInternal[m,#,quadruples]],
+			$Failed
+		]& /@ positions
+	]
+
+listQuadruples[m_,edgelist_] :=
 With[{
 	faces=connectivity[m,"edges"->"ordered faces"][[ listEdges[m, edgelist] ]]
 },
@@ -2659,14 +3055,17 @@ foldAngleAnalytic[positions_,quadrupleList_]:=
 	]&/@quadrupleList
 
 
+gaussianCurvature::pos=$positionError;
+gaussianCurvature::vertices=$vertexError;
+
+
 gaussianCurvature[m_?mechanismQ, _?vertexCoordinatesQ, {} ] :={}
 gaussianCurvature[m_?mechanismQ, {} ] :={}
 
-gaussianCurvature[m_?mechanismQ, vertexList : {__Integer}]:=
-	gaussianCurvatureInternal[m, m["positions"], vertexList] /; Max[vertexList] <= Length[m["positions"]] && Min[vertexList] >= 1
-
-gaussianCurvature[m_?mechanismQ, positions_?vertexCoordinatesQ, vertexList : {__Integer}]:=
-	gaussianCurvatureInternal[m, positions, vertexList] /; Max[vertexList] <= Length[positions] && Length[positions] == MeshCellCount[m["mesh"],0] && Min[vertexList] >= 1
+gaussianCurvature[m_?mechanismQ, vertexList_] /; vertexArgumentsQ["gaussianCurvature",m,vertexList] :=
+	gaussianCurvatureInternal[m, m["positions"], vertexList]
+gaussianCurvature[m_?mechanismQ, positions_, vertexList_] /; vertexArgumentsQ["gaussianCurvature",m,positions,vertexList]:=
+	gaussianCurvatureInternal[m, positions, vertexList]
 
 
 gaussianCurvatureInternal[m_, pos_,vertexlist_]:=ConstantArray[0,Length[vertexlist]] /; embeddingDimension[m]==2
@@ -2719,77 +3118,52 @@ FindGeometricTransform[pts_, m_framework, r___ ] ^:= FindGeometricTransform[ pts
 FindGeometricTransform[m1_framework, m2_framework, r___] ^:= FindGeometricTransform[ m1["positions"], m2["positions"], r]
 
 
-alignMechanismInternal[ positionsFrom_?vertexCoordinatesQ, positionsTo_?vertexCoordinatesQ, options_ ] := 
-With[{transformation = FindGeometricTransform[positionsFrom, positionsTo, Flatten[{options, {TransformationClass -> "Rigid", Method -> "Linear" }}] ]},
-	If[Head[transformation] === FindGeometricTransform, $Failed, transformation[[2]] ]
-]
-
-
 Options[alignMechanism]=Options[FindGeometricTransform];
 
-alignMechanism[mFrom_?mechanismQ, mTo_?mechanismQ, opt : OptionsPattern[] ] := With[
-{res = alignMechanismInternal[ mFrom["positions"], mTo["positions"], {opt} ] },
-	mechanismPositions[ mTo -> res[mTo["positions"]] ] /; res =!= $Failed
-] /; {mFrom["VertexNumber"],embeddingDimension[mFrom]} == {mTo["VertexNumber"], embeddingDimension[mTo]}
-
-alignMechanism[positionsFrom_?vertexCoordinatesQ, mTo_?mechanismQ, opt : OptionsPattern[] ] := With[
-{res = alignMechanismInternal[ positionsFrom, mTo["positions"], {opt} ] },
-	mechanismPositions[ mTo -> res[mTo["positions"]] ] /; res =!= $Failed
-] /; numericCoordinatesQ[mTo, positionsFrom]
-
-alignMechanism[positionsFrom_?vertexCoordinatesQ, {mTo_?mechanismQ, vertexList : {__Integer} } , opt : OptionsPattern[] ] := With[
-{
-res = alignMechanismInternal[ positionsFrom, mTo["positions"][[ vertexList ]], {opt} ]
-},
-	mechanismPositions[ mTo -> res[ mTo["positions"] ] ] /; res =!= $Failed
-] /; MatrixQ[positionsFrom, NumericQ] && Dimensions[positionsFrom][[2]] == embeddingDimension[mTo] && Length[positionsFrom] == Length[vertexList] && Max[vertexList] <= mTo["VertexNumber"] && Min[vertexList] > 0
-
-alignMechanism[mFrom_?mechanismQ, {positionsTo_?vertexCoordinatesQ, vertexList : {__Integer} } , opt : OptionsPattern[] ] := With[
-{
-res = alignMechanismInternal[ mFrom["positions"][[ vertexList ]], positionsTo[[ vertexList ]], {opt} ]
-},
-	res[ positionsTo ] /; res =!= $Failed
-] /; MatrixQ[positionsTo, NumericQ] && Dimensions[positionsTo][[2]] == embeddingDimension[mFrom] && Max[vertexList] <= mFrom["VertexNumber"] && Min[vertexList] > 0
-
-alignMechanism[mFrom_?mechanismQ, positionsTo_?vertexCoordinatesQ , opt : OptionsPattern[] ] := With[
-{
-res = alignMechanismInternal[ mFrom["positions"], positionsTo, {opt} ]
-},
-	res[ positionsTo ] /; res =!= $Failed
-] /; MatrixQ[positionsTo, NumericQ] && Dimensions[positionsTo] == { mFrom["VertexNumber"], embeddingDimension[mFrom] }
-
-
-alignMechanism::match="Mechanisms must have the same number of vertices and embedding dimension and positions must be numeric.";
-alignMechanism::vert="Vertices are out of bound";
-alignMechanism::number="Number of vertices must match number of points.";
-alignMechanism[_?vertexCoordinatesQ, _?mechanismQ, opt : OptionsPattern[] ] := "nothing" /; Message[alignMechanism::match]
-alignMechanism[_?mechanismQ, _?mechanismQ, opt : OptionsPattern[] ] := "nothing" /; Message[alignMechanism::match]
-alignMechanism[ pos : _?vertexCoordinatesQ, { mTo : _?mechanismQ, vertexList : {__Integer} }, opt : OptionsPattern[] ] := "nothing" /; Which[
-	Not[ MatrixQ[pos, NumericQ] && Dimensions[pos][[2]] == embeddingDimension[mTo] ], Message[alignMechanism::match]; False,
-	Not[ Max[vertexList] <= mTo["VertexNumber"] && Min[vertexList] > 0 ], Message[alignMechanism::vert]; False,
-	True, Message[alignMechanism::number]; False
+alignMechanism[ from_, to_, opt : OptionsPattern[] ] := 
+With[{fromPos = convertToAlign[ from ], toPos = convertToAlign[ to ]},
+	With[{ transform = alignTransform[ fromPos, toPos, {opt} ] },
+		transform[ toPos[[1]] ] /; transform =!= $Failed
+	] /; fromPos =!= $Failed && toPos =!= $Failed
 ]
 
 
-congruentQ[m1_?mechanismQ, m2_?mechanismQ, tolerance_ ] := With[{res = congruentQ[m1["positions"], m2["positions"],tolerance]},
-	res /; Head[res] =!= congruentQ
+(*convert the arguments appropriately*)
+convertToAlign[ m1_?mechanismQ ] := { m1["positions"], All}
+convertToAlign[ { m1_?mechanismQ , v : {__Integer} } ] := {m1["positions"], v} /; Max[v] <= m1["VertexNumber"] && Min[v]>0
+convertToAlign[ {m1_?mechanismQ, v_ } ] := (Message[alignMechanism::oob, v]; $Failed )
+
+convertToAlign[ pos_?numericCoordinatesQ ] := {pos,All}
+convertToAlign[ {pos_?numericCoordinatesQ, v : {__Integer} } ] := {pos,v} /; Max[v] <= Length[pos] && Min[v] > 0
+convertToAlign[ {pos_?numericCoordinatesQ, v_ } ] := (Message[alignMechanism::oob,v]; $Failed )
+convertToAlign[ {pos_, v_} ] := (Message[alignMechanism::num]; $Failed)
+
+alignMechanism::oob = "Specified vertices `1` are out of bounds of mechanism.";
+alignMechanism::num = "Vertex positions must be numerical.";
+
+
+(*find the geometric transform we need*)
+alignTransform[ {positionsFrom_,vFrom_}, {positionsTo_,vTo_}, options_ ] := 
+With[{
+transformation = FindGeometricTransform[positionsFrom[[vFrom]], positionsTo[[vTo]], Flatten[{options, {TransformationClass -> "Rigid", Method -> "Linear" }}] ]
+},
+	If[Head[transformation] === FindGeometricTransform, Message[alignMechanism::gt]; $Failed, transformation[[2]] ]
+] /; Dimensions[positionsFrom] == Dimensions[positionsTo]
+
+alignTransform[ {positionsFrom_,vFrom_}, {positionsTo_,vTo_}, options_ ] := (Message[alignMechanism::match]; $Failed)
+
+alignMechanism::gt = "Failed to find geometric transform.";
+alignMechanism::match = "Vertices are not of the same dimension and number.";
+
+
+congruentQ[tolerance_?(NumericQ[#]&&#>0&)][ from_, to_ ] := With[
+{ fromPos = convertToAlign[from ], toPos = convertToAlign[ to ] },
+	With[ { transform = alignTransform[ fromPos, toPos, {} ] },
+		With[ { difference = Flatten[transform[ toPos[[1]] ] - fromPos[[1]]] },
+			difference . difference < tolerance
+		] /; transform =!= $Failed
+	] /; fromPos =!= $Failed && toPos =!= $Failed
 ]
-
-congruentQ[pos1_?vertexCoordinatesQ, pos2_?vertexCoordinatesQ, tolerance_ ] := False /; Dimensions[pos1] != Dimensions[pos2]
-congruentQ[pos1_?vertexCoordinatesQ, pos2_?vertexCoordinatesQ, tolerance : _?(NumericQ[#] && # > 0&) ] := 
-With[{res = FindGeometricTransform[ pos1, pos2, TransformationClass -> "Rigid", Method -> "Linear" ]},
-	With[{newPos = res[[2]][ pos2 ]},
-		(pos1 - newPos) . (pos1 - newPos) < tolerance^2
-]] /; Dimensions[pos1] == Dimensions[pos2]
-
-congruentQ[pos1_?vertexCoordinatesQ, pos2_?vertexCoordinatesQ, tolerance_, vertexList : {__Integer} ] := False /; Dimensions[pos1] != Dimensions[pos2]
-congruentQ[pos1_?vertexCoordinatesQ, pos2_?vertexCoordinatesQ, tolerance : _?(NumericQ[#] && # > 0&) , vertexList : {__Integer} ] := 
-With[{res = FindGeometricTransform[ pos1[[ vertexList ]], pos2[[ vertexList ]], TransformationClass -> "Rigid", Method -> "Linear" ]},
-	With[{newPos = res[[2]][ pos2 ]},
-		(pos1 - newPos) . (pos1 - newPos) < tolerance^2
-]] /; Dimensions[pos1] == Dimensions[pos2] && Min[vertexList] > 0 && Max[vertexList] <= Length[pos1]
-
-congruentQ[tolerance__][a_,b_] := congruentQ[a,b,tolerance]
 
 
 BoundingRegion[o_origami, r___] ^:= BoundingRegion[ o["positions"], r ]
@@ -2828,6 +3202,28 @@ RegionDistance[ f_origami, p___ ] ^:= RegionDistance[ f["mesh"], p ]
 
 SignedRegionDistance[ f_framework, p___ ] ^:= SignedRegionDistance[ f["mesh"], p ]
 SignedRegionDistance[ f_origami, p___ ] ^:= SignedRegionDistance[ f["mesh"], p ]
+
+
+(*tierEdges::usage="tierEdges[m] partitions the edges of a 2D mechanism into tiers so that no two edges sharing a vertex are on the same tier.";*)
+
+
+selectEdgeTiers[ {edgeList_, other_} ] := 
+With[{
+	pass =Sort/@(List@@@FindIndependentEdgeSet[UndirectedEdge@@@edgeList])
+},
+	{
+	DeleteCases[ Sort /@ edgeList, Alternatives@@pass],
+	Join[{pass},other]
+	}
+]
+
+tierEdges[ m_?mechanismQ ] := With[{edges = listEdges[m]},
+	Reverse[NestWhile[selectEdgeTiers,{edges,{}}, Length[First[#]]>0&][[2]]]
+] /; embeddingDimension[m]==2
+
+tierEdges[ m_?mechanismQ ] := "nothing" /; Message[tierEdges::embdim]
+
+tierEdges::embdim="Mechanism embedding dimension must be 2.";
 
 
 incrementVertices[d_List]:=#+1&/@d
@@ -2893,8 +3289,13 @@ Henneberg[2][ {v1,v2,v3},label -> pos] is a Henneberg operation of type 2 that s
 Henneberg[t][pos] is a random Henneberg operation of type t, placing the new vertex at position pos.";
 
 
-cellData::usage = "cellData[ m, cellType, dataType ] returns the equilibrium data of a certain type for a certain cell type.
-cellData[ m, positions, cellType, dataType ] uses provided vertex positions to compute equilibrium data where not specified explicitly.";
+cellData::usage = "cellData[ m, cellPattern ] returns the equilibrium data cells matching a pattern.
+cellData[ m, positions, cellPattern ] uses provided vertex positions to compute equilibrium data where not specified explicitly.";
+
+constrainedCells::usage="constrainedComponents[m] returns a list of cells with infinite stiffness.
+constrainedComponents[m , {head, indices}] returns a list of cells matching the specification with infinite stiffness.
+constrainedComponents[m, patt] returns a list of cells matching a pattern with infinite stiffness.";
+constrainedComponents::usage="Use constrainedCells[] instead.";
 
 
 constraintEquations::usage=
@@ -2978,48 +3379,6 @@ The optional argument \!\(\*
 StyleBox[\"energy\",\nFontSlant->\"Italic\"]\)\!\(\*
 StyleBox[\" \",\nFontSlant->\"Italic\"]\)can be either an expression or a compiled mechanism energy.";
 
-repeatedMinimizeEnergy::usage=
-"repeatedMinimizeEnergy[\!\(\*
-StyleBox[\"mechanism\",\nFontSlant->\"Italic\"]\), \!\(\*
-StyleBox[\"energy\",\nFontSlant->\"Italic\"]\), \!\(\*
-StyleBox[\"number\",\nFontSlant->\"Italic\"]\)] minimizes the energy number times using random initial conditions.
-repeatedMinimizeEnergy[\!\(\*
-StyleBox[\"mechanism\",\nFontSlant->\"Italic\"]\),\!\(\*
-StyleBox[\"energy\",\nFontSlant->\"Italic\"]\),\!\(\*
-StyleBox[\"number\",\nFontSlant->\"Italic\"]\),\!\(\*
-StyleBox[\"test\",\nFontSlant->\"Italic\"]\)\!\(\*
-StyleBox[\" \",\nFontSlant->\"Italic\"]\)\!\(\*
-StyleBox[\"value\",\nFontSlant->\"Italic\"]\)] uses a numeric test value to determine if two vertex positions are the same.
-repeatedMinimizeEnergy[\!\(\*
-StyleBox[\"mechanism\",\nFontSlant->\"Italic\"]\),\!\(\*
-StyleBox[\"energy\",\nFontSlant->\"Italic\"]\),\!\(\*
-StyleBox[\"number\",\nFontSlant->\"Italic\"]\),\!\(\*
-StyleBox[\"test\",\nFontSlant->\"Italic\"]\)\!\(\*
-StyleBox[\" \",\nFontSlant->\"Italic\"]\)\!\(\*
-StyleBox[\"function\",\nFontSlant->\"Italic\"]\)] uses a test function to determine if two vertex positions are the same.";
-
-tallyRepeatedMinimizeEnergy::usage=
-"tallyRepeatedMinimizeEnergy[\!\(\*
-StyleBox[\"mechanism\",\nFontSlant->\"Italic\"]\), \!\(\*
-StyleBox[\"energy\",\nFontSlant->\"Italic\"]\)\!\(\*
-StyleBox[\",\",\nFontSlant->\"Italic\"]\)\!\(\*
-StyleBox[\" \",\nFontSlant->\"Italic\"]\)\!\(\*
-StyleBox[\"number\",\nFontSlant->\"Italic\"]\)] minimizes the energy number times using random initial conditions and tallies the results.
-tallyRepeatedMinimizeEnergy[\!\(\*
-StyleBox[\"mechanism\",\nFontSlant->\"Italic\"]\),energy,\!\(\*
-StyleBox[\"number\",\nFontSlant->\"Italic\"]\)\!\(\*
-StyleBox[\",\",\nFontSlant->\"Italic\"]\)\!\(\*
-StyleBox[\"test\",\nFontSlant->\"Italic\"]\)\!\(\*
-StyleBox[\" \",\nFontSlant->\"Italic\"]\)\!\(\*
-StyleBox[\"value\",\nFontSlant->\"Italic\"]\)] uses a numeric test value to determine if two vertexPositions are the same.
-tallyRepeatedMinimizeEnergy[\!\(\*
-StyleBox[\"mechanism\",\nFontSlant->\"Italic\"]\),energy,\!\(\*
-StyleBox[\"number\",\nFontSlant->\"Italic\"]\)\!\(\*
-StyleBox[\",\",\nFontSlant->\"Italic\"]\)\!\(\*
-StyleBox[\"test\",\nFontSlant->\"Italic\"]\)\!\(\*
-StyleBox[\" \",\nFontSlant->\"Italic\"]\)\!\(\*
-StyleBox[\"function\",\nFontSlant->\"Italic\"]\)] uses a test function to determine if two vertexPositions are the same.";
-
 dynamicalSystem::usage=
 "dynamicalSystem[\!\(\*
 StyleBox[\"m\",\nFontSlant->\"Italic\"]\)\!\(\*
@@ -3102,12 +3461,7 @@ StyleBox[\"}\",\nFontSlant->\"Italic\"]\)\!\(\*
 StyleBox[\",\",\nFontSlant->\"Italic\"]\)\!\(\*
 StyleBox[\" \",\nFontSlant->\"Italic\"]\)\!\(\*
 StyleBox[\"..\",\nFontSlant->\"Italic\"]\)\!\(\*
-StyleBox[\"}\",\nFontSlant->\"Italic\"]\). Each step is specified by the option \"stepMethod\" using options \"stepOptions\".
-
-isometricTrajectory[mechanism, direction, {variable, start, end}] attempts to find an isometric trajectory for a system with one degree of freedom.
-\!\(\*
-StyleBox[\"direction\",\nFontSlant->\"Italic\"]\) is either +1 or -1. It returns a list of InterpolatingFunctions as a function of \!\(\*
-StyleBox[\"variable\",\nFontSlant->\"Italic\"]\) representing the positions of the vertices.";
+StyleBox[\"}\",\nFontSlant->\"Italic\"]\).";
 
 findMinimalTrajectory::usage=
 "findMinimalTrajectory[\!\(\*
@@ -3146,7 +3500,7 @@ Module[{dim = embeddingDimension[m], lin = NullSpace[rigidityMatrix,opt]},
 
 (*does an expression evaluate to a number if the vertex positions or displacements are set?*)
 numericExpressionQ[positions_, expression_]:=
-With[{reducedExpression = (# . #&)[ Flatten[{expression /. positionRules[ N[positions] ] /. vertexDisplacement[_,_]->0.001} ] ]},
+With[{reducedExpression = (# . #&)[ Flatten[{expression /. Dispatch@positionRules[ N[positions] ] /. vertexDisplacement[_,_]->0.001} ] ]},
 	NumericQ[reducedExpression] && Chop[Im[reducedExpression]]==0
 ]
 
@@ -3345,6 +3699,16 @@ With[{
 ]
 
 
+meshCells[ mr_MeshRegion ] := Module[{i},
+	Table[
+		Property[ MeshCells[ mr, {i, #} ], getProperties[ mr, i, # ] ]& /@ Range[ MeshCellCount[ mr, i ] ],
+		{i,0,2}
+	]
+]
+
+getProperties[ mr_MeshRegion, d_, cell_ ] := # -> PropertyValue[ {mr, {d, cell}}, # ] & /@ $meshRegionProperties
+
+
 Options[toFramework]=Options[framework];
 
 toFramework[mr_MeshRegion,opt:OptionsPattern[]]:=framework[
@@ -3378,7 +3742,7 @@ With[{randomPoints=RandomReal[{-1/2,1/2},{numPoints,2}]},
 
 	With[{expandedMesh=MeshPrimitives[VoronoiMesh[Flatten[Table[randomPoints+ConstantArray[{i,j},numPoints],{i,-1,1},{j,-1,1}],2]],2]},
 
-		selectedPrimitives = Select[expandedMesh,Or@@RegionMember[#, randomPoints]&];
+		selectedPrimitives = Select[expandedMesh,Or @@ RegionMember[#, randomPoints]&];
 		positions = DeleteDuplicates[Flatten[selectedPrimitives[[All,1]],1]];
 		mappedPositions = OptionValue["map"] /@ positions;
 
@@ -3412,7 +3776,7 @@ With[{randomPoints=RandomReal[{-1/2,1/2},{numPoints,2}]},
 
 	With[{expandedMesh=MeshPrimitives[DelaunayMesh[Flatten[Table[randomPoints+ConstantArray[{i,j},numPoints],{i,-1,1},{j,-1,1}],2]],2]},
 
-		selectedPrimitives = Select[expandedMesh,Or@@RegionMember[#, randomPoints]&];
+		selectedPrimitives = Select[expandedMesh,Or @@ RegionMember[#, randomPoints]&];
 		positions = DeleteDuplicates[Flatten[selectedPrimitives[[All,1]],1]];
 		mappedPositions = OptionValue["map"] /@ positions;
 
@@ -3437,7 +3801,7 @@ randomTriangulatedNetwork::num="Number of points should be a positive integer.";
 
 
 Henneberg[1][n_?VectorQ, label_ -> pos_?VectorQ][ m_?mechanismQ ] :=
-	addCells[ {Point[label -> PadRight[pos, embeddingDimension[m]] ], rigidBar[{#,label}]& /@ n } ][m]
+	addCells[ {joint[label -> PadRight[pos, embeddingDimension[m]] ], rigidBar[{#,label}]& /@ n } ][m]
 
 Henneberg[1][pos_?VectorQ][ m_?mechanismQ ] :=
 	With[{ vertices = RandomSample[ Range[ m["VertexNumber"] ], 2 ] },
@@ -3446,7 +3810,7 @@ Henneberg[1][pos_?VectorQ][ m_?mechanismQ ] :=
 
 
 Henneberg[2][{n1_, n2_,n3_}, label_ -> pos_][ m_?mechanismQ ] :=
-	addCells[{rigidBar[{label, n3}]}] @ splitEdge[ {n1,n2}, label -> pos ][ m ]
+	placeVertices[label -> pos] @ addCells[{rigidBar[{label, n3}]}] @ subdivideCell[ {n1,n2}, label ][ m ]
 
 Henneberg[2][pos_?VectorQ][ m_?mechanismQ ] :=
 	With[{ edge = RandomChoice[ m["edges"] ] },
@@ -3456,90 +3820,97 @@ Henneberg[2][pos_?VectorQ][ m_?mechanismQ ] :=
 Henneberg[d:1|2][m_?mechanismQ, x__ ] := Henneberg[d][x][m]
 
 
-cellData[ m_?mechanismQ, pos : _?MatrixQ|Automatic : Automatic, {head_Symbol, dataType_} ] :=
-With[ {
-	positions = If[pos === Automatic, m["positions"], pos ], components = mechanismComponents[m, head[_]]
+faceToBlock[ thickness_, label_, centroid_ , normal_ , indices_ ] := 
+{
+	joint[ label[1] -> (centroid + thickness normal) , {"shape"->None,"blockJoint"}],
+	joint[ label[2] -> (centroid - thickness normal) , {"shape"->None,"blockJoint"}],
+	rigidBar[ {#, label[1]} , {"shape" -> None, "blockEdge"} ]& /@ indices,
+	rigidBar[ {#, label[2]} , {"shape" -> None, "blockEdge"} ]& /@ indices
+}
+
+blockFaces[ faces_ ][ m_?mechanismQ ] := With[
+{
+	normals = normalVector[ m , faces , "normalize" -> False],
+	centroids = Mean[m[[1,#]]]& /@ faces,
+	labels = Unique[] /@ Range[Length[faces]]
 },
-	If[ Length[components] > 0,
-		cellDataInternal[m,positions,dataType,First @ components],
-		{{},{}}
-	] /; cellDataArgumentsQ[m,positions]
-]
-cellData[ m_?mechanismQ, pos : _?MatrixQ|Automatic : Automatic, {pattern_, dataType_} ] :=
-With[ {
-	positions = If[pos === Automatic, m["positions"], pos ]
-},
-	cellDataInternal[m,positions,dataType,#]& /@ mechanismComponents[m, pattern] /; cellDataArgumentsQ[m,positions]
+	addCells[ MapThread[ faceToBlock[ 0.1, #1, #2, #3, #4 ]&, { labels, centroids, normals, faces } ] ][m]
 ]
 
-cellData::pos = "Positions do not have same dimensions as mechanism positions.";
-cellDataArgumentsQ[ m_, positions_ ] := True /; Dimensions[positions] == Dimensions[m["positions"]]
-cellDataArgumentsQ[ m_, positions_ ] := (Message[cellData::pos]; False)
+blockFaces[ m_?mechanismQ ] := With[ { faces = Select[listFaces[m],Length[#]>3&] }, blockFaces[ faces ][m] ]
 
-cellDataInternal[ m_, positions_, All , head_[indices_, data_] ] :=
-With[{
-	results = # -> Normal[cellDataAutomatic[m,positions,#,{head[indices],data}]]& /@ mechanisms`Private`dataForm[head]
+
+cellData[ m_?mechanismQ, positions_?MatrixQ , cellSpec_ : _ ] := 
+Module[ { 
+cells = mechanismCells[m, cellSpec],
+activeCells, inactiveCells
 },
-	Association[
-		"indices" -> indices,
-		Association @@ results
+	activeCells = Cases[cells,_Rule];
+	inactiveCells = DeleteCases[cells,_Rule];
+	Join[
+		( #[[1]]-> cellDataInternal[ m, positions, #[[1]] -> Merge[#[[2]],Join] ] ) & /@ activeCells,
+		inactiveCells
+	]
+] /; Length[positions] == m["VertexNumber"]
+
+cellData[ m_?mechanismQ, cellSpec_ : _] := cellData[m, m["positions"], cellSpec]
+
+cellDataInternal[ m_, positions_ , Rule[ rigidBar[indices_], data_Association] ] := 
+Module[ { automaticCells , newlengths },
+	automaticCells = Position[ data["length"], Automatic ];
+	newlengths = displacementLength[m, positions, Extract[indices,automaticCells] ];
+	ReplacePart[ data, "length" -> ReplacePart[ data["length"], Thread[Flatten[automaticCells] -> newlengths] ] ]
+]
+
+cellDataInternal[ m_, positions_ , Rule[ spring[indices_], data_Association] ] := 
+Module[ { automaticCells , newlengths , newstrains},
+	automaticCells = Position[ data["length"], Automatic ];
+
+	newlengths = ReplacePart[ data["length"],Thread[ Flatten[ automaticCells ] -> displacementLength[m, positions, Extract[indices,automaticCells] ] ] ];	
+	newstrains = data["strain"] /. {"linear" -> ((#1-#2)/#2 &) };
+
+	ReplacePart[ data, {
+		"length" -> newlengths,
+		"strain" -> newstrains
+		}
 	]
 ]
 
-cellDataInternal[ m_, positions_, dataType_, head_[indices_, data_] ] :=
-	{indices, cellDataAutomatic[m,positions,dataType,{head[indices],data} ]}
-
-
-cellDataAutomatic[ m_, positions_, "length", {rigidBar[indices_], data_} ] := 
-Module[{ 
-automaticCells = Position[ Normal@ data["length"], "Automatic" ], newlengths
-},
-	newlengths = displacementLength[m, positions, Extract[indices,automaticCells] ];
-	ReplacePart[ data["length"], Thread[Flatten[automaticCells] -> newlengths] ]
+cellDataInternal[ m_, positions_, Rule[fold[indices_], data_Association ] ] :=
+Module[ {automaticCells, newangles},
+	automaticCells = Position[ data["angle"], Automatic ];
+	newangles = foldAngle[m, positions, Extract[indices,automaticCells] ];
+	ReplacePart[ data, "angle" -> ReplacePart[ data["angle"], Thread[Flatten[automaticCells] -> newangles] ] ]
 ]
 
-cellDataAutomatic[ m_, positions_, "length", {spring[indices_],data_}] :=
-Module[{ 
-automaticCells = Position[Normal@data["length"], "Automatic" ], newlengths
-},
-	newlengths = displacementLength[m, positions, Extract[indices,automaticCells] ];
-	ReplacePart[ data["length"], Thread[Flatten[automaticCells] -> newlengths] ]
+cellDataInternal[ m_, positions_, Rule[angleJoint[indices_], data_Association ] ] :=
+Module[ {automaticCells, newangles},
+	automaticCells = Position[ data["angle"], Automatic ];
+	newangles = turningAngle[m, positions, Extract[indices,automaticCells] ];
+	ReplacePart[ data, "angle" -> ReplacePart[ data["angle"], Thread[Flatten[automaticCells] -> newangles] ] ]
 ]
 
-cellDataAutomatic[ m_, positions_, "strain", {spring[indices_],data_}] :=
-Module[{ 
-automaticCells = Position[Normal@data["strain"], "linear" ], newlengths, vertices
-},
-	ReplacePart[ data["strain"], Thread[Flatten[automaticCells] -> ((#1-#2)/#2&)] ]
+cellDataInternal[ m_, positions_, Rule[ pinnedJoint[indices_], data_Association ] ] :=
+Module[ { automaticCells, pos, newconstraints},
+	automaticCells = Position[ data["constraint"], Automatic ];
+	pos = positions[[ Flatten[ automaticCells ] ]];
+	newconstraints = ReplacePart[ data["constraint"], Thread[ Flatten[automaticCells] -> (#1-#2 &) ] ];
+	
+	ReplacePart[ data, "constraint" -> newconstraints ]
 ]
 
-cellDataAutomatic[ m_, positions_, "angle", {fold[indices_],data_}] :=
-Module[{ 
-automaticCells = Position[Normal@data["angle"], "Automatic" ], newlengths
+cellDataInternal[ m_, positions_, Rule[ cell_, data_ ]] := data
+
+
+constrainedComponents[ m_, c_ : _ ] := constrainedCells[m,c]
+
+constrainedCells[m_?mechanismQ, cellSpec_ : _ ] := constrainedCells[ m, m["positions"], cellSpec]
+constrainedCells[ m_?mechanismQ, pos_, cellSpec_ : _ ] := With[
+{
+	dataToCheck = {"stiffness", "torsionalStiffness", "pinningStiffness", "faceStiffness","YoungsModulus"}
 },
-	newlengths = foldAngle[m, positions, Extract[indices,automaticCells] ];
-	ReplacePart[ data["angle"], Thread[Flatten[automaticCells] -> newlengths] ]
-]
-
-cellDataAutomatic[ m_, positions_, "angle", {angleJoint[indices_],data_}] :=
-Module[{ 
-automaticCells = Position[Normal@data["angle"], "Automatic" ], newlengths
-},
-	newlengths = turningAngle[m, positions, Extract[indices,automaticCells] ];
-	ReplacePart[ data["angle"], Thread[Flatten[automaticCells] -> newlengths] ]
-]
-
-cellDataAutomatic[ m_, positions_, "constraint", {joint[indices_],data_}] :=
-Module[{ 
-automaticCells = Position[Normal@data["constraint"], "Automatic" ], newlengths, vertices
-},
-	newlengths = vertexPinningFunction/@ positions[[ Extract[ indices, automaticCells] ]];
-
-	ReplacePart[ data["constraint"], Thread[Flatten[automaticCells] -> newlengths] ]
-]
-vertexPinningFunction[pos_]:=((#-pos)&)
-
-cellDataAutomatic[ m_, positions_, dataType_, {head_[indices_], data_} ] := data[dataType]
+	Flatten[( (#[[1]] -> cellDataInternal[m, pos, #[[1]] -> Merge[#[[2]],Join]] &) /@ mechanismCells[ m, cellSpec , #1 -> Infinity ]) & /@ dataToCheck]
+] /; vertexCoordinatesQ[m,pos]
 
 
 Options[ constraintEquations ] = {
@@ -3579,7 +3950,7 @@ Module[{tmp, tmpPositions},
 		reduceConstraintToOrder[
 			positions,
 			Flatten[{
-				(componentToConstraints[m , tmpPositions, vertexPosition[m], # ]& /@ constrainedComponents[m , pattern ]),
+				(componentToConstraints[m , tmpPositions, vertexPosition[m], # ]& /@ constrainedCells[m , tmpPositions, pattern ]),
 				constraintVector[ tmpPositions, constraints ]
 			}],
 			order
@@ -3594,48 +3965,35 @@ Module[{tmp, tmpPositions},
 ]
 
 
-componentToConstraints[ m_, positions_, arbitraryPositions_, bar_rigidBar ]:=
-With[ {constrainedBars = cellDataInternal[  m, positions, "length", bar ] },
-	(displacementLengthSquared[ arbitraryPositions, constrainedBars[[1]] ] - constrainedBars[[2]]^2)
+componentToConstraints[ m_, positions_, arbitraryPositions_, Rule[rigidBar[indices_], data_] ]:=
+	displacementLengthSquared[ arbitraryPositions, indices ] - data["length"]^2
+
+componentToConstraints[ m_, positions_, arbitraryPositions_, Rule[elasticFace[indices_], data_] ]:=
+With[{
+	edges = DeleteDuplicatesBy[Flatten[Partition[indices,{1,2},1,1],2],Sort ]
+},
+	displacementLengthSquared[ arbitraryPositions, edges ] - displacementLengthSquared[ positions, edges ]
 ]
 
+componentToConstraints[ m_, positions_, arbitraryPositions_, Rule[spring[indices_], data_] ] :=
+	MapThread[ #1[#2,#3]&, { data["strain"], displacementLength[ arbitraryPositions, indices ], data["length"] } ]
 
-componentToConstraints[ m_, positions_, arbitraryPositions_, bar_spring ] :=
-With[ { constrainedBars = cellDataInternal[ m, positions, "length", bar], strain = cellDataInternal[ m, positions, "strain", bar ] },
-	MapThread[ #1[#2, #3]&, { strain[[2]], displacementLength[ arbitraryPositions, constrainedBars[[1]] ], constrainedBars[[2]] } ]
-]
+componentToConstraints[ m_, positions_, arbitraryPositions_, Rule[fold[indices_], data_ ] ] :=
+	foldAngle[ m, arbitraryPositions, indices ] - data["angle"]
 
-
-componentToConstraints[ m_, positions_, arbitraryPositions_, bar_fold ] :=
-With[ { constrainedBars = cellDataInternal[ m, positions, "angle", bar] },
-	foldAngle[ m, arbitraryPositions, constrainedBars[[1]] ] - constrainedBars[[2]]
-]
-
-
-componentToConstraints[ m_, positions_, arbitraryPositions_, vertices_joint ]:=
-With[ { constrainedVertices = cellDataInternal[  m, positions, "constraint", vertices ] },
-	If[ Length[constrainedVertices[[1]]] == 0,
-		{}, 
-		MapThread[
-			#1[#2,#3]&,
-			{
-			constrainedVertices[[2]] , 
-			vertexPosition[ constrainedVertices[[1]], All[ m["EmbeddingDimension"] ] ],
-			positions[[ constrainedVertices[[1]] ]]
-			}
-		]
-	]
-]
+componentToConstraints[ m_, positions_, arbitraryPositions_, Rule[pinnedJoint[indices_], data_ ] ] :=
+	MapThread[ #1[#2,#3]&, { data["constraint"], vertexPosition[ indices, All[ m["EmbeddingDimension"] ] ], positions[[ indices ]] } ]
 
 
 componentToConstraints[ ___ ] := {}
 
 
-$defaultStiffness["Methods"]:={rigidBar, spring, fold, joint, angleJoint, "constraints"}
+$defaultStiffness["Methods"]={rigidBar, spring, fold, joint, angleJoint, "constraints"};
 $defaultStiffness[rigidBar]=1;
 $defaultStiffness[spring]=1;
 $defaultStiffness[fold]=10^(-4);
-$defaultStiffness[joint]=10^(-4);
+$defaultStiffness[elasticFace] = 1;
+$defaultStiffness[pinnedJoint]=10^(-4);
 $defaultStiffness[angleJoint]=10^(-4);
 $defaultStiffness["constraints"]=10^(-1);
 
@@ -3655,59 +4013,67 @@ mechanismEnergy[m_?mechanismQ, _, OptionsPattern[] ] := "nothing" /; Message[mec
 mechanismEnergyInternal[ m_, positions_, constraints_, pattern_ ] := 
 With[
 {
-	components = mechanismComponents[m, pattern],
-	nonlinearConstraints = nonlinearConstraintVector[positions, constraints],
+	components = cellData[m, positions, pattern],
+(*	nonlinearConstraints = nonlinearConstraintVector[positions, constraints],*)
+	constraintData = processConstraintEquations[positions , constraints] ,
 	arbitraryPositions = vertexPosition[m]
 },
 	Total @ Flatten[{
 		componentEnergy[m, positions, arbitraryPositions, #]& /@ components,
-		$defaultStiffness["constraints"] nonlinearConstraints . nonlinearConstraints/2
-	}]
+		$defaultStiffness["constraints"] (constraintData["nonlinear constraints"] . constraintData["nonlinear constraints"])/2
+	}] /. constraintData["linear solutions"]
 ]
 
 
-componentEnergy[m_, positions_, arbitraryPositions_, bar_rigidBar ]:=With[
-{
-	data = cellDataInternal[ m, positions, All, bar ]
+componentEnergy[m_, positions_, arbitraryPositions_, Rule[rigidBar[indices_],data_]] :=
+	( data["stiffness"] /. Infinity -> $defaultStiffness[rigidBar] ) ( 
+		displacementLengthSquared[arbitraryPositions, indices ]/data["length"]^2 - ConstantArray[1,Length[indices]]
+	)^2/8
+
+componentEnergy[m_, positions_, arbitraryPositions_, Rule[spring[indices_],data_]] :=
+With[{
+	stiffness = data["stiffness"] /. Infinity -> $defaultStiffness[spring]
 },
-	(* this form has the property that the elastic energy to apply a fixed strain to N beams in series is the same. *)
-	( data["stiffness"] /. Infinity -> $defaultStiffness[rigidBar] ) ( displacementLengthSquared[arbitraryPositions, data["indices"] ]/data["length"]^2 - 1 )^2/8
+	stiffness MapThread[ #1[#2,#3]^2&, { data["strain"], displacementLength[arbitraryPositions, indices ], data["length"] } ]
 ]
 
-componentEnergy[m_, positions_, arbitraryPositions_, bar_spring ]:=With[
-{
-	data = cellDataInternal[ m, positions, All, bar ]
+componentEnergy[m_, positions_, arbitraryPositions_, Rule[fold[indices_], data_]] :=
+With[{
+	stiffness = data["torsionalStiffness"] /. Infinity -> $defaultStiffness[fold]
 },
-	(data["stiffness"] /.Infinity -> $defaultStiffness[spring])  MapThread[#1[#2,#3]^2/2&, {
-		data["strain"], displacementLength[arbitraryPositions, data["indices"]], data["length"] } 
+	stiffness (foldAngle[m,arbitraryPositions, indices ] - data["angle"])^2/2
+]
+
+componentEnergy[m_, positions_, arbitraryPositions_, Rule[elasticFace[indices_], data_]] :=
+With[{
+	stiffness = data["YoungsModulus"] /. Infinity -> $defaultStiffness[elasticFace],
+	poissonratio = data["PoissonRatio"]
+},
+	MapThread[
+		elasticFaceEnergy[ #1, #2, positions[[ #3 ]], arbitraryPositions[[ #3 ]] ]&,
+		{stiffness, poissonratio, indices}
 	]
 ]
 
-componentEnergy[m_, positions_, arbitraryPositions_, bar_fold ]:=With[
-{
-	data = cellDataInternal[ m, positions, All, bar ]
+componentEnergy[m_, positions_, arbitraryPositions_, Rule[angleJoint[indices_], data_]] :=
+With[{
+	stiffness = data["angularStiffness"] /. Infinity -> $defaultStiffness[fold]
 },
-	( data["torsionalStiffness"]  /. Infinity -> $defaultStiffness[fold] ) (foldAngle[m,arbitraryPositions, data["indices"]] - data["angle"])^2/2
+	stiffness (turningAngle[m,arbitraryPositions, indices ] - data["angle"])^2/2
 ]
 
-componentEnergy[m_, positions_, arbitraryPositions_, angles_angleJoint ]:=With[
-{
-	data = cellDataInternal[ m, positions, All, angles ]
+componentEnergy[m_, positions_, arbitraryPositions_, Rule[pinnedJoint[indices_], data_]] :=
+With[{
+	stiffness = data["pinningStiffness"] /. Infinity -> $defaultStiffness[fold]
 },
-	( data["angularStiffness"]  /. Infinity -> $defaultStiffness[angleJoint] ) (turningAngle[m,arbitraryPositions, data["indices"]] - data["angle"])^2/2
+	stiffness MapThread[ #1[#2,#3]^2/2& , { data["constraint"], arbitraryPositions[[ indices ]], positions[[ indices ]] } ]
 ]
 
-componentEnergy[m_, positions_, arbitraryPositions_, ind_joint ]:=With[
-{
-	data = cellDataInternal[ m, positions, All, ind ]
-},
-	( data["pinningStiffness"]  /. Infinity -> $defaultStiffness[joint] ) (MapThread[ #1[#2]^2/2&, {data["constraint"] , arbitraryPositions[[ data["indices"] ]] } ] )
-]
+componentEnergy[m_,_,_,_] := {0}
 
-componentEnergy[m_, positions_, arbitraryPositions_, ind_face ]:={0}
-componentEnergy[m_, positions_, arbitraryPositions_, ind_Polygon ]:={0}
-componentEnergy[m_, positions_, arbitraryPositions_, ind_Line ]:={0}
-componentEnergy[m_, positions_, arbitraryPositions_, ind_Point ]:={0}
+
+elasticFaceEnergy[Y_,\[Nu]_,{{x1_,y1_,z1_},{x2_,y2_,z2_},{x3_,y3_,z3_}},{{X1_,Y1_,Z1_},{X2_,Y2_,Z2_},{X3_,Y3_,Z3_}}] := 
+1/(2 (1+\[Nu])) Y ((Sqrt[(-x1+x2)^2+(-y1+y2)^2+(-z1+z2)^2]-Sqrt[(-X1+X2)^2+(-Y1+Y2)^2+(-Z1+Z2)^2])^2/((-x1+x2)^2+(-y1+y2)^2+(-z1+z2)^2)+(Sqrt[1-(x1^2+x2 x3-x1 (x2+x3)+(y1-y2) (y1-y3)+(z1-z2) (z1-z3))^2/(((x1-x2)^2+(y1-y2)^2+(z1-z2)^2) ((x1-x3)^2+(y1-y3)^2+(z1-z3)^2))] Sqrt[(-x1+x3)^2+(-y1+y3)^2+(-z1+z3)^2]-Sqrt[1-(X1^2+X2 X3-X1 (X2+X3)+(Y1-Y2) (Y1-Y3)+(Z1-Z2) (Z1-Z3))^2/(((X1-X2)^2+(Y1-Y2)^2+(Z1-Z2)^2) ((X1-X3)^2+(Y1-Y3)^2+(Z1-Z3)^2))] Sqrt[(-X1+X3)^2+(-Y1+Y3)^2+(-Z1+Z3)^2])^2/((1-(x1^2+x2 x3-x1 (x2+x3)+(y1-y2) (y1-y3)+(z1-z2) (z1-z3))^2/(((x1-x2)^2+(y1-y2)^2+(z1-z2)^2) ((x1-x3)^2+(y1-y3)^2+(z1-z3)^2))) ((-x1+x3)^2+(-y1+y3)^2+(-z1+z3)^2))+((Sqrt[(-X1+X2)^2+(-Y1+Y2)^2+(-Z1+Z2)^2] (x1^2+x2 x3-x1 (x2+x3)+(y1-y2) (y1-y3)+(z1-z2) (z1-z3)) Sqrt[(-x1+x3)^2+(-y1+y3)^2+(-z1+z3)^2])/(Sqrt[((x1-x2)^2+(y1-y2)^2+(z1-z2)^2) ((x1-x3)^2+(y1-y3)^2+(z1-z3)^2)])-(Sqrt[(-x1+x2)^2+(-y1+y2)^2+(-z1+z2)^2] (X1^2+X2 X3-X1 (X2+X3)+(Y1-Y2) (Y1-Y3)+(Z1-Z2) (Z1-Z3)) Sqrt[(-X1+X3)^2+(-Y1+Y3)^2+(-Z1+Z3)^2])/(Sqrt[((X1-X2)^2+(Y1-Y2)^2+(Z1-Z2)^2) ((X1-X3)^2+(Y1-Y3)^2+(Z1-Z3)^2)]))^2/(4 ((-x1+x2)^2+(-y1+y2)^2+(-z1+z2)^2) (1-(x1^2+x2 x3-x1 (x2+x3)+(y1-y2) (y1-y3)+(z1-z2) (z1-z3))^2/(((x1-x2)^2+(y1-y2)^2+(z1-z2)^2) ((x1-x3)^2+(y1-y3)^2+(z1-z3)^2))) ((-x1+x3)^2+(-y1+y3)^2+(-z1+z3)^2)))+1/(2 (1-2 \[Nu]) (1+\[Nu])) Y (-((Sqrt[(-x1+x2)^2+(-y1+y2)^2+(-z1+z2)^2]-Sqrt[(-X1+X2)^2+(-Y1+Y2)^2+(-Z1+Z2)^2])/Sqrt[(-x1+x2)^2+(-y1+y2)^2+(-z1+z2)^2])-(Sqrt[1-(x1^2+x2 x3-x1 (x2+x3)+(y1-y2) (y1-y3)+(z1-z2) (z1-z3))^2/(((x1-x2)^2+(y1-y2)^2+(z1-z2)^2) ((x1-x3)^2+(y1-y3)^2+(z1-z3)^2))] Sqrt[(-x1+x3)^2+(-y1+y3)^2+(-z1+z3)^2]-Sqrt[1-(X1^2+X2 X3-X1 (X2+X3)+(Y1-Y2) (Y1-Y3)+(Z1-Z2) (Z1-Z3))^2/(((X1-X2)^2+(Y1-Y2)^2+(Z1-Z2)^2) ((X1-X3)^2+(Y1-Y3)^2+(Z1-Z3)^2))] Sqrt[(-X1+X3)^2+(-Y1+Y3)^2+(-Z1+Z3)^2])/(Sqrt[1-(x1^2+x2 x3-x1 (x2+x3)+(y1-y2) (y1-y3)+(z1-z2) (z1-z3))^2/(((x1-x2)^2+(y1-y2)^2+(z1-z2)^2) ((x1-x3)^2+(y1-y3)^2+(z1-z3)^2))] Sqrt[(-x1+x3)^2+(-y1+y3)^2+(-z1+z3)^2]))^2 \[Nu]
 
 
 compiledMechanismEnergy[variables_List,energy_CompiledFunction,gradient_CompiledFunction]["variables"]:=variables
@@ -3725,10 +4091,13 @@ StringJoin[
 
 compiledMechanismEnergy[variables_?VectorQ,energy_CompiledFunction,gradient_CompiledFunction]["data"]:=variables
 
-compiledMechanismEnergy[variables_List,energy_CompiledFunction,gradient_CompiledFunction]["energy"][pos_?(VectorQ[#,NumericQ]&),data_] := energy[pos,data]
-compiledMechanismEnergy[variables_List,energy_CompiledFunction,gradient_CompiledFunction]["gradient"][pos_?(VectorQ[#,NumericQ]&),data_] := gradient[pos,data]
+compiledMechanismEnergy[variables_List,energy_CompiledFunction,gradient_CompiledFunction]["energy"][pos_?(VectorQ[#,NumericQ]&),data_] := 
+	energy[pos,data]
+compiledMechanismEnergy[variables_List,energy_CompiledFunction,gradient_CompiledFunction]["gradient"][pos_?(VectorQ[#,NumericQ]&),data_] := 
+	gradient[pos,data]
 
-compiledMechanismEnergy[variables_List,energy_CompiledFunction,gradient_CompiledFunction][v_?(VectorQ[#,NumericQ]&)] := compiledMechanismEnergy[v,energy,gradient]
+compiledMechanismEnergy[variables_List,energy_CompiledFunction,gradient_CompiledFunction][v_?(VectorQ[#,NumericQ]&)] := 
+	compiledMechanismEnergy[v,energy,gradient]
 
 
 compiledMechanismEnergyQ[compiledMechanismEnergy[variables_,energy_CompiledFunction,gradient_CompiledFunction]]:=VectorQ[variables]
@@ -3784,8 +4153,9 @@ dataInjector,data
 	ReleaseHold[Hold[Compile][
 		{{c,_Real,1},{data,_Real,1}},
 		body,
-		RuntimeOptions->{"EvaluateSymbolically"->False},
-		CompilationTarget->compiler
+		RuntimeOptions->{"Speed","EvaluateSymbolically"->False},
+		CompilationTarget->compiler,
+		Parallelization->True
 	]]
 ]
 
@@ -3803,8 +4173,9 @@ dataInjector,data
 	ReleaseHold[Hold[Compile][
 		{{c,_Real,1},{data,_Real,1}},
 		body,
-		RuntimeOptions->{"EvaluateSymbolically"->False},
-		CompilationTarget->compiler
+		RuntimeOptions->{"Speed","EvaluateSymbolically"->False},
+		CompilationTarget->compiler,
+		Parallelization->True
 	]]
 ]
 
@@ -4047,6 +4418,56 @@ linearMotionsToDisplacementRules[m_,linearMotions_,displacements_]:=Which[
 ]
 
 
+Options[constraintMatrixFunction]={ "constraints" -> None, "pattern" -> _, "rules" -> {} };
+
+constraintMatrixFunction[ m_?mechanismQ , opt : OptionsPattern[] ] := 
+Module[ { constraintMatrices, vars , symb = Array[Unique["x"]&,Length[Flatten[vertexPosition[m]]]], map},
+
+	vars = Check[ reduceVariables[ Flatten[vertexDisplacement[m]] , OptionValue["rules"] ], $Failed ];
+
+	constraintMatrices = If[vars === $Failed,
+
+		CoefficientArrays[
+			constraintEquations[ m, vertexPosition[m], 1, "constraints" -> OptionValue["constraints"], "pattern"->OptionValue["pattern"], "output" -> vertexDisplacement ],
+			Flatten[vertexDisplacement[m]]
+		],
+
+		CoefficientArrays[
+			constraintEquations[ m, vertexPosition[m], 1, "constraints" -> OptionValue["constraints"], "pattern"->OptionValue["pattern"], "output" -> vertexDisplacement ] //. OptionValue["rules"],
+			vars
+		]
+	];
+	
+	Which[
+		constraintMatrices=={{}}, {ConstantArray[0, m["EmbeddingDimension"] m["VertexNumber"]]},
+		
+		True,
+			map=Dispatch@Thread[Flatten[vertexPosition[m]]->symb];
+			Function @@ { symb, Normal@constraintMatrices[[2]] /. map}
+	]
+]
+
+reduceVariables[vars_,{}]:=vars
+reduceVariables[vars_,rules : {Rule[ vertexDisplacement[_,_], _ ]..}] := Cases[Variables[vars //. rules],_vertexDisplacement]
+reduceVariables[vars_, notRules_ ] := (Message[ constraintMatrixFunction::rules]; vars)
+
+constraintMatrixFunction::rules="Replacement rules are not of the form { vertexDisplacement[v1, c1] -> .., .. }.";
+
+
+Options[mechanismEnergyFunction] := Options[mechanismEnergy];
+
+mechanismEnergyFunction[m_?mechanismQ, opt : OptionsPattern[]] :=
+Module[
+{
+energy = mechanismEnergy[m, opt ], 
+symb = Array[Unique["x"]&,Length[Flatten[vertexPosition[m]]]], 
+map
+},
+	map=Dispatch@Thread[Flatten[vertexPosition[m]]->symb];
+	Function @@ { symb, energy /. map}
+]
+
+
 Options[minimizeEnergy]=Join[ {"initial"->Automatic}, Options[mechanismEnergy], Options[FindMinimum] ];
 SetAttributes[minimizeEnergy,HoldRest];
 
@@ -4104,7 +4525,7 @@ Module[
 	data = energy["data"], allVariables = Flatten[vertexPosition[m]],
 	variables, variableSpecifications, linearConstraints,
 	
-	minimizationOptions = Sequence @@ FilterRules[options, Options[FindMinimum]],
+	minimizationOptions = FilterRules[options, Options[FindMinimum]],
 	minimizationResults
 },
 	variables = Flatten[constraintData[ "constrained positions" ]];
@@ -4115,20 +4536,41 @@ Module[
 
 	minimizationResults = Cases[
 		Map[ 
-			executeMinimizationCompiled[ energy["energy"][variables, data], linearConstraints, #, energy["gradient"][variables,data], minimizationOptions ]&,
-			 variableSpecifications
+			executeMinimizationCompiled[
+				energy["energy"][variables, data], 
+				linearConstraints, 
+				#, 
+				energy["gradient"][variables,data], 
+				minimizationOptions 
+			]&,
+			variableSpecifications
 		],
 		
-		{ _?NumericQ, {__Rule}}
+		{ _ , {__Rule} }
 	];
 	
-	{ #[[1]] , constraintData["constrained positions"] /. Dispatch[ #[[2]] ] }& /@ minimizationResults
+	If[Length[minimizationResults]>0,
+		{ #[[1]] , constraintData["constrained positions"] /. Dispatch[ #[[2]] ] }& /@ minimizationResults,
+		{}
+	]
 ]
 
-executeMinimizationCompiled[ energy_, constraints_, initial_, gradient_, options_ ]:= 
-	(FindMinimum @@ {
-		Flatten[ {energy, constraints} ], Sequence @@ initial, Gradient :> gradient, options 
-	})
+executeMinimizationCompiled[ energy_, {}, initial_, gradient_, options_ ]:= Module[ {tmp},
+	Check[
+		tmp = FindMinimum @@ {
+			energy, Sequence @@ initial, Gradient :> gradient, options 
+		},
+		If[Length[tmp]==2, {"error"@tmp[[1]], tmp[[2]] }, $Failed ]
+	]
+]
+executeMinimizationCompiled[ energy_, constraints_, initial_, gradient_, options_ ]:= Module[ {tmp},
+	tmp = Check[
+		FindMinimum @@ {
+			Flatten[ {energy, constraints} ], Sequence @@ initial, Gradient :> gradient, options 
+		},
+		If[Length[tmp]==2, {"error" @ tmp[[1]], tmp[[2]] }, $Failed ]
+	]
+]
 
 (*energy is an analytic expression*)
 minimizeEnergyMinimize[ m_, energy_, initialPositions_, options_ ] := 
@@ -4147,63 +4589,19 @@ Module[
 
 	minimizationResults = Cases[
 		Map[ executeMinimizationAnalytic[ constrainedEnergy, #, minimizationOptions ] & , variableSpecifications ],
-		{ _?NumericQ, {__Rule}}
+		{ _, {__Rule}}
 	];
 
-	{ #[[1]] , constraintData["constrained positions"] /. Dispatch[ #[[2]] ] }& /@ minimizationResults
+	If[Length[minimizationResults]>0,
+		{ #[[1]] , constraintData["constrained positions"] /. Dispatch[ #[[2]] ] }& /@ minimizationResults,
+		{}
+	]
 ]
 
-executeMinimizationAnalytic[ energy_, data_, options_ ] := FindMinimum @@ {energy, data, Sequence @@ options }
-
-
-Options[repeatedMinimizeEnergy]=Join[{"MaxEnergy"->Infinity},Options[randomDisplacements],Options[minimizeEnergy]];
-
-
-repeatedMinimizeEnergy[ m_?mechanismQ, energy : Except[_Integer] : Automatic, num_, opt : OptionsPattern[] ] :=
-With[{positions = If[OptionValue["initial"]===Automatic, m["positions"], OptionValue["initial"] ] },
-Module[{res = repeatedMinimizeEnergyInternal[ m, positions, energy, num, OptionValue["MaxEnergy"], {opt} ]},
-	res /; Head[res] =!= repeatedMinimizeEnergyInternal
-]]
-
-
-repeatedMinimizeEnergyInternal[m_, positions_, energy_, number_Integer?(#>0&), maxEnergy : _?NumericQ|Infinity, options_ ] := 
-Module[{
-displacementOptions = FilterRules[options, Options[randomDisplacements]],
-minimizationOptions = FilterRules[options, Options[minimizeEnergy]],
-res
-},
-	res = minimizeEnergyInternal[ m, energy, randomDisplacements[ positions, number, displacementOptions ], minimizationOptions ];
-	Select[res, #[[1]] <= maxEnergy & ] /; res =!= minimizeEnergyInternal && res =!= $Failed
-] /; numericCoordinatesQ[m, positions]
-
-repeatedMinimizeEnergyInternal[m_, positions_, energy_, number_, maxEnergy_, options_] := "nothing" /; Which[
-	Not[numericCoordinatesQ[m, positions]], Message[repeatedMinimizeEnergy::pos]; False,
-	Not[ IntegerQ[number] && number > 0 ], Message[repeatedMinimizeEnergy::numneg]; False,
-	Not[ NumericQ[maxEnergy] || maxEnergy == Infinity ], Message[repeatedMinimizeEnergy::max]; False,
-	True, False
-]
-
-
-repeatedMinimizeEnergy::numneg="Number of repetitions should be a positive integer.";
-repeatedMinimizeEnergy::max="Option \"MaxEnergy\" does not have a valid value.";
-repeatedMinimizeEnergy::pos="Initial positions are not numerical and valid.";
-
-
-Options[tallyRepeatedMinimizeEnergy]=Join[Options[repeatedMinimizeEnergy],{SameTest -> Automatic}];
-
-tallyRepeatedMinimizeEnergy[m_?mechanismQ,num_Integer,tol:_?NumericQ:10^(-6),opt:OptionsPattern[]]:=Module[{
-res=repeatedMinimizeEnergy[m,num,opt]},
-	tallyRepeatedMinimizeEnergyOutput[res,tol]/;Head[res]=!=repeatedMinimizeEnergy
-]
-
-tallyRepeatedMinimizeEnergy[m_?mechanismQ,energy_,num_Integer,tol:_?NumericQ:10^(-6),opt:OptionsPattern[]]:=Module[{
-res=repeatedMinimizeEnergy[m,energy,num,opt]},
-	tallyRepeatedMinimizeEnergyOutput[res,tol]/;Head[res]=!=repeatedMinimizeEnergy
-]
-
-tallyRepeatedMinimizeEnergyOutput[{},_]:={}
-tallyRepeatedMinimizeEnergyOutput[res_,tol_]:=With[{output=Transpose[res]},
-	{Max[output[[1]]],Tally[output[[2]], Flatten[#1-#2].Flatten[#1-#2]<tol^2& ]}
+executeMinimizationAnalytic[ energy_, data_, options_ ] := Module[ {tmp}, 
+	Check[ tmp = FindMinimum @@ {energy, data, Sequence @@ options },
+		If[Length[tmp]==2, { "error" @ tmp[[1]], tmp[[2]] } , $Failed ]
+	]
 ]
 
 
@@ -4428,180 +4826,155 @@ monteCarloStep[ energy_, {_, oldEnergy_, oldPositions_} , beta_, distribution_, 
 
 Options[ isometricTrajectory ] := {
 	"initial" -> Automatic,
-	"constraints" -> None,
+	"constraints" -> None, "rules" -> {},
 	Method -> {"Minimization", MaxIterations -> 10^4},
 	Tolerance -> 10^(-8),
-	"stepsize" -> 0.1,
-	"compile" -> False
+	"stepsize" -> 0.1
 };
 
-isometricTrajectory[ m_?mechanismQ, directionSpecification_, steps_?stepNumberQ, opt : OptionsPattern[] ] :=
-With[
-{
-	positions = If[ OptionValue["initial"] === Automatic, m["positions"], OptionValue["initial"] ],
-	methodOptions = Flatten[Rest[OptionValue[Method]]]
+
+isometricTrajectory[m_?mechanismQ, direction_, steps_?stepsQ , opt : OptionsPattern[] ] :=
+With[{
+	initialPositions = If[OptionValue["initial"]===Automatic, m["positions"], OptionValue["initial"]]
 },
-	With[ {res = isometricTrajectoryStepperInternal[ 
-		m,
-		{positions, directionSpecification}, 
-		{steps, OptionValue["stepsize"]}, 
-		{OptionValue["compile"], constraintVector[positions,OptionValue["constraints"]]},
-		{First[OptionValue[Method]], OptionValue[Tolerance], methodOptions }
-		]},
-		res /; Head[res] === List
-	] /; directionQ[ m, directionSpecification ] && positionsQ[ m, positions ] && stepsizeQ[OptionValue["stepsize"]] && compileQ[ OptionValue["compile"] ]
+	With[{
+		res = isometricTrajectoryInternal[m, initialPositions, direction, 
+			{steps, OptionValue["stepsize"], OptionValue[Tolerance]}, 
+			Flatten[{OptionValue[Method]}],
+			{opt}
+		]
+	},
+		res /; Head[res] =!= isometricTrajectoryInternal
+	] /; And[ positionsQ[m, initialPositions] , displacementsQ[m, direction] , toleranceQ[ OptionValue[Tolerance] ] ]
 ]
+
+stepsQ[ steps_Integer?(#>0&) ] := True
+stepsQ[ steps_ ] := (Message[isometricTrajectory::steps]; False)
+
+toleranceQ[ tol_?(NumericQ[#]&&#>=0&) ] := True
+toleranceQ[ tol_ ] := (Message[isometricTrajectory::tol]; False)
+
+positionsQ[ m_ , positions_ ] := If[ numericCoordinatesQ[m,positions], True, Message[isometricTrajectory::pos,positions]; False]
+displacementsQ[ m_ , positions_ ] := If[ numericCoordinatesQ[m,positions], True, Message[isometricTrajectory::disp,positions]; False]
 
 
 isometricTrajectory::steps="Number of steps is not a positive integer.";
-stepNumberQ[ num_Integer?(#>0&) ] := True
-stepNumberQ[ num_ ] := ( Message[ isometricTrajectory::steps]; False )
-
-isometricTrajectory::dir="Initial direction is not numerical.";
-isometricTrajectory::dir2="Initial direction is not a valid set of vertex displacements.";
-directionQ[ m_, v_ ] := True /; numericCoordinatesQ[m, v]
-directionQ[ m_, v_ ] := Which[
-	vertexCoordinatesQ[m, v],
-		Message[ isometricTrajectory::dir2 ]; False,
-	True,
-		Message[ isometricTrajectory::dir ]; False
-]
-
-isometricTrajectory::pos="Initial positions are not numerical or are not compatible with mechanism.";
-isometricTrajectory::pos2="Initial positions are not a valid set of vertex positions.";
-positionsQ[ m_, v_ ] := True /; numericCoordinatesQ[m, v]
-positionsQ[ m_, v_ ] := Which[
-	vertexCoordinatesQ[m, v],
-		Message[ isometricTrajectory::pos2 ]; False,
-	True,
-		Message[ isometricTrajectory::pos ]; False
-]
-
-isometricTrajectory::stepsize="Option \"stepsize\" should be a positive, real number.";
-stepsizeQ[ num_?(#>0&) ] := True
-stepsizeQ[ num_ ] := (Message[ isometricTrajectory::stepsize ]; False)
-
-isometricTrajectory::compile="Option \"compile\" should be a Boolean indicating if the constraints should be precompiled or compiled energy.";
-compileQ[ x_?BooleanQ ] := True
-compileQ[ x_?compiledMechanismEnergyQ ] := True
-compileQ[ _ ] := (Message[isometricTrajectory::compile]; False)
+isometricTrajectory::tol = "Tolerance should be a positive real number.";
+isometricTrajectory::stepsize = "Stepsize should be a function of positions or a positive real number.";
+isometricTrajectory::pos = "Initial positions `1` should be numerical and correspond to mechanism..";
+isometricTrajectory::disp = "Initial displacements `1` should be numerical and correspond to mechanism..";
 
 
-isometricTrajectoryStepperInternal[m_, {initialPositions_,initialDirection_},{steps_,stepsize_},{energy_,constraintVec_},{method_,tolerance_,stepOptions_}]:=
-Module[{energyTemp,out},
-With[{
-	variables=Flatten[vertexDisplacement[m]],
-	blankPositions=Flatten[vertexPosition[m]],
-	positions=Flatten[initialPositions],
-	initialDirectionNormalized=Normalize[Flatten[initialDirection]],
+isometricTrajectoryInternal[ m_, initialPositions_, direction_, {steps_, stepsize_, tolerance_}, {method_ , methodSpec___} , options_ ] :=
+With[
+{
+	minimizationOptions = FilterRules[ {methodSpec}, Options[FindMinimum] ],
+	nullspaceOptions = FilterRules[ {methodSpec}, Options[NullSpace] ],
 
-	(*figure out the constraints we want to use at 1st order and at infinite order*)
-	firstOrderConstraints=Join[
-		constraintEquationsInternal[ m, vertexPosition[m], 1, _, None, vertexDisplacement ],
-		reduceConstraintToOrder[vertexPosition[m],constraintVec,1]
-		],
-
-	fullConstraints=Join[
-		constraintEquationsInternal[ m, initialPositions, Infinity, _, None, vertexPosition ],
-		constraintVec
-		]
-	},
-
-	With[
-	{
-
-	(*this function will find the numerical 1st order constraint matrix*)
-	constraintMatFunction=(CoefficientArrays[firstOrderConstraints/.Dispatch[Thread[blankPositions->#]],variables][[2]]&),
-
-	(*figure out the energy we want to use*)
-	constraintEnergy=Which[
-		energy===False, fullConstraints . fullConstraints,
-		energy===True, compiledMechanismEnergy[{},
-			compileEnergy[m,fullConstraints . fullConstraints,{},$compilationTarget],
-			compileGradient[m,fullConstraints . fullConstraints,{},$compilationTarget]],
-		True, energy (*user may be passing an energy*)
-		]
+	normalizedDirection = direction/Sqrt[Flatten[direction] . Flatten[direction] ],
+	
+	constraintMatrixFunc = constraintMatrixFunction[ m , FilterRules[ options, Options[constraintMatrixFunction] ]],
+	energyFunc = mechanismEnergy[m , initialPositions , FilterRules[ options, Options[mechanismEnergy] ] ]
 },
-
-	ArrayReshape[#,{Length[#],MeshCellCount[m,0],embeddingDimension[m]}]&[ 
+	DeleteCases[
 		FoldList[
-			(*take one step*)
-			(
-			energyTemp=evaluateEnergy[m, #1[[1]], constraintEnergy];
-			isometricTrajectoryStep[
-				{method,stepsize,tolerance},
-				m,
-				#1, (*the latest position and step direction*)
-				{constraintMatFunction[#1[[1]]],constraintEnergy}, (* {the matrix of linear constraints, an energy associated with the constraints} *)
-				variables,
-				stepOptions]
-			)&,
-			{positions,initialDirectionNormalized},
-		Range[steps]
-		][[All,1]]
+			isometricTrajectoryStep[ {method, stepsize, tolerance}, m, #1, #2, { Quiet[constraintMatrixFunc @@ Flatten[#1[[1]]]] , nullspaceOptions}, {energyFunc , minimizationOptions} ] &,
+			{initialPositions,normalizedDirection},
+			Range[steps]
+		][[All,1]],
+		$Failed
 	]
-]]]
+]
 
 
-isometricTrajectoryStep[{"Minimization",stepsize_,tolerance_},m_,{positions_,lastDirection_},{constraintMat_,constraintEnergy_},var_,stepOptions_]:=
-Module[{
-	nullspaceBasis=Orthogonalize[NullSpace[constraintMat,FilterRules[stepOptions,Options[NullSpace]]]],
-	newDirection,
-	trialStep , test
+isometricTrajectoryStep[ _,_,{$Failed, _},_,_]:={$Failed, $Failed}
+
+
+isometricTrajectoryStep[ {None, stepsize_,tolerance_},m_,{positions_,lastDirection_}, n_, {constraintMat_, nullspaceOptions_}, {constraintEnergy_, minimizationOptions_} ] :=
+Module[
+{
+	newDirection = projectTrialDirection[positions, lastDirection, constraintMat, nullspaceOptions ]
 },
-	newDirection=If[Length[nullspaceBasis]>0,
-		Normalize[Transpose[nullspaceBasis] . nullspaceBasis . lastDirection],
-
-		Message[isometricTrajectory::dirns,positions];
-		ConstantArray[0,Length[positions]]
-	];
-	trialStep=positions+ stepsize newDirection;
-
 	{
-	If[ evaluateEnergy[m, trialStep, constraintEnergy] > tolerance,
-		Flatten[
-			minimizeEnergyInternal[m, constraintEnergy, Partition[positions+stepsize newDirection,embeddingDimension[m]], FilterRules[stepOptions, Options[FindMinimum]]][[2]]
+		computeTrialPosition[ positions, newDirection, stepsize, n ],
+		newDirection
+	}
+]
+
+isometricTrajectoryStep[ {"Minimization", stepsize_, tolerance_} , m_, {positions_, lastDirection_}, n_, {constraintMat_, nullspaceOptions_}, {constraintEnergy_, minimizationOptions_} ] :=
+Module[
+{
+	newDirection = projectTrialDirection[ positions, lastDirection, constraintMat, nullspaceOptions ],
+	trialPosition
+},
+	trialPosition = computeTrialPosition[ positions, newDirection, stepsize, n ];
+	{
+		If[ evaluateEnergy[m, trialPosition, constraintEnergy] > tolerance,
+			correctTrialPosition[m, trialPosition, constraintEnergy, minimizationOptions],
+			trialPosition
 		],
-		trialStep
-	],
-	newDirection
+		newDirection
 	}
 ]
 
-isometricTrajectoryStep[{"RandomWalk",stepsize_,tolerance_},m_,{positions_,lastDirection_},{constraintMat_,constraintEnergy_},var_,stepOptions_]:=
-Module[{
-nullspaceBasis=Orthogonalize[NullSpace[constraintMat,FilterRules[stepOptions,Options[NullSpace]]]],
-newDirection,trialStep
+isometricTrajectoryStep[ {"RandomWalk", stepsize_, tolerance_} , m_, {positions_, lastDirection_}, n_, {constraintMat_, nullspaceOptions_}, {constraintEnergy_, minimizationOptions_} ] :=
+Module[
+{
+	newDirection = projectTrialDirection[ positions, randomDisplacements[m,positions], constraintMat, nullspaceOptions ],
+	trialPosition
 },
-	newDirection=If[Length[nullspaceBasis]>0,
-		Normalize[RandomReal[{-stepsize,stepsize},Length[nullspaceBasis]] . nullspaceBasis],
-
-		Message[isometricTrajectory::dirns,positions];
-		ConstantArray[0,Length[positions]]
-	];
-	trialStep=positions+ stepsize newDirection;
+	trialPosition = computeTrialPosition[ positions, newDirection, stepsize, n ];
 	{
-	If[ evaluateEnergy[m, trialStep, constraintEnergy] > tolerance,
-		Flatten[minimizeEnergyInternal[m,constraintEnergy, Partition[positions+stepsize newDirection,embeddingDimension[m]], FilterRules[stepOptions,Options[FindMinimum]]][[2]]],
-		trialStep
-	],
-	newDirection
+		If[ evaluateEnergy[m, newDirection, constraintEnergy] > tolerance,
+			correctTrialPosition[m, trialPosition, constraintEnergy, minimizationOptions],
+			trialPosition
+		],
+		newDirection
 	}
 ]
 
-isometricTrajectoryStep[{None,stepsize_,tolerance_},m_,{positions_,lastDirection_},{constraintMat_,constraintEnergy_},var_,stepOptions_]:=
-Module[{
-	nullspaceBasis=Orthogonalize[NullSpace[constraintMat,FilterRules[stepOptions,Options[NullSpace]]]],
-	newDirection
-},
-	newDirection=If[Length[nullspaceBasis]>0,
-		Normalize[Transpose[nullspaceBasis] . nullspaceBasis . lastDirection],
 
-		Message[isometricTrajectory::dirns,positions];
-		ConstantArray[0,Length[positions]]
-	];
-	{positions+stepsize newDirection,newDirection}
+(* returns a normalized displacement tangent to the configuration space and as close to trialDirection as possible *)
+projectTrialDirection[ positions_ , trialDirection_, constraintMat_ , nullspaceOptions_ ] :=
+With[ {
+nullspaceBasis = Orthogonalize[ NullSpace[constraintMat, nullspaceOptions ] ]
+},
+	If[ Length[nullspaceBasis] > 0,
+		ArrayReshape[
+			Normalize[Transpose[nullspaceBasis] . nullspaceBasis . Flatten[trialDirection]],
+			Dimensions[positions]
+		],
+
+		Message[isometricTrajectory::dirns , positions];
+		ConstantArray[ 0, Dimensions[positions] ]
+	]
 ]
+
+isometricTrajectory::dirns="Cannot identify tangent space at `1`.";
+
+
+(* find a new set of positions from a trial step *)
+computeTrialPosition[ positions_ , trialStep_ , stepsize_?NumericQ, n_ ] := 
+		If[ stepsize >= 0,
+			positions + stepsize trialStep,
+
+			Message[ isometricTrajectory::stepsize ];
+			$Failed
+		]
+
+computeTrialPosition[ positions_ , trialStep_ , stepsize_, n_ ] :=
+With[ { actualSize = stepsize[positions,n] },
+	If[ NumericQ[ actualSize ] && actualSize >= 0,
+		positions + actualSize trialStep,
+
+		Message[ isometricTrajectory::stepsize ];
+		$Failed
+	]
+]
+
+
+correctTrialPosition[ m_, trialPosition_ , constraintEnergy_, minimizationOptions_ ]:=
+	minimizeEnergyInternal[m, constraintEnergy, trialPosition, minimizationOptions][[2]]
 
 
 Options[findMinimalTrajectory]={
@@ -4711,6 +5084,10 @@ StyleBox[\"origami\",\nFontSlant->\"Italic\"]\)] returns True if it can be deter
 Use option ZeroTest to modify how the function tests for zero. Use option WorkingPrecision to set a number of digits for the test.";
 
 
+targetFoldAngles::usage="targetFoldAngles[m,(positions), (data)] returns an association containing a list of folds, their corresponding target angles, and their actual angles.
+Optional argument data is a string that is either \"folds\", \"angles\", \"target\".";
+
+
 foldMatrix::usage=
 "foldMatrix[\!\(\*
 StyleBox[\"origami\",\nFontSlant->\"Italic\"]\)] returns the fold matrix mapping linear vertex displacements to linear fold angle changes.";
@@ -4724,7 +5101,9 @@ StyleBox[\"vertex\",\nFontSlant->\"Italic\"]\)] returns the angular fold matrix 
 
 toOrigami::usage=
 "toOrigami[ \!\(\*
-StyleBox[\"object\",\nFontSlant->\"Italic\"]\) ] converts an object to an origami mechanism. Effectively this only works for some MeshRegion[] or framework[] objects.";
+StyleBox[\"object\",\nFontSlant->\"Italic\"]\) ] converts an object to an origami mechanism. Effectively, this only works for some MeshRegion[] or framework[] objects.";
+
+elasticizeOrigami::usage="elasticizeOrigami[ o ] attempts to create an elastic model of an origami structure.";
 
 
 singleVertex::usage=
@@ -4747,9 +5126,6 @@ miuraOri::usage=
 "miuraOri[ {length1, length2}, \!\(\*
 StyleBox[\"angle\",\nFontSlant->\"Italic\"]\) ] returns a Miura ori unit cell at a particular angle and face lengths.";
 
-addFold::usage="addFold[ m, edge ] creates an edge across a face.";
-subdivideFaces::usage="subdivideFaces[m] subdivides all the faces of a mechanism until all faces are triangles.";
-
 
 flatOrigamiQ::usage=
 "flatOrigamiQ[ \!\(\*
@@ -4757,8 +5133,8 @@ StyleBox[\"origami\",\nFontSlant->\"Italic\"]\) ] returns True if the origami me
 Use option ZeroTest to specify how to test for zero. Use option WorkingPrecision to choose the precision.";
 
 
-yoshimuraOrigami::usage=
-"yoshimuraOrigami[{\!\(\*
+kresling::usage=
+"kresling[{\!\(\*
 StyleBox[\"#\",\nFontSlant->\"Italic\"]\)\!\(\*
 StyleBox[\" \",\nFontSlant->\"Italic\"]\)\!\(\*
 StyleBox[\"azimuthal\",\nFontSlant->\"Italic\"]\)\!\(\*
@@ -4774,7 +5150,7 @@ StyleBox[\" \",\nFontSlant->\"Italic\"]\)\!\(\*
 StyleBox[\"scale\",\nFontSlant->\"Italic\"]\), \!\(\*
 StyleBox[\"height\",\nFontSlant->\"Italic\"]\)\!\(\*
 StyleBox[\" \",\nFontSlant->\"Italic\"]\)\!\(\*
-StyleBox[\"ratio\",\nFontSlant->\"Italic\"]\)] creates a Yoshimura fold pattern of a particular radius, height, and integer twist if specified.";
+StyleBox[\"ratio\",\nFontSlant->\"Italic\"]\)] creates a Kresling fold pattern of a particular radius, height, and integer twist if specified.";
 
 
 MVAssignment::usage = "MVAssignment[ o (, positions), tolerance_ (, assignmentFunction)] returns a list of rules assigning a value to mountain or valley folds up to the value of tolerance.
@@ -4796,6 +5172,12 @@ Option \"edgeWeights\" allows the assignment of positive weights that allow some
 Option \"defaultWeight\" is the default weight on all edges.";
 
 extrudedPolygon::usage="extrudedPolygon[coords, extrusion vector, (translation vector)] takes a Polygon and creates a 3D version.";
+
+
+origamiData::usage="origamiData[ origami ] returns an Assocation of data for various origami structures. Use origamiData[] to see what is available.";
+
+
+MVColor::usage="MVColor[ origami, data, styleFunction] attempts to color data according to styles specified by styleFunction.";
 
 
 Begin["`Private`"];
@@ -4853,107 +5235,78 @@ precisionQ[ prec_ ] := Which[
 toOrigami[_]:="nothing" /; Message[toOrigami::notsurface]
 
 
-Options[singleVertex]=Join[
-	Options[origami],
-	{
-	"angles"->None,
-	"torsionalStiffnesses"->None
-	}
-];
+Options[singleVertex]=Options[origami];
 
 
-sectorAnglesQ[ an : {__?NumericQ} ] := If[Chop[Total[an]]==2 Pi,True, Message[singleVertex::gc]; False ];
-sectorAnglesQ[ an_?VectorQ ] := (Message[singleVertex::sa]; False)
-
-singleVertex::gc = "The sum of sector angles must be 2 Pi.";
-singleVertex::sa = "Argument must be a list of sector angles summing to 2 Pi or list of boundary vertices.";
-
-
-lengthsQ[ s_, l : {__?NumericQ} ] := Which[
-	AnyTrue[ l, # <= 0& ], Message[singleVertex::l]; False, 
-	Length[l]!= Length[s], Message[singleVertex::lsa]; False,
-	True, True
+singleVertexQ[ angles_, lengths_ ] := With[{
+	deficitAngle = 2 Pi - Total[angles]
+},
+	And[
+		If[ VectorQ[ angles, NumericQ ] && AllTrue[ angles, #>0 & ], True, Message[singleVertex::sa]; False ],
+		If[ Chop[deficitAngle] == 0, True, Message[singleVertex::da]; False ],
+		If[ VectorQ[ lengths, NumericQ ] && AllTrue[ lengths, #>0 & ], True, Message[singleVertex::sl]; False],
+		If[Length[angles] == Length[lengths] , True , Message[singleVertex::sl]; False ]
+	]
+]
+singleVertexQ[ angles_ ] := With[{
+	deficitAngle = 2 Pi - Total[angles]
+},
+	And[
+		If[ VectorQ[ angles, NumericQ ] && AllTrue[ angles, #>0 & ], True, Message[singleVertex::sa]; False ],
+		If[ Chop[deficitAngle] == 0, True, Message[singleVertex::da]; False ]
+	]
 ]
 
-singleVertex::l = "Lengths must be positive numbers.";
-singleVertex::lsa="There must be as many lengths as sector angles.";
+singleVertex::sa="Sector angles must be positive real numbers.";
+singleVertex::da="Sum of sector angles must be 2 Pi.";
+singleVertex::sl="Lengths must be positive real numbers.";
+singleVertex::n="You must have the same number of sector angles and lengths.";
 
 
-stiffnessesQ[ sectorAngles_ , angles_?VectorQ, stiffnesses_?VectorQ ] :=
-	Which[
-		Length[sectorAngles] !=  Length[angles], Message[singleVertex::folds, Length[sectorAngles] ]; False,
-		Length[sectorAngles] != Length[stiffnesses], Message[singleVertex::folds]; False,
-		AnyTrue[stiffnesses, #<0 &], Message[singleVertex::stiffnesses]; False,
-		True, True
-	]
-stiffnessesQ[ sectorAngles_ , angles_?VectorQ, None ] :=
-	Which[
-		Length[sectorAngles] !=  Length[angles], Message[singleVertex::folds, Length[sectorAngles] ]; False,
-		True, True
-	]
-stiffnessesQ[ sectorAngles_ , None, stiffnesses_?VectorQ ] :=
-	Which[
-		Length[sectorAngles] != Length[stiffnesses], Message[singleVertex::folds]; False,
-		AnyTrue[stiffnesses, #<0 &], Message[singleVertex::stiffnesses]; False,
-		True, True
-	]
-stiffnessesQ[ sectorAngles_, None, None ] := True
-stiffnessesQ[ _,_,_] := (Message[singleVertex::stiffnesses]; False)
-
-singleVertex::folds="The number of equilibrium angles and stiffnesses must be `1`.";
-singleVertex::stiffnesses="Torsional stiffnesses of the folds must be positive real numbers.";
-singleVertex::stiffnesses="Equilibrium angles and torsional stiffnesses should either be None or a list of appropriate numbers.";
-
-
-modifyAngles[ foldIndices_, None ] := ConstantArray["angle" -> Automatic, Length[foldIndices] ]
-modifyAngles[ foldIndices_, angles_ ] := ("angle" -> # &) /@ Mod[angles,2 Pi, - Pi ]
-modifyStiffnesses[ foldIndices_, None ] := ConstantArray["torsionalStiffness"-> 0, Length[foldIndices] ]
-modifyStiffnesses[ foldIndices_, s_ ] := ("torsionalStiffness"-> # &) /@ s
-
-createFolds[ foldIndices_, an_, stiffnesses_ ] :=
-	MapThread[ Property[ fold[#1],  Flatten[{#2,#3}] ]&, 
+singleVertex[ pts_?vertexCoordinatesQ, opt : OptionsPattern[] ] :=
+With[{
+	num = Length[pts],
+	dim = Length[pts[[1]]]
+},
+	origami[
+		pts,
 		{
-		foldIndices,
-		modifyAngles[foldIndices, an], 
-		modifyStiffnesses[foldIndices,stiffnesses]
-		} 
+			joint[0 -> ConstantArray[0, dim]],
+			face[ {#[[1]],#[[2]],num+1}& /@ Partition[Range[num],2,1,1] ]
+		},
+		opt
 	]
+]
 
-
-singleVertex[ vertices : _?numericCoordinatesQ, opt : OptionsPattern[] ] :=
-With[{faceSpec = Range[Length[vertices]]},
-	deleteCells[
-		addCells[{
-			createFolds[ {"0",#}&/@faceSpec, OptionValue["angles"],OptionValue["torsionalStiffnesses"] ],
-			freeJoint["0"]
-		}] @ addVertex[faceSpec, "0" -> PadRight[{0,0},Length[vertices[[1]]]] ] @  origami[ vertices, {face[faceSpec]}],
-		Point[_]
+singleVertex[ sectorAngles_, opt : OptionsPattern[] ] :=
+With[{
+	angles = Accumulate[sectorAngles] - ConstantArray[sectorAngles[[1]],Length[sectorAngles]],
+	num = Length[sectorAngles]
+},
+	origami[
+		Map[ {Cos[#],Sin[#]}& , angles ],
+		{
+			joint[0-> {0,0}],
+			face[ {#[[1]],#[[2]],num+1}& /@ Partition[Range[num],2,1,1] ]
+		},
+		opt
 	]
-] /; stiffnessesQ[ vertices, OptionValue["angles"], OptionValue["torsionalStiffnesses"] ]
-singleVertex[ vertices : _?MatrixQ, opt : OptionsPattern[] ]:="nothing" /; Message[singleVertex::sa]
+] /; singleVertexQ[sectorAngles ]
 
-singleVertex[ angles_?sectorAnglesQ , opt : OptionsPattern[] ] :=
-With[ { faceSpec = Range[Length[angles]], vertices =  {Cos[#],Sin[#]}& /@ Accumulate[angles]},
-	deleteCells[
-		addCells[{
-			createFolds[ {"0",#}&/@faceSpec, OptionValue["angles"],OptionValue["torsionalStiffnesses"] ],
-			freeJoint["0"]
-			}] @ addVertex[faceSpec, "0" -> {0,0} ] @  origami[ vertices, {face[faceSpec]}],
-		Point[_]
+singleVertex[ sectorAngles_, lengths_, opt : OptionsPattern[] ] :=
+With[{
+	angles = Accumulate[sectorAngles] - ConstantArray[sectorAngles[[1]],Length[sectorAngles]],
+	num = Length[sectorAngles]
+},
+	origami[
+		MapThread[ #1 {Cos[#2],Sin[#2]}& , {lengths, angles} ] ,
+		{
+			joint[0 -> {0,0}],
+			face[ {#[[1]],#[[2]],num+1}& /@ Partition[Range[num],2,1,1] ]
+		},
+		opt
 	]
-] /; stiffnessesQ[ angles, OptionValue["angles"], OptionValue["torsionalStiffnesses"] ]
-
-singleVertex[ angles_?sectorAnglesQ , lengths_, opt : OptionsPattern[] ] :=
-With[ { faceSpec = Range[Length[angles]], vertices =  MapThread[#2 {Cos[#1],Sin[#1]}&, {Accumulate[angles],lengths}]},
-	deleteCells[
-		addCells[{
-			createFolds[ {"0",#}&/@faceSpec, OptionValue["angles"],OptionValue["torsionalStiffnesses"] ],
-			freeJoint["0"]
-			}] @ addVertex[faceSpec, "0" -> {0,0} ] @  origami[ vertices, {face[faceSpec]}],
-		Point[_]
-	]
-
-] /; stiffnessesQ[ angles, OptionValue["angles"], OptionValue["torsionalStiffnesses"] ] && lengthsQ[angles,lengths]
+] /; singleVertexQ[sectorAngles , lengths ]
 
 
 Options[miuraOri]={ "triangulate"->False };
@@ -4975,8 +5328,8 @@ Module[{ m },With[
 	m = origami[coordinates,face/@faces];
 	tesselateMechanism[
 		If[ OptionValue["triangulate"], 
-			addCells[{fold[{1,3}],fold[{1,6}]}] @ addFold[{1,3}] @ addFold[{1,6}] @ m, 
-			addLabel[{1->"back",2->"front",3->"top-front",4->"top-back",5->"bottom-back",6->"bottom-front"}] @ m
+			addCells[{fold[{{1,3},{1,6}},{"passive","shape"->None}]}] @ divideFace[{{1,3},{1,6}}] @ m, 
+			m
 		],
 		{{1/2,0,0},{0,1,0}},
 		{2,1}
@@ -4992,11 +5345,11 @@ miuraOri::angle = "Angle must be a numeric value between 0 and \[Pi].";
 miuraOri::t = "Option \"triangulate\" should be a boolean variable.";
 
 
-Options[yoshimuraOrigami]=Options[origami];
+Options[kresling]=Options[origami];
 
 
-yoshimuraOrigami[{numTriangles_Integer,numHeight_Integer,twist_Integer:0},opt:OptionsPattern[]]:=yoshimuraOrigami[{numTriangles,numHeight,twist},1,1,opt]
-yoshimuraOrigami[{numTriangles_Integer,numHeight_Integer,twist_Integer:0},radius_?NumericQ,heightScale_?NumericQ,opt:OptionsPattern[]]:=Module[{i},
+kresling[{numTriangles_Integer,numHeight_Integer,twist_Integer:0},opt:OptionsPattern[]]:=kresling[{numTriangles,numHeight,twist},1,1,opt]
+kresling[{numTriangles_Integer,numHeight_Integer,twist_Integer:0},radius_?NumericQ,heightScale_?NumericQ,opt:OptionsPattern[]]:=Module[{i},
 With[
 {
 height=heightScale Sqrt[2 (Cos[Pi/numTriangles]-Cos[2 Pi/numTriangles])]
@@ -5048,11 +5401,13 @@ firstMesh = randomMesh[ numberOfVertices, OptionValue[Precision], OptionValue["b
 },
 	(
 	meshTry = toOrigami[ firstMesh , Precision -> OptionValue[Precision] ];
+
 	While[ Not @ validrandomOrigamiQ[ numberOfVertices, meshTry, OptionValue["minimumFolds"], Length[OptionValue["boundary"]] ] && ctr <= OptionValue[MaxIterations],
 		meshTry = toOrigami[ randomMesh[ numberOfVertices, OptionValue[Precision], OptionValue["boundary"] ], Precision -> OptionValue[Precision] ]; ctr++
 	];
+
 	If[ ctr > OptionValue[MaxIterations], Message[randomOrigami::max, ctr - 1] ];
-	
+
 	origami[ meshTry, FilterRules[{opt}, Options[origami]] ]
 	) /; MeshRegionQ[firstMesh]
 
@@ -5076,7 +5431,8 @@ randomOrigamiMaxIterationsQ[ f_ ] := (Message[randomOrigami::miter, f]; False)
 
 
 (* get a Delaunay triangulation from a set of random points *)
-randomMesh[numberOfVertices_Integer?(#>0&), precision : _?(NumericQ[#] && #>0&)|Automatic|MachinePrecision, boundary_?(MatrixQ[#,NumericQ]&)]:=Module[{points},
+randomMesh[numberOfVertices_Integer?(#>0&), precision : _?(NumericQ[#] && #>0&)|Automatic|MachinePrecision, boundary_?(MatrixQ[#,NumericQ]&)]:=
+Module[{points},
 	points=Join[
 		boundary,
 		Select[
@@ -5102,49 +5458,110 @@ randomMesh[ numberOfVertices_, precision_, boundary_ ] := "nothing" /; (
 )
 
 
-addFold[ {v1_,v2_} ][ m_?mechanismQ ] := mapCells[ splitFace[#, {v1,v2}]& ] @ m
-addFold[ m_?mechanismQ, {v1_,v2_} ] := mapCells[ splitFace[#, {v1,v2}]&, m ]
-
-splitFace[ cell: {head_, {v1_,l___, v2_}, data_, display_}, {v1_Integer, v2_Integer} ] := cell
-splitFace[ { head_, { l1___, v1_, l2__, v2_, l3___} , data_, display_}, {v1_Integer, v2_Integer} ] :=
-	Sequence[
-		{head, {v1,l2,v2},data, display},
-		{head, {v2, l3, l1, v1}, data, display},
-		{rigidBar, {v1,v2}, {},{}}
+origami[ "RandlettBird" ] := origami[ {"RandlettBird"} ]
+origami[{"RandlettBird", s_String : "unfolded coordinates"}] := 
+With[{ data = origamiData[ "RandlettBird" ] },
+	origami[
+		data[s],
+		{
+		rigidBar[ data["face folds"] , "shape" -> None],
+		face[ data["faces"] ],
+		MapThread[ fold[#1, {"angle"->#2,"active"}]&, {data["folds"], data["jihwan"]}],
+		fold[ data["face folds"] , {"passive", "angle" -> 0}]
+		}
 	]
-splitFace[ { head_, { l1___, v1_, l2__, v2_, l3___} , data_, display_}, {v2_Integer, v1_Integer} ] :=
-	Sequence[
-		{head, {v1,l2,v2},data, display},
-		{head, {v2, l3, l1, v1}, data, display},
-		{rigidBar, {v2,v1}, {},{}}
+]
+
+
+origamiData[] := {"RandlettBird"};
+
+origamiData[ "RandlettBird" ] := Association[
+	"folds"->{{16,2},{2,15},{15,16},{20,15},{3,12},{12,13},{3,7},{7,12},{3,6},{6,7},{5,6},{4,11},{11,21},{4,10},{10,11},{10,17},{17,11},{15,17},{17,16},{1,17},{9,18},{16,9},{14,10},{19,14},{9,6},{8,7},{9,8},{14,12},{8,14},{8,17}},
+	"boundary"->{{1,20},{20,2},{2,18},{18,5},{5,3},{3,13},{13,19},{19,4},{4,21},{21,1}},
+	"face folds"->{{1,11},{1,15},{6,8},{6,18},{8,12},{9,17},{10,19},{12,19},{14,17},{16,18}},
+	"faces"->{{15,20,1},{1,17,15},{11,17,1},{1,21,11},{18,2,16},{16,9,18},{16,2,15},{15,2,20},{13,3,12},{12,3,7},{7,3,6},{6,3,5},{21,4,11},{11,4,10},{10,4,19},{19,14,10},{6,5,18},{18,9,6},{8,7,6},{6,9,8},{12,7,8},{8,14,12},{14,8,17},{17,10,14},{17,8,9},{9,16,17},{11,10,17},{19,13,12},{12,14,19},{16,15,17}},
+	"face fold lengths"->{0.7913396176795269`,0.7908518374761098`,0.4256202239155842`,0.41820627040046277`,0.4256214113580315`,0.3661853242047003`,0.5778591613439372`,0.4182055804484132`,0.36642731880122054`,0.5778622627981455`},
+	"fold lengths"->{0.6668302449309317`,0.7905987902232614`,0.2635292648903121`,0.5900528686107307`,0.2260243957445146`,0.10234385548891164`,0.19243997335732346`,0.07476947912792758`,0.2260251237847865`,0.07476836902333805`,0.10234618221503516`,0.7899358777822478`,0.5900530310922064`,0.6668278565928233`,0.26292795741175695`,0.33331002589557746`,0.35349728907839567`,0.3531715279617028`,0.33294017146420657`,1.0001365746515256`,0.3495350708976718`,0.2902649617356811`,0.2902613044683481`,0.3495354877728568`,0.5373516043568678`,0.44156905689970305`,0.25766229600206336`,0.5373541657262233`,0.25766207233991933`,0.3657613109073552`},
+	"boundary lengths"->{0.2350773277983888`,1.1792012718458462`,0.8061889965405188`,0.42175777675288983`,0.18620179179423596`,0.18620363078624286`,0.4217559689391429`,0.8061889535079899`,1.178492447495307`,0.2355242761556322`},
+	"unfolded coordinates" -> N@{{0,0,0},{1.414278593427568`,-0.00012107343015166361`,0},{1.4142678318232762`,1.4140274916158289`,0},{0.00011927863201000033`,1.414016642177331`,0},{1.4142692917736754`,1.227825699827347`,0},{1.3131744350755659`,1.211870419723824`,0},{1.2781932400501788`,1.2779508631318839`,0},{0.9659583817161155`,0.9657127724823382`,0},{1.0728360008415996`,0.7312622802432727`,0},{0.47189742974276605`,0.9427579377876374`,0},{0.353962452288944`,0.7077633593785156`,0},{1.2121120814828474`,1.312933079920714`,0},{1.2280642010424148`,1.4140260798657769`,0},{0.731505784488571`,1.0725852346780647`,0},{0.7073110670506855`,0.3537763181270138`,0},{0.9430090748133337`,0.47164965094818173`,0},{0.7074588006059522`,0.7069478151898358`,0},{1.4142724979918373`,0.8060679230868013`,0},{0.8063082321157269`,1.4140228586178498`,0},{0.23507732779834628`,1.1102230246251565`*^-16,0},{0.0001931022705954355`,0.2355241969949885`,0}},
+	"folded coordinates"->{{0.5216212272644043`,0.0041301921010017395`,-0.5215774178504944`},{-0.6376347541809082`,0.4420289695262909`,-0.16293174028396606`},{-0.435793399810791`,-0.10257021337747574`,0.4356272220611572`},{0.16264325380325317`,0.442157119512558`,0.6371942758560181`},{-0.4927003085613251`,0.07479492574930191`,0.4173307418823242`},{-0.4104839861392975`,0.11236074566841125`,0.36908411979675293`},{-0.4352164566516876`,0.0874059870839119`,0.43510642647743225`},{-0.22010493278503418`,-0.2338118851184845`,0.22003494203090668`},{-0.13188940286636353`,-0.15577159821987152`,-0.008406173437833786`},{0.11944180727005005`,0.1096508726477623`,0.06939235329627991`},{0.047771066427230835`,-0.13527639210224152`,0.09195645153522491`},{-0.3691454231739044`,0.11233522742986679`,0.410442054271698`},{-0.4174804091453552`,0.07477816939353943`,0.49260756373405457`},{0.00845295935869217`,-0.15610502660274506`,0.13212451338768005`},{-0.09123314917087555`,-0.13514138758182526`,-0.04728326201438904`},{-0.06939570605754852`,0.11028251051902771`,-0.11917997896671295`},{-0.18727263808250427`,0.1310577541589737`,0.1871875524520874`},{-0.41846323013305664`,-0.254423052072525`,0.16566649079322815`},{-0.1659073531627655`,-0.25454390048980713`,0.4185855984687805`},{0.3550601601600647`,-0.1361958533525467`,-0.4324187636375427`},{0.43267032504081726`,-0.13634231686592102`,-0.35442548990249634`}},
+	"jihwan" -> {-((13 \[Pi])/15),(143 \[Pi])/180,-((17 \[Pi])/30),(41 \[Pi])/60,(139 \[Pi])/180,-((149 \[Pi])/180),-((107 \[Pi])/180),-((149 \[Pi])/180),(139 \[Pi])/180,-((149 \[Pi])/180),-((149 \[Pi])/180),(143 \[Pi])/180,(41 \[Pi])/60,-((13 \[Pi])/15),-((17 \[Pi])/30),-((13 \[Pi])/15),(43 \[Pi])/60,(43 \[Pi])/60,-((13 \[Pi])/15),-((79 \[Pi])/180),\[Pi],(157 \[Pi])/180,(157 \[Pi])/180,\[Pi],-((23 \[Pi])/30),(107 \[Pi])/180,(34 \[Pi])/45,-((23 \[Pi])/30),(34 \[Pi])/45,-((91 \[Pi])/180)}
+]
+
+
+origami["WaterBombBase"] := singleVertex[ ConstantArray[2 Pi/8,8] ,Flatten[ {1,Sqrt[2]} & /@ Range[4]]  ]
+
+
+elasticizeOrigami[ m_origami ] := Module[
+{
+	bars = cellData[m, _rigidBar],
+	faces = cellData[m,_face],
+	folds = cellData[m,_fold],
+	possibleFolds = interiorEdges[m],
+	skippedFolds
+},
+	addCells[ 
+		deleteCells[ 
+			Join[ 
+				If[Length[bars]>0, Thread[bars[[1,1]]] , {}] , 
+				If[Length[faces]>0, Thread[faces[[1,1]] ], {} ]
+			] 
+		] @ m,
+
+		{
+		If[ Length[faces]>0, elasticFace /@ faces[[1,1,1]] , {} ],
+		If[ Length[folds]>0,
+			skippedFolds = Complement[ Sort/@possibleFolds, Sort/@folds[[1,1,1]]];
+			If[Length[skippedFolds]>0, fold[ skippedFolds , {"torsionalStiffness" -> 0}], {} ],
+			fold[possibleFolds,{"torsionalStiffness" -> 0}]
+		]
+		}
+	] /; facesWorkQ[ faces ]
+]
+
+facesWorkQ[ {} ] := True
+facesWorkQ[ {face[ indices_ ] -> data_ } ] := AllTrue[ {MatrixQ[indices], Last[Dimensions[indices]] == 3}, TrueQ ]
+facesWorkQ[ _ ] := False
+
+elasticizeOrigami[ m_origami ] := "nothing" /; Message[elasticizeOrigami::faces];
+elasticizeOrigami::faces="Faces must be triangles to elasticize this origami.";
+
+
+targetFoldAngles[ m_origami ]:=With[ {res=targetFoldAngles[m,m["positions"]]}, res /; Head[res] =!= targetFoldAngles]
+targetFoldAngles[ m_origami , s_String]:=With[ {res=targetFoldAngles[m,m["positions"],s]}, res /; Head[res] =!= targetFoldAngles]
+
+targetFoldAngles[ m_origami, pos_ ] := 
+With[{ data=cellData[m,_fold]},
+	If[Length[data]>0,
+		Association[
+			"folds" -> data[[1,1,1]],
+			"target" -> data[[1,2]]["angle"],
+			"actual" -> foldAngle[m, pos, data[[1,1,1]]]
+		],
+		Association["folds"->{},"target"->{},"actual"->{}]
 	]
-splitFace[ cell_, {v1_Integer, v2_Integer} ] := cell
+] /; numericCoordinatesQ[m,pos]
 
+targetFoldAngles[ m_origami, pos_ ,"folds"] := 
+With[{ data=cellData[m,_fold]},
+	If[Length[data]>0,data[[1,1,1]],{}]
+] /; numericCoordinatesQ[m,pos]
 
-ClearAll[polygonDiagonals];
-polygonDiagonals[ vertices_ ] := With[ {guesses = Tuples[ Range[Length[vertices]], 2 ], l = Length[vertices]},
-	DeleteDuplicatesBy[ Map[ vertices[[#]]&, Select[ guesses, Between[ Abs[ #[[1]] - #[[2]] ],  {2, Length[vertices]-2} ] & ], {2} ], Sort]
-]
+targetFoldAngles[ m_origami, pos_ , "target"] := 
+With[{ data=cellData[m,_fold]},
+	If[Length[data]>0,data[[1,2]]["angle"],{}]
+] /; numericCoordinatesQ[m,pos]
 
-findShortestDiagonal[ coordinates_, vertices : {__Integer} ] :=
-With[ {diagonals = polygonDiagonals[ vertices ]},
-	MinimalBy[ Transpose[ { diagonals , displacementLength[ coordinates, diagonals ] } ] , Last ][[1,1]]
-]
+targetFoldAngles[ m_origami, pos_ , "actual"] := 
+With[{ data=cellData[m,_fold]},
+	If[Length[data]>0,foldAngle[m, pos, data[[1,1,1]]],{}]
+] /; numericCoordinatesQ[m,pos]
 
-ClearAll[addFoldToFace];
-addFoldToFace[ coordinates_, dataNew_, displayNew_, { face , indices_, data_, display_ } ] :=
-Sequence @@ With[ {shortestDiagonal = findShortestDiagonal[ coordinates, indices ]},
-	{
-		splitFace[ {face, indices, data, display} , shortestDiagonal ],
-		{ fold, shortestDiagonal, dataNew, displayNew }
-	}
-] /; Length[indices] > 3
-addFoldToFace[ coordinates_, data_, display_, cell_ ] := cell
+targetFoldAngles::data = "Data is not one of \"folds\", \"actual\", \"target\"";
+targetFoldAngles::pos = "Positions are not numeric or do not correspond to mechanism.";
 
-Options[subdivideFaces] = {"display" -> {}, "data"-> {"angle" -> 0 , "torsionalStiffness" -> Infinity }};
-subdivideFaces[ m_?mechanismQ, OptionsPattern[] ] := With[ {coordinates = m["positions"], data = OptionValue["data"], display = OptionValue["display"]},
-	FixedPoint[ mapCells[ addFoldToFace[ coordinates, data, display , # ]&, # ] &, m ]
-]
+targetFoldAngles[m_origami, pos_, s_] := "nothing"/;Message[targetFoldAngles::data]
+targetFoldAngles[m_origami, pos_, "folds"|"target"|"actual"] := "nothing"/;Message[targetFoldAngles::pos]
 
 
 Options[flatOrigamiQ]={
@@ -5353,8 +5770,8 @@ butterflyDecompositionStep[ {facepair_, o_origami} ] := Module[
 	faces = connectivity[ o, "vertices" -> "faces"][[ boundary ]];
 	possibleButterflies = Select[ Transpose[ {boundary, faces} ], Length[Last[#]] == 2 & ];
 	If[Length[possibleButterflies]>0,
-		butterfly = RandomChoice[possibleButterflies]; 
-		{ butterfly[[2]], deleteCells[o, Alternatives@@( face /@ butterfly[[2]] ) ] },
+		butterfly = RandomChoice[possibleButterflies];
+		{ butterfly[[2]], deleteCells[o, Alternatives@@( face /@ butterfly[[2]] ) ]  },
 
 		{facepair, o}
 	]
@@ -5385,7 +5802,7 @@ Module[
 	folds = Property[ fold[#], {"angle" -> 0} ]& /@ interiorEdges[m],
 	selfflatteningOrigami, res
 },
-	selfflatteningOrigami = addCells[ deleteCells[ _joint ] @ deleteCells[ _fold ] @ m, folds];
+	selfflatteningOrigami = addCells[ folds ] @ deleteCells[ _pinnedJoint ] @ deleteCells[ _fold ] @ m;
 
 	res = minimizeEnergy[ selfflatteningOrigami, MaxIterations -> 10^6 ];
 	If[ Head[res]===List, res, {Infinity, m["positions"]} ]
@@ -5460,71 +5877,19 @@ MVdefaultColor[-1] := Blue
 MVdefaultColor[0] := Black
 
 
+MVColor[m_origami, s_String, colorFunction_Function ]:= Module[ {data=targetFoldAngles[m],styles},
+	(
+	styles=colorFunction/@data[s];
+	changeCellData[m, rigidBar,data["folds"],"style" -> styles]
+	) /; If[ MemberQ[ Keys[data], s], True, Message[MVColor::s,s,Keys[data]]; False]
+]
+
+MVColor::s="`1` is not a valid string of type `2`.";
+
+
 SurfaceArea[o_origami, r___] ^:= SurfaceArea[ o["mesh"], r ]
 RegionMeasure[o_origami, r___] ^:= RegionMeasure[ o["mesh"], r ]
 RegionMoment[o_origami, r___] ^:= RegionMoment[ o["mesh"], r ]
-
-
-(*texture[] := { "WhitePaper", "GrayPaper", "WrinkledPaper" };
-
-$dataDirectory=FileNameJoin[{(First@PacletFind["Mechanisms"])["Location"],"Resources","Textures"}];
-
-texture["WrinkledPaper"] := texture["WrinkledPaper"] = Texture @ Normal[Import[FileNameJoin[{$dataDirectory,"crinkled-paper.jpg"}]]]
-texture["WhitePaper"] := texture["WhitePaper"] = Texture @ Normal[Import[FileNameJoin[{$dataDirectory,"white-paper.jpg"}]]]
-texture["GrayPaper"] := texture["GrayPaper"] = Texture @ Normal[Import[FileNameJoin[{$dataDirectory,"blue-paper.jpeg"}]]]
-
-texture::bad="Unrecognized texture `1`.";
-texture[s_] := "nothing" /; Message[texture::bad, s]*)
-
-
-(*Options[ plotOrigami ] = { "folds" \[Rule] None,  "face" \[Rule] "WrinkledPaper", "thickness" \[Rule] 0.003 };
-
-plotOrigami[ m_origami, opt : OptionsPattern[] ] := plotOrigami[ m, m["positions"], opt ]
-plotOrigami[ m_origami, pos_?(MatrixQ[#,NumericQ]&), OptionsPattern[] ] :=
-Module[
-{
-	faces, positions ,
-	folds = interiorEdges[m],
-	boundary = Flatten[ boundaryEdges[m] , 1 ],
-	d = displayDimension[m],
-	positionMap
-},
-	positions = PadRight[ pos, {Length[pos], d} ];
-	positionMap = Dispatch[ Thread[ Range[ Length[pos] ] \[Rule] positions ] ];
-	faces = toGraphics[ m, positions, 2, VertexTextureCoordinates \[Rule] positions ];
-
-	Show[
-		If[d\[Equal]2, Graphics, Graphics3D ] /@
-		{
-			{
-			Check[ If[StringQ[ OptionValue["face"] ], texture[OptionValue["face"]] , OptionValue["face"] ] , Nothing ],
-			faces
-			},
-		
-			Flatten @ { Thickness[ 2 OptionValue["thickness"] ], Black, Line /@ (boundary /. positionMap) },
-			Check[
-				MapThread[ Flatten[{ #1, Thickness[ OptionValue["thickness"] ],  Line[#2] }] & , { foldStyleGraphics[ folds, OptionValue["folds"] ],  (folds /. positionMap)} ],
-				Nothing
-			]
-		},
-		Boxed\[Rule]False, BoxRatios\[Rule]{1,1,1}, Lighting\[Rule]"Neutral"
-	]
-] /; lineThicknessQ[ OptionValue["thickness"] ] && checkVertexNumberQ[ m["VertexNumber"] \[Equal] Length[pos] ]
-
-plotOrigami::vert = "Number of vertices does not match number of vertex positions provided.";
-checkVertexNumberQ[ b_?BooleanQ ] := (If[ Not[b], Message[plotOrigami::vert] ]; b)
-
-plotOrigami::thick = "Line thickness, `1`, should be a positive real number.";
-lineThicknessQ[ t_?(NumericQ[#] && #>0 &) ] := True
-lineThicknessQ[ t_ ] := (Message[plotOrigami::thick, t]; False)
-
-plotOrigami::folds = "Folds should be of the form {{v1,v2}, ... } -> { style1, ... }.";
-foldStyleGraphics[ allFolds_, None ] := ConstantArray[ Black, Length[allFolds] ]
-foldStyleGraphics[ allFolds_, {folds_?MatrixQ \[Rule] style_List} ] := foldStyleGraphics[ allFolds, folds \[Rule] style ]
-foldStyleGraphics[ allFolds_, folds_?(MatrixQ[#,IntegerQ]&) \[Rule] style_List ] := With[ { rules = Dispatch @ Thread[ (Sort /@ folds) \[Rule] style ] },
-	(Sort/@allFolds) /. rules /. {_Integer, _Integer} \[Rule] Black
-] /; Last[Dimensions[ folds ]] \[Equal] 2 && Length[folds] \[Equal] Length[style]
-foldStyleGraphics[ _ , _ ] := (Message[plotOrigami::folds]; $Failed)*)
 
 
 Options[deconstructedPlot]={
@@ -5576,35 +5941,6 @@ Module[{n=Length[pts], v2, future, past, futureEdge, edge, pastEdge},
 ]
 
 
-scalePolygon[coords_ , shrinkBy_ ]:=
-With[
-{
-	center = ConstantArray[Mean[coords],Length[coords]]
-},
-	center + Clip[1-shrinkBy,{0,1}] (coords-center)
-]
-
-
-extrudedPolygon[Polygon[rawCoords_], extrusionVector_, translationVector_:{0,0,0}] := extrudedPolygon[ rawCoords, extrusionVector, translationVector ]
-
-extrudedPolygon[rawCoords_, extrusionVector_, translationVector_:{0,0,0} ]:=
-	extrudedPolygon[PadRight[rawCoords,{Length[rawCoords],3}],extrusionVector,translationVector] /; MatrixQ[rawCoords] && Dimensions[rawCoords][[2]] == 2
-
-extrudedPolygon[rawCoords_, extrusionVector : {_?NumericQ, _?NumericQ, _?NumericQ} , translationVector: {_?NumericQ, _?NumericQ, _?NumericQ} :{0,0,0} ] :=
-With[{coords = rawCoords + ConstantArray[translationVector,Length[rawCoords]]},
-With[{ extrudedCoords = coords + ConstantArray[extrusionVector , Length[coords]] },
-	Polyhedron @ Join[
-		{
-		coords
-		},
-		MapThread[Join[#1,Reverse[#2]]&,{Partition[coords,2,1,1],Partition[extrudedCoords,2,1,1]}],
-		{
-		Reverse @ extrudedCoords
-		}
-	]
-]] /; MatrixQ[rawCoords] && Dimensions[rawCoords][[2]] == 3
-
-
 End[];
 
 EndPackage[];
@@ -5625,10 +5961,10 @@ toGraphicsComplex::usage = "toGraphicsComplex[ m, (positions) ] returns a Graphi
 
 pinnedJointShape::usage="pinnedJointShape[] is a triangular pinned joint in 2D.";
 springShape::usage="springShape[] represents a spring shape function with a particular thickness and number of jags.";
-jointShape::usage="jointShape[] represents a joint shape distinguishing pinned joints from free joints.";
+pinnedJointShape::usage="jointShape[] represents a joint shape distinguishing pinned joints from free joints.";
 chromoElasticShape::usage="chromoElasticShape[]";
 rigidBarShape::usage="rigidBarShape[] represents the shape of a rigidBar";
-freeJointShape::usage="freeJointShape[] represents the shape of a freeJoint.";
+jointShape::usage="jointShape[] represents the shape of a free joint.";
 faceShape::usage="faceShape[]";
 
 
@@ -5638,7 +5974,9 @@ plotMechanism[mechanism, {positions 1, positions 2,...}] creates a list of plott
 
 
 texture::usage="texture[ s ] returns a texture having the name s. Use texture[] to see examples.";
-plotOrigami::usage = "plotOrigami[ o ] plots an origami.";
+
+
+$themes = "List of recognized graphics themes.";
 
 
 Begin["`Private`"];
@@ -5649,48 +5987,43 @@ Needs["mechanisms`rigidity`"];
 Needs["mechanisms`origami`"];
 
 
-(*what should the default primitive be for our plotting functions?*)
-
-defaultGraphicsPrimitive[rigidBar|Line, framework] := rigidBarShape[]
-defaultGraphicsPrimitive[rigidBar|Line, origami] := rigidBarShape["width"->0.015]
-defaultGraphicsPrimitive[spring, _] :=springShape[]
-defaultGraphicsPrimitive[joint, framework] := jointShape[]
-defaultGraphicsPrimitive[joint, origami] := jointShape["diameter"->0.03]
-defaultGraphicsPrimitive[face,_] := faceShape["thickness"->0.01]
-defaultGraphicsPrimitive[Polygon,_][x_,_,_] := Polygon[x]
-defaultGraphicsPrimitive[_,_][ x_, _, _ ] := {}
+defaultGraphicsPrimitive[rigidBar|Line , framework , Automatic] := rigidBarShape[]
+defaultGraphicsPrimitive[joint , framework , Automatic] := freeJointShape[]
+defaultGraphicsPrimitive[pinnedJoint , framework , Automatic] := pinnedJointShape[]
 
 
-(*find the user specified graphics elements we may want to deal with*)
-specifiedGraphicsElements[ m_, spec_ ] := With[ {mesh = m["mesh"], components = cellData[m,spec] },
-	MapThread[ {#1[[1]],Join[#1[[2]],#2]}& , {components, getProperties[ mesh, # ]& /@ components } ]
-]
+defaultGraphicsPrimitive[rigidBar|Line , origami , Automatic] := (Line[#]&)
+defaultGraphicsPrimitive[joint , origami , Automatic] := (Point[#]&)
+defaultGraphicsPrimitive[pinnedJoint , origami , Automatic] := (Point[#]&)
+defaultGraphicsPrimitive[fold, origami, Automatic] := (Line[#]&)
 
-getProperties[ mr_, {cellSpec : joint, association_} ] := 
-With[ {indices = association["indices"]},
-	Association[
-	"style" -> PropertyValue[ {mr, Point[indices]} , MeshCellStyle ],
-	"shape" -> PropertyValue[ {mr, Point[indices]} , MeshCellShapeFunction ],
-	"label" -> PropertyValue[ {mr, Point[indices]} , MeshCellLabel ]
-	]
-]
+defaultGraphicsStyle[ fold, origami, Automatic ] := {Black}
 
-getProperties[ mr_, {cellSpec : rigidBar|spring, association_} ] := 
-With[ {indices = association["indices"]},
-	Association[
-	"style" -> PropertyValue[ {mr, Line[indices]} , MeshCellStyle ],
-	"shape" -> PropertyValue[ {mr, Line[indices]} , MeshCellShapeFunction ],
-	"label" -> PropertyValue[ {mr, Line[indices]} , MeshCellLabel ]
-	]
-]
-getProperties[ mr_, {cellSpec : face, association_} ] := 
-With[ {indices = association["indices"]},
-	Association[
-	"style" -> PropertyValue[ {mr, Polygon[indices]} , MeshCellStyle ],
-	"shape" -> PropertyValue[ {mr, Polygon[indices]} , MeshCellShapeFunction ],
-	"label" -> PropertyValue[ {mr, Polygon[indices]} , MeshCellLabel ]
-	]
-]
+
+defaultGraphicsPrimitive[face | elasticFace, origami, "thick"] := faceShape["thickness"->0.01]
+defaultGraphicsPrimitive[face | elasticFace, origami, "thick"[thickness_] ] := faceShape["thickness" -> thickness]
+
+
+defaultGraphicsPrimitive[face, _ , Automatic] := faceShape[]
+defaultGraphicsPrimitive[elasticFace, _ , Automatic] := faceShape["thickness"->0.01]
+defaultGraphicsPrimitive[Polygon , _ , Automatic] := (Polygon[#]&)
+defaultGraphicsPrimitive[spring , _ , Automatic] := springShape[]
+
+defaultGraphicsPrimitive[_ , _ , _ ] := None
+
+
+defaultGraphicsPrimitive[ rigidBar|spring|Line, _, "minimal" ] := (Line[#]&)
+defaultGraphicsPrimitive[ joint|pinnedJoint|Point, _, "minimal" ] := (Point[#]&)
+defaultGraphicsPrimitive[ face|elasticFace|Polygon, _, "minimal" ] := (Polygon[#]&)
+
+
+defaultGraphicsStyle[ rigidBar , _ , Automatic] := {Black}
+defaultGraphicsStyle[ joint , _ , Automatic] := {Black}
+defaultGraphicsStyle[ pinnedJoint , _ , Automatic] := {Black}
+defaultGraphicsStyle[ face , _ , Automatic] := {GrayLevel[0.85]}
+defaultGraphicsStyle[ elasticFace , _ , Automatic] := {RGBColor[{0.85,0.85,0.95}]}
+defaultGraphicsStyle[ spring , _ , Automatic] := {}
+defaultGraphicsStyle[ _ , _ , _] := {}
 
 
 dimension[ position_?MatrixQ ] := Length[position[[1]]]
@@ -5742,20 +6075,31 @@ mechanism::notflat = "Cannot project a fully 3D mechanism into 2D.";
 mechanism::vn = "Number of vertices `1` does not agree with number of vertex positions.";
 
 
-mechanismPrimitives[ m_?mechanismQ, dimension : 2|3|Automatic : Automatic ] :=With[
+$themes={Automatic , "minimal", "thick"};
+
+themesQ[m_, Automatic] := Automatic
+themesQ[m_,theme_ ] /; Length[theme]==0 := If[ Not@MemberQ[ $themes, theme ], Message[mechanismPrimitives::theme, theme]; Automatic , theme]
+themesQ[m_, theme_ ] := If[ Not@MemberQ[ $themes, Head[theme] ], Message[mechanismPrimitives::theme, theme]; Automatic , theme]
+
+mechanismPrimitives::theme="`1` is not a valid theme.";
+
+
+Options[mechanismPrimitives] = {"theme"->Automatic};
+
+mechanismPrimitives[ m_?mechanismQ, dimension : 2|3|Automatic : Automatic , OptionsPattern[]] :=With[
 {pos=positionDimension[m, Automatic, dimension]},
-	mechanismPrimitivesInternal[ m, pos ] /; pos =!= $Failed
+	mechanismPrimitivesInternal[ m, pos, m["positions"] , themesQ[m,OptionValue["theme"]] ] /; pos =!= $Failed
 ]
-mechanismPrimitives[ m_?mechanismQ, positions_?numericCoordinatesQ, dimension : 2|3|Automatic : Automatic ] :=With[
+mechanismPrimitives[ m_?mechanismQ, positions_?numericCoordinatesQ, dimension : 2|3|Automatic : Automatic , OptionsPattern[]] :=With[
 { pos=positionDimension[m, positions, dimension]},
-	mechanismPrimitivesInternal[ m, pos] /; pos =!= $Failed
+	mechanismPrimitivesInternal[ m, pos, positions, themesQ[m,OptionValue["theme"]] ] /; pos =!= $Failed
 ]
 
-mechanismPrimitives[ m_?mechanismQ, positions_?numericCoordinatesQ, dimension : 2|3|Automatic : Automatic ] :=
+mechanismPrimitives[ m_?mechanismQ, positions_?numericCoordinatesQ, dimension : 2|3|Automatic : Automatic , OptionsPattern[]] :=
 	"nothing" /; Message[mechanismPrimitives::coord, Length[positions], m["VertexNumber"]]
-mechanismPrimitives[ m_?mechanismQ, positions_?numericCoordinatesQ, dimension_ ] :=
+mechanismPrimitives[ m_?mechanismQ, positions_?numericCoordinatesQ, dimension_ , OptionsPattern[]] :=
 	"nothing" /; Message[mechanismPrimitives::dim]
-mechanismPrimitives[ m_?mechanismQ, positions_?vertexCoordinatesQ, dimension : 2|3|Automatic : Automatic ] :=
+mechanismPrimitives[ m_?mechanismQ, positions_?vertexCoordinatesQ, dimension : 2|3|Automatic : Automatic , OptionsPattern[]] :=
 	"nothing" /; Message[mechanismPrimitives::num]
 
 
@@ -5764,17 +6108,18 @@ mechanismPrimitives::dim = "Number of dimensions requested is not 2, 3, or Autom
 mechanismPrimitives::num = "Vertices should be numeric.";
 
 
-mechanismPrimitivesInternal[ m_, positions_ ] :=
-	Transpose[mechanismPrimitivesFromComponent[ m, positions, # ]& /@ sortComponentsForGraphics[componentData[m,"display",_]] ]
+mechanismPrimitivesInternal[ m_, positions_ , actualPositions_, theme_] :=
+	Transpose[
+		mechanismPrimitivesFromComponent[ m, positions, # , theme]& /@ sortComponentsForGraphics[ cellData[ m, actualPositions, _ ] ]
+	]
 
-mechanismPrimitivesFromComponent[ m_, positions_, Rule[head_[ indices_ ], styleDirectives_ ] ] :=
+mechanismPrimitivesFromComponent[ m_, positions_, Rule[head_[ indices_ ], display_ ] , theme_] :=
 With[ {
 	coordinates = N[positions[[ # ]] & /@ indices], 
-	primitive = getPrim[head], 
-	data = getData[m, positions, head, indices],
-	labels = styleDirectives[[All,2]],
-	shapes = styleDirectives[[All,3]] /. {Automatic -> defaultGraphicsPrimitive[head, Head[m]], None -> ({}&) },
-	style = styleDirectives[[All,1]]
+	data = Transpose[ Join[{ConstantArray[ m["EmbeddingDimension"] , Length[indices]]}, Drop[Values[ display ],-3]] ],
+	style = mechanisms`Private`combineDataList[ defaultGraphicsStyle[head, Head[m], theme] ,display["style"]],
+	labels = display["label"],
+	shapes = display["shape"] /. {Automatic -> defaultGraphicsPrimitive[head, Head[m], theme]} /. { None -> ({}&) }
 },
 	{
 		MapThread[applyFunction ,
@@ -5806,37 +6151,32 @@ applyLabel[ coordinates_, _, Text[lab_, coord_, other___] ] := Text[ lab, coord 
 applyFunction[ None, coordinates_, primitive_, data_, style_ ] := {}
 applyFunction[ shapeFunction_, coordinates_, primitive_, data_, style_ ] := Flatten[ {style, shapeFunction[coordinates,primitive,data]} ]
 
-getPrim[rigidBar|spring|fold|Line]:=Line
-getPrim[joint|Point]:=Point
-getPrim[face|Polygon]:=Polygon
-getPrim[_]:={}
 
-getData[m_, positions_, face, indices_] := ConstantArray[{embeddingDimension[m],0},Length[indices]]
-getData[m_, positions_, head_, indices_ ] :=
-	Transpose[
-		Join[
-			{ ConstantArray[embeddingDimension[m],Length[indices]] }, 
-			cellData[ m , {head, All} ]/@ mechanisms`Private`dataForm[head]
-		]
-	]
-getData[m_, positions_, angleJoint , indices_] := ConstantArray[{embeddingDimension[m],0},Length[indices]]
+sortComponentsForGraphics[ components_ ]:=
+	SortBy[DeleteCases[
+		{ graphicsOrder[Head[#[[1]]]] , # }& /@ components,
+		{3,_}
+	],First][[All,2]]
 
-
-sortComponentsForGraphics[ components_ ]:=SortBy[ components, graphicsOrder[Head[#[[1]]]]&]
-graphicsOrder[ joint|Point ]:=2
-graphicsOrder[ rigidBar|spring ]:=1
-graphicsOrder[ face|Polygon ]:=0
+graphicsOrder[ pinnedJoint|joint|Point ]:=2
+graphicsOrder[ rigidBar|spring|Line|fold ]:=1
+graphicsOrder[ face|elasticFace|Polygon ]:=0
 graphicsOrder[ _ ]:=3
 
 
-Options[toGraphicsComplex] = Options[GraphicsComplex];
+Options[toGraphicsComplex] = Join[Options[GraphicsComplex], {"theme"->Automatic}];
 
 toGraphicsComplex[ m_?mechanismQ, dimension : 2|3|Automatic : Automatic, opt : OptionsPattern[] ] :=
-With[ {res=toGraphicsComplexInternal[ m, positionDimension[m, Automatic, dimension], dimension, {opt} ]},
+With[ {
+res=toGraphicsComplexInternal[ m, positionDimension[m, Automatic, dimension], m["positions"],
+	dimension, OptionValue["theme"], FilterRules[{opt},Options[GraphicsComplex]] ]
+},
 	res /; res =!= $Failed
 ]
 toGraphicsComplex[ m_?mechanismQ, positions_?vertexCoordinatesQ, dimension : 2|3|Automatic : Automatic, opt : OptionsPattern[] ] :=
-With[ {res = toGraphicsComplexInternal[ m, positionDimension[m, positions, dimension], dimension, {opt} ]},
+With[ {res = toGraphicsComplexInternal[ m, positionDimension[m, positions, dimension], positions, 
+	dimension, OptionValue["theme"],FilterRules[{opt},Options[GraphicsComplex]] ]
+},
 	res /; res =!= $Failed
  ] /; Length[positions] == m["VertexNumber"]
 
@@ -5858,9 +6198,9 @@ DeleteDuplicates[
 ]
 
 
-toGraphicsComplexInternal[ m_, positions_, dimension_, options_ ] :=
+toGraphicsComplexInternal[ m_, positions_, actualPositions_, dimension_, theme_, options_ ] :=
 Module[ {prims, modifiedPrimitives, coordinates, coordinateRules, x},
-	prims = mechanismPrimitivesInternal[m , positions ] /. canonicalizePrimitiveRules;
+	prims = mechanismPrimitivesInternal[m , positions, actualPositions , themesQ[m,theme] ] /. canonicalizePrimitiveRules;
 
 	If[ Head[prims] === mechanismPrimitives,
 		$Failed,
@@ -5876,7 +6216,7 @@ Module[ {prims, modifiedPrimitives, coordinates, coordinateRules, x},
 		GraphicsComplex[
 			coordinates,
 			modifiedPrimitives,
-			Flatten[{options,VertexTextureCoordinates -> coordinates}]
+			Flatten[{ options,VertexTextureCoordinates -> coordinates}]
 		]
 	]
 ]
@@ -5890,14 +6230,16 @@ plotAccessQ=_Line|_Point|_Polygon;
 
 Options[rigidBarShape] = 
 {
-	"width" -> 0.01,
+	"width" -> 0.03,
 	"aspectRatio" -> 0.5,
 	"thickness" -> 0.025,
 	"startShift" -> 0,
-	"endShift" -> 0
+	"endShift" -> 0,
+	"heightOffset" -> 0
 };
 
 
+(*embedded in 2D*)
 rigidBarShape[ opt : OptionsPattern[] ][ { x : coordinate2D, y : coordinate2D}, _ , _rigidBar|_Line ] := 
 With[{length = Norm[y-x], width = OptionValue["width"]},
 	TranslationTransform[x] /@ RotationTransform[{{1,0},y-x}] /@ {
@@ -5914,11 +6256,11 @@ rigidBarShape[ opt : OptionsPattern[] ][ { x : coordinate3D, y : coordinate3D} ,
 
 (*embedded in 2D, plotted in 3D*)
 rigidBarShape[ opt : OptionsPattern[] ][ { x : coordinate3D, y : coordinate3D}, {2,___}, _rigidBar ] :=
-With[{ length = Norm[ y-x ], width = OptionValue["width"], shift1 = OptionValue["startShift"], shift2=OptionValue["endShift"], thickness = OptionValue["thickness"] },
+With[{ length = Norm[ y-x ], width = OptionValue["width"], shift1 = OptionValue["startShift"], shift2=OptionValue["endShift"], thickness = OptionValue["thickness"], off=OptionValue["heightOffset"] },
 	{
 	EdgeForm[None],
 	TranslationTransform[ x ][RotationTransform[{{1.,0.,0.}, y-x }][
-		Cuboid[ {shift1*length,-width/2.,-thickness/2.}, {(1.-shift2)*length, width/2., thickness/2.} ]
+		Cuboid[ {shift1*length,-width/2.,-thickness/2.+off}, {(1.-shift2)*length, width/2., thickness/2.+off} ]
 	]]
 	}
 ]
@@ -5926,7 +6268,7 @@ With[{ length = Norm[ y-x ], width = OptionValue["width"], shift1 = OptionValue[
 
 Options[freeJointShape] = 
 {
-	"diameter" -> 0.01,
+	"diameter" -> 0.025,
 	"thickness" -> 0.026
 };
 
@@ -5948,9 +6290,9 @@ With[ {sphereRadius = OptionValue["diameter"]/2}, Sphere[ x, sphereRadius] ]
 
 Options[pinnedJointShape] =
 {
-	"diameter" -> 0.02,
+	"diameter" -> 0.05,
 	"angle" -> 0,
-	"thickness" -> 0.026
+	"thickness" -> 0.027
 };
 
 
@@ -5969,7 +6311,7 @@ With[{circleRadius = OptionValue["diameter"]/5, x = pt[[1]], y = pt[[2]], angle 
 ]
 
 
-pinnedJointShape[OptionsPattern[]][x : coordinate3D, {2,___}, _joint ] :=
+pinnedJointShape[OptionsPattern[]][x : coordinate3D, {2,___}, _joint|_pinnedJoint ] :=
 With[{circleRadius = OptionValue["diameter"] + 0.02 , thickness = OptionValue["thickness"]},
 	{
 	EdgeForm[None],
@@ -5978,7 +6320,7 @@ With[{circleRadius = OptionValue["diameter"] + 0.02 , thickness = OptionValue["t
 	}
 ]
 
-pinnedJointShape[OptionsPattern[]][pt : coordinate3D, {3,___}, _joint ]:= Sphere[pt,OptionValue["diameter"]/2]
+pinnedJointShape[OptionsPattern[]][pt : coordinate3D, {3,___},  _joint|_pinnedJoint ]:= Sphere[pt,OptionValue["diameter"]/2]
 pinnedJointShape[OptionsPattern[]][pt : coordinate3D, _ , _Point ]:= Sphere[pt,OptionValue["diameter"]/2]
 
 
@@ -5989,14 +6331,14 @@ Options[jointShape] =
 	"thickness" -> 0.026
 };
 
+jointShape[ opt : OptionsPattern[] ][ x : coordinate2D, a : {_, Infinity, ___ } , b : _joint|_pinnedJoint ] := pinnedJointShape[ FilterRules[{opt},Options[pinnedJointShape]] ][x,a,b]
+jointShape[ opt : OptionsPattern[] ][ x : coordinate3D, a : {_, Infinity, ___ } , b : _joint|_pinnedJoint ] := pinnedJointShape[ FilterRules[{opt},Options[pinnedJointShape]] ][x,a,b]
+
+jointShape[ opt : OptionsPattern[] ][ x : coordinate2D, a : {_, ___ } , b : _joint|_pinnedJoint ] := freeJointShape[ FilterRules[{opt},Options[freeJointShape]] ][x,a,b]
+jointShape[ opt : OptionsPattern[] ][ x : coordinate3D, a : {_, ___ } , b : _joint|_pinnedJoint ] := freeJointShape[ FilterRules[{opt},Options[freeJointShape]] ][x,a,b]
+
 jointShape[ opt : OptionsPattern[] ][ x : coordinate2D, a_, b_Point ] := freeJointShape[ FilterRules[{opt},Options[freeJointShape]] ][x,a,b]
 jointShape[ opt : OptionsPattern[] ][ x : coordinate3D, a_, b_Point ] := freeJointShape[ FilterRules[{opt},Options[freeJointShape]] ][x,a,b]
-
-jointShape[ opt : OptionsPattern[] ][ x : coordinate2D, a : {_, Infinity, ___ } , b : _joint ] := pinnedJointShape[ FilterRules[{opt},Options[pinnedJointShape]] ][x,a,b]
-jointShape[ opt : OptionsPattern[] ][ x : coordinate3D, a : {_, Infinity, ___ } , b : _joint ] := pinnedJointShape[ FilterRules[{opt},Options[pinnedJointShape]] ][x,a,b]
-
-jointShape[ opt : OptionsPattern[] ][ x : coordinate2D, a : {_, _, ___ } , b : _joint ] := freeJointShape[ FilterRules[{opt},Options[freeJointShape]] ][x,a,b]
-jointShape[ opt : OptionsPattern[] ][ x : coordinate3D, a : {_, _, ___ } , b : _joint ] := freeJointShape[ FilterRules[{opt},Options[freeJointShape]] ][x,a,b]
 
 
 Options[springShape] =
@@ -6116,7 +6458,7 @@ Options[faceShape] = {
 
 faceShape[ OptionsPattern[] ][ x : {coordinate2D..}, _, _ ] := Polygon[ x ]
 
-faceShape[ OptionsPattern[] ][ x : {coordinate3D..}, {2|3, ___ } , _face ] := 
+faceShape[ OptionsPattern[] ][ x : {coordinate3D..}, {2|3, ___ } , _face|_elasticFace ] := 
 	If[ OptionValue["thickness"] == 0,
 		Polygon[ x ],
 		extrudedPolygon[{-OptionValue["thickness"], OptionValue["thickness"]}][x]
@@ -6166,7 +6508,7 @@ splineCircle[m_List, r_, angles_List: {0., 2. \[Pi]}] :=
     pts = Join[
        Take[{{1., 0.}, {1., 1.}, {0., 1.}, {-1., 1.}, {-1., 0.}, {-1., -1.}, {0., -1.}}, 2 seg + 1],
        {{cseg - sseg t\[Phi], sseg + cseg t\[Phi]}, {cseg c\[Phi] - sseg s\[Phi], c\[Phi] sseg + cseg s\[Phi]}}
-       ].{{rcs, rss}, {-rss, rcs}}
+       ] . {{rcs, rss}, {-rss, rcs}}
     ];
    pts = ConstantArray[m, Length[pts]] + 
      If[Length[m] == 2, 
@@ -6185,7 +6527,7 @@ Options[circleFromPoints] = {arc -> False};
 circleFromPoints[m : {q1_, q2_, q3_}, OptionsPattern[]] :=
 Module[{c, r, \[Phi]1, \[Phi]2, p1, p2, p3, h, 
         rot = Quiet[RotationMatrix[{{0, 0, 1}, Cross[#1 - #2, #3 - #2]}],RotationMatrix::spln] &},
-  {p1, p2, p3} = {q1, q2, q3}.rot[q1, q2, q3];
+  {p1, p2, p3} = {q1, q2, q3} . rot[q1, q2, q3];
   h = p1[[3]];
   {p1, p2, p3} = {p1, p2, p3}[[All, ;; 2]];
   {c, r} = List @@ Circumsphere[{p1, p2, p3}];
@@ -6193,8 +6535,8 @@ Module[{c, r, \[Phi]1, \[Phi]2, p1, p2, p3, h,
   \[Phi]2 = ArcTan @@ (p1 - c);
   c = Append[c, h];
   If[OptionValue[arc] // TrueQ,
-    MapAt[Function[{p}, rot[q1, q2, q3].p] /@ # &, splineCircle[c, r, {\[Phi]1, \[Phi]2}], {1}],
-    MapAt[Function[{p}, rot[q1, q2, q3].p] /@ # &, splineCircle[c, r], {1}]
+    MapAt[Function[{p}, rot[q1, q2, q3] . p] /@ # &, splineCircle[c, r, {\[Phi]1, \[Phi]2}], {1}],
+    MapAt[Function[{p}, rot[q1, q2, q3] . p] /@ # &, splineCircle[c, r], {1}]
   ]
 ] /; MatrixQ[m, NumericQ] && Dimensions[m] == {3, 3}
 
@@ -6218,12 +6560,20 @@ angleMarker[m_?mechanismQ, {v1_Integer,v2_Integer,v3_Integer},_,_?NumericQ]:="no
 Options[plotMechanism] = Join[
 	Options[Graphics3D],
 	{
+		"theme" -> Automatic,
 		"displacement" -> None,
+
 		"stress" -> None,
-		"stressStyle" -> {{Red , AbsoluteThickness[4]}, {Blue , AbsoluteThickness[4]} },
+		"stressStyle" -> {
+			{RGBColor[{#2,0,0}] , AbsoluteThickness[1+3*#2] , Line[#]}&,
+			{RGBColor[{0,0,-#2}] , AbsoluteThickness[1+3*(-#2)] ,Line[#]}&
+		},
+
 		"displacementStyle" -> {Black},
 		"displacementScale" -> 0.25,
-		"displayDimension" -> Automatic
+
+		"displayDimension" -> Automatic,
+		"preamble"->{}
 	}
 ];
 
@@ -6234,41 +6584,29 @@ plotMechanism[ m_?mechanismQ, opt : OptionsPattern[] ] :=
 		opt
 	]
 
-plotMechanism[ m_?mechanismQ, positions : _?numericCoordinatesQ, opt : OptionsPattern[] ] := 
+plotMechanism[ m_?mechanismQ, positions : _?numericCoordinatesQ|{__?numericCoordinatesQ}, opt : OptionsPattern[] ] := 
 Module[ { 
 (*organize all the coordinates into proper form*)
-coordinates = positionDimension[ m , {positions} , OptionValue["displayDimension"] ] , 
+coordinates = If[ ArrayDepth[positions] == 2,
+	positionDimension[ m , {positions} , OptionValue["displayDimension"] ],
+	positionDimension[ m , positions , OptionValue["displayDimension"] ]
+] , 
 graphics, dimension, directive, options, stresses, displacements
 }, 
 	graphics = createMechanismGraphics[m, coordinates, Length[ coordinates[[1,1]] ], {opt} ];
-	directive = graphicsDirective[ m, graphics ];
-	options = graphicsOptions[ {opt}, directive, boundingRegions[m, graphics] ];
+	directive = graphicsDirective[ m, graphics, Length[coordinates[[1,1]]] ];
+	options = graphicsOptions[ {opt}, directive, boundingRegions[m, coordinates] ];
 
 	stresses = createStressGraphics[ listEdges[m], coordinates, {OptionValue["stress"]}, OptionValue["stressStyle"] ];
 	displacements = createDisplacementGraphics[ coordinates, {OptionValue["displacement"]}, OptionValue["displacementScale"], OptionValue["displacementStyle"] ];
 	
-	First@MapThread[ directive[ {#1, #2, #3}, options ]&, {graphics, stresses, displacements} ]
-]
-
-plotMechanism[ m_?mechanismQ, positions : {__?numericCoordinatesQ}, opt : OptionsPattern[] ] :=
-Module[ { 
-(*organize all the coordinates into proper form*)
-coordinates = positionDimension[ m , positions , OptionValue["displayDimension"] ] , 
-graphics, dimension, directive, options, stresses, displacements
-}, 
-	graphics = createMechanismGraphics[m, coordinates, Length[ coordinates[[1,1]] ], {opt} ];
-	directive = graphicsDirective[ m, graphics ];
-	options = graphicsOptions[ {opt}, directive, boundingRegions[m, graphics] ];
-
-	stresses = createStressGraphics[ listEdges[m], coordinates, OptionValue["stress"], OptionValue["stressStyle"] ];
-	displacements = createDisplacementGraphics[ coordinates, OptionValue["displacement"], OptionValue["displacementScale"], OptionValue["displacementStyle"] ];
-	
-	MapThread[ directive[ {#1, #2, #3}, options ]&, {graphics, stresses, displacements} ]
+	If[ ArrayDepth[positions]==2, First, Identity] @ MapThread[ directive[ {OptionValue["preamble"],#1, #2, #3}, options ]&, {graphics, stresses, displacements} ]
 ]
 
 
 createMechanismGraphics[ m_, $Failed, dimension_, inputOptions_ ] := (Message[ plotMechanism::pos ]; {})
-createMechanismGraphics[ m_, positions_, dimension_, inputOptions_ ] := toGraphicsComplex[ m, #, dimension ] & /@ positions
+createMechanismGraphics[ m_, positions_, dimension_, inputOptions_ ] :=
+	mechanismPrimitives[ m, #, dimension, FilterRules[inputOptions, Options[mechanismPrimitives]] ] & /@ positions
 
 
 plotMechanism::numstress="Stress should be a numeric list of stresses.";
@@ -6302,9 +6640,10 @@ Module[{
 
 boundingRegions[ m_, $Failed] := $Failed
 boundingRegions[ m_, graphics : {__GraphicsComplex}] := plotSizes[ Flatten[ graphics[[All,1]], 1 ] ]
+boundingRegions[ m_, pos_ ] := plotSizes[pos]
 
-graphicsDirective[ m_, $Failed ] := Identity
-graphicsDirective[ m_, graphics : {__GraphicsComplex} ] := With[ {dims = Length /@ graphics[[All,1,1]]},
+graphicsDirective[ m_, $Failed, dim_ ] := Identity
+graphicsDirective[ m_, graphics : {__GraphicsComplex}, expectedDim_ ] := With[ {dims = Length /@ graphics[[All,1,1]]},
 	Which[
 		Not[ Equal @@ dims ], Identity,
 		dims[[1]]==2, Graphics,
@@ -6312,6 +6651,12 @@ graphicsDirective[ m_, graphics : {__GraphicsComplex} ] := With[ {dims = Length 
 		True, Identity
 	]
 ]
+graphicsDirective[m_, graphics_, expectedDim_ ] := 
+	Switch[ expectedDim,
+		2, Graphics, 
+		3, Graphics3D,
+		_, Identity
+	]
 
 graphicsOptions[ options_, directive_, $Failed ] := {}
 graphicsOptions[ options_, directive_, {boundingRegion_, boundingRatios_} ] :=
@@ -6326,7 +6671,7 @@ createStressGraphics[ edges_, coordinates_, None|{None}, _ ]:=ConstantArray[ {},
 
 createStressGraphics[ edges_ , coordinates_ , stress : _?(MatrixQ[#,NumericQ]&), style : {_,_}] :=
 With[{
-	stressScale = Max[Max[stress,0], Abs @ Min[stress,0]]
+	stressScale = Max[ Max[stress,0], Abs @ Min[stress,0] ]
 },
 	MapThread[ plotStresses[ stressScale, edges, #1, #2, style ]&, { coordinates, stress } ]
 ] /; Dimensions[stress] == {Length[ coordinates ], Length[edges] }
@@ -6341,30 +6686,22 @@ createStressGraphics[ edges_, coordinates_, stress_, style_ ] := (
 )
 
 
-plotStresses[ stressScale_, edges_, coordinates_, stress_, style_ ] :=
-With[ {padding = 0.9},
-	Flatten @ MapThread[
-		stressGraphic[ style ],
+plotStresses[ stressScale_, edges_, coordinates_, stress_, stressFunc_Function ] :=
+	plotStresses[ stressScale, edges, coordinates, stress, {stressFunc, stressFunc} ]
+
+plotStresses[ stressScale_, edges_, coordinates_, stress_, {posStress_Function, negStress_Function} ] :=
+With[ {
+	coordinatePairs = coordinates[[ # ]]& /@ edges,
+	normalizedStresses = stress/stressScale
+},
+	MapThread[
+		Which[#2<0, negStress[ #1, #2 ], #2>0, posStress[ #1, #2 ], True, {} ]&,
 		{
-			({ (#[[2]] + #[[1]])/2, padding (#[[2]]-#[[1]])/2} &) /@ (coordinates[[ # ]]& /@ edges),
-			stress/stressScale
+		coordinatePairs,
+		normalizedStresses
 		}
 	]
 ]
-
-stressGraphic[{posStyle_ , _}][ {center_, displacement_}, stress_?NumericQ ] := {
-	posStyle,
-	Arrow[ { center,  center + stress displacement }] ,
-	Arrow[ { center,  center - stress displacement }]
-} /; stress > 0
-
-stressGraphic[{_ , negStyle_}][ {center_, displacement_}, stress_?NumericQ ] := {
-	negStyle,
-	Arrow[ { center + stress displacement , center }] ,
-	Arrow[ { center - stress displacement , center  }]
-} /; stress < 0
-
-stressGraphic[ {center_, displacement_}, stress_?NumericQ ] := {} /; stress == 0
 
 
 createDisplacementGraphics[ coordinates_, None|{None}, _ , _]:= ConstantArray[{},Length[coordinates]]
@@ -6376,8 +6713,8 @@ With[{ maxDisplacement = Max[ Map[Norm , displacements, {2} ] ] },
 ] /; Dimensions[ coordinates ] == Dimensions[ displacements ]
 
 createDisplacementGraphics[ coordinates_, displacements_, displacementScale_, style_ ] :=(
-	If[ Not @ And[ MatrixQ[#,NumericQ]& /@ displacements ], Message[plotMechanism::numdisp] ];
-	If[ Not@NumericQ[displacementScale] || # <= 0&, Message[plotMechanism::displscale] ];
+	If[ Not @ (And@@( MatrixQ[#,NumericQ]& /@ displacements) ) , Message[plotMechanism::numdisp] ];
+	If[ Not @ NumericQ[displacementScale] || # <= 0&, Message[plotMechanism::displscale] ];
 	If[ Dimensions[ coordinates ] != Dimensions[ displacements ], Message[plotMechanism::numinstdisp] ];
 
 	ConstantArray[ {}, Length[coordinates] ]
@@ -6522,6 +6859,25 @@ extrudedPolygon[{thickness1_?NumericQ, thickness2_?NumericQ}][coords_] :=
 			}
 		]
 	]] /; MatrixQ[coords] && Dimensions[coords][[2]] == 2
+
+
+shrinkPolygon[ pts_, widths_ ] := pts + Total @ MapIndexed[ shrinkPolygonSide[ pts, #2[[1]], #1 ]&, widths ]
+
+shrinkPolygonSide[ pts_, v1_, width_ ] :=
+Module[{n=Length[pts], v2, future, past, futureEdge, edge, pastEdge},
+	v2=Mod[v1+1, n, 1]; future=Mod[v2+1, n, 1]; past = Mod[v1-1,n,1];
+	edge=Normalize[ pts[[v2]] - pts[[v1]] ];
+	futureEdge = Normalize[ pts[[future]] - pts[[v2]] ];
+	pastEdge = Normalize[ pts[[past]] - pts[[v1]] ];
+	
+	RotateRight[Join[
+		width*{
+			pastEdge/Norm[ Cross[ pastEdge, edge ] ],
+			futureEdge/Norm[ Cross[ futureEdge, edge ] ]
+		},
+		ConstantArray[{0,0,0},n-2]
+	], v1-1]
+]
 
 
 End[];

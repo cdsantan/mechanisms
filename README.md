@@ -13,4 +13,4 @@ You should obviously replace location with the location of the directory you dow
 
 <<"mechanisms`"
 
-Functions are in Camel case. Currently, and unfortunately, the documentation is sub-par but I will *slowly* be working to update it and get it working. Until then, you can peruse the notebook in Documentation/English/ReferencePages/Guides/ for some examples.
+Currently, and unfortunately, the documentation is sub-par but I will *slowly* be working to update it and get it working. Until then, you can peruse the notebook in Documentation/English/ReferencePages/Guides/ for some examples.

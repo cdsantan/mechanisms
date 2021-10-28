@@ -106,7 +106,7 @@ Properties:\n
 Cell properties can be specified by Property[ cell1[ {i1, ...} ], {property1 -> value1, ... } ].
 Properties are \"Style\", \"Shape\" (to specify a shape function), \"Label\". DefaultCellData[cell] will list additional properties that can be specified.\n
 Options:\n
-Linkage[] takes the option \"OverlapPrecision\" which determines how close vertices need to be in order to be mapped onto each other. This could be set to 0 (or None).";
+Linkage[] takes the option OverlapPrecision which determines how close vertices need to be in order to be mapped onto each other. This could be set to 0 (or None).";
 
 Origami::usage=
 "Origami[ { {x1, y1}, ...}, {cell1[ {i1, i2, ..} ], ... } ] returns an Origami in 3D (displayed in 2D) with vertices at {{x1, y1}, ..} and made from the specified cells.
@@ -119,7 +119,7 @@ Properties are \"Style\", \"Shape\" (to specify a shape function), \"Label\". De
 
 Options:
 
-Origami[] takes the option \"OverlapPrecision\" which determines how close vertices need to be in order to be mapped onto each other. This could be set to 0 (or None).";
+Origami[] takes the option OverlapPrecision which determines how close vertices need to be in order to be mapped onto each other. This could be set to 0 (or None).";
 
 MechanismQ::usage="MechanismQ[ m ] returns True if m is a Mechanism.";
 
@@ -345,7 +345,7 @@ compressCellData[ AngleJoint, data_ ] :=
 With[ 
 { 
 	mergedData = Merge[#, Reverse[Flatten[#]]&]& /@ data,
-	default = Dispatch @ DefaultCellData[TorsionalFold]
+	default = Dispatch @ DefaultCellData[AngleJoint]
 },
 	{
 	combineData[ "AngleStiffness", Infinity, mergedData , Last],
@@ -474,12 +474,14 @@ With[ { head = Head[cells[[1]]], indices = cells[[All,1]], data = cells[[All,2]]
 
 
 facePattern = Face|ElasticTriangle ;
-edgePattern = RigidBar|TorsionalFold|AngleJoint|Spring ;
+edgePattern = RigidBar|TorsionalFold|Spring ;
 vertexPattern = FreeJoint|PinnedJoint ;
-cellSpecPattern = facePattern|edgePattern|vertexPattern|_String ;
+triplePattern = AngleJoint ;
+cellSpecPattern = facePattern|edgePattern|vertexPattern|triplePattern|_String ;
 
-edgeLoopQ = (VectorQ[#] && Length[#]>2 &);
-faceListQ = (VectorQ[#, VectorQ]&);
+edgeLoopQ = (VectorQ[#] && Length[#]>2 &) ;
+faceListQ = (VectorQ[#, VectorQ]&) ;
+tripleListQ = (MatrixQ[#] &) ;
 
 distributePropertyRules = {
 	(h : cellSpecPattern)[ indices_ ] :> h[indices, {} ],
@@ -490,6 +492,7 @@ distributePropertyRules = {
 	(h : edgePattern)[ indices_?faceListQ , properties_ ] :> (  h[ # , properties ]& /@ indices  ),
 	(h : edgePattern)[ indices_?edgeLoopQ , properties_ ] :> (  h[ # , properties ]& /@ Partition[indices,2,1] ),
 	(h : facePattern)[ indices_?faceListQ , properties_ ] :> (  h[ # , properties ]& /@ indices  ),
+	(h : triplePattern)[ indices_?tripleListQ , properties_ ] :> ( h[ # , properties ]& /@ indices ),
 	(h : vertexPattern)[ label_ -> coordinates_ , properties_ ] :> { h[ label, properties ], add[ label , coordinates ] }
 };
 
@@ -498,7 +501,7 @@ expansionRules = {
 };
 
 
-properCellPattern= (vertexPattern)[ Except[_List], _ ] | (edgePattern)[ _?(VectorQ[#]&&Length[#]==2&), _ ] | (facePattern)[ _?(VectorQ[#]&&Length[#]>2&) , _]|_String[_,_];
+properCellPattern= (vertexPattern)[ Except[_List], _ ] | (edgePattern)[ _?(VectorQ[#]&&Length[#]==2&), _ ] | (facePattern)[ _?(VectorQ[#]&&Length[#]>2&) , _]|(triplePattern[_?(VectorQ[#]&&Length[#]==3&),_])|_String[_,_];
 
 parseCells[ cells_List ] := parseCells[ {{},{},{}}, cells ]
 parseCells[ {oldcoordinates_, oldcells_ , oldlabels_}, cells_List ] := 
@@ -4206,7 +4209,7 @@ With[{
 
 componentEnergy[m_, positions_, arbitraryPositions_, Rule[AngleJoint[indices_], data_]] :=
 With[{
-	stiffness = data["angularStiffness"] /. Infinity -> $DefaultMechanismStiffnesses[TorsionalFold]
+	stiffness = data["AngleStiffness"] /. Infinity -> $DefaultMechanismStiffnesses[TorsionalFold]
 },
 	stiffness (TurningAngle[m,arbitraryPositions, indices ] - data["Angle"])^2/2
 ]

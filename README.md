@@ -11,6 +11,6 @@ PacletInstall[
 
 You should obviously replace location with the location of the directory you download from GitHub. Once installed, you can call it with
 
-<<"mechanisms`"
+<<"Mechanisms`"
 
 Currently, and unfortunately, the documentation is sub-par but I will *slowly* be working to update it and get it working. Until then, you can peruse the notebook in Documentation/English/ReferencePages/Guides/ for some examples.

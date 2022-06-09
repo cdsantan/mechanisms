@@ -1,0 +1,487 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 12.1' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[     17653,        479]
+NotebookOptionsPosition[     13999,        407]
+NotebookOutlinePosition[     14392,        423]
+CellTagsIndexPosition[     14349,        420]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["PinnedJoint", "Section",ExpressionUUID->"8a17468c-318a-42df-abd7-a3fbe46aaa0e"],
+
+Cell["PinnedJoint[v1] represents a pinned joint at vertex v1.", "Text",
+ Background->GrayLevel[
+  0.85],ExpressionUUID->"763ab846-c398-4c6f-8ada-ea56cc278480"],
+
+Cell[CellGroupData[{
+
+Cell["Basic examples", "Subsection",ExpressionUUID->"117915f2-82d1-4fab-a496-fd5a2cbbb56d"],
+
+Cell["Create a linkage with one rigid bar.", "Text",ExpressionUUID->"d3a20e2e-731f-4576-be54-bc3ddb5ab78d"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"m", "=", 
+  RowBox[{"Linkage", "[", 
+   RowBox[{
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"0", ",", "0"}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"1", ",", "0"}], "}"}]}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"RigidBar", "[", 
+       RowBox[{"{", 
+        RowBox[{"1", ",", "2"}], "}"}], "]"}], ",", 
+      RowBox[{"PinnedJoint", "[", "1", "]"}]}], "}"}]}], "]"}]}]], "Input",
+ CellLabel->"In[75]:=",ExpressionUUID->"05b3b061-5875-4131-97b3-25cf043d27da"],
+
+Cell[BoxData[
+ GraphicsBox[
+  TagBox[
+   DynamicModuleBox[{Typeset`mesh = {
+    MeshRegion, {
+     Properties -> {{0, 1} -> (
+         MeshCellShapeFunction -> (
+          Mechanisms`graphics`PinnedJointShape[][#, #2, #3]& )), {
+         0, Default} -> (MeshCellShapeFunction -> Automatic), {0, 1} -> (
+         MeshCellStyle -> Directive[
+           Directive[
+            GrayLevel[0]], 
+           Directive[
+            GrayLevel[0]]]), {0, 2} -> (MeshCellStyle -> Directive[
+           GrayLevel[0]]), {0, Default} -> (MeshCellStyle -> Automatic), {1, 
+         1} -> (MeshCellStyle -> Directive[
+           CapForm["Round"], 
+           GrayLevel[0]]), {1, Default} -> (MeshCellStyle -> Automatic)}, 
+      Method -> {
+       "DeleteDuplicateCoordinates" -> False, "CoplanarityTolerance" -> 
+        100}}}}, 
+    TagBox[GraphicsComplexBox[{{0., 0.}, {1., 0.}}, 
+      {Hue[0.6, 0.3, 0.75], 
+       TagBox[LineBox[{{1, 2}}],
+        Annotation[#, "Geometry"]& ], PointBox[{1, 2}], 
+       {GrayLevel[0], CapForm["Round"], LineBox[{{1, 2}}]}, {
+        {GrayLevel[0], CircleBox[{0., 0.}, 0.010000000000000002], 
+         LineBox[{{
+          0., -0.010000000000000002`}, {-0.05, -0.060000000000000005`}, {
+          0.05, -0.060000000000000005`}, {0., -0.010000000000000002`}}], 
+         LineBox[{{-0.1, -0.060000000000000005`}, {
+          0.1, -0.060000000000000005`}}]}, 
+        {GrayLevel[0], PointBox[2]}}}],
+     MouseAppearanceTag["LinkHand"]],
+    AllowKernelInitialization->False],
+   "MeshGraphics",
+   AutoDelete->True,
+   Editable->False,
+   Selectable->False],
+  DefaultBaseStyle->{
+   "MeshGraphics", FrontEnd`GraphicsHighlightColor -> 
+    Hue[0.1, 1, 0.7]}]], "Output",
+ CellLabel->"Out[75]=",ExpressionUUID->"080d42b1-dc24-46aa-90dc-78acf569dc04"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Properties", "Subsection",ExpressionUUID->"a049e762-22d7-4067-ac3d-b01f28e1dfb9"],
+
+Cell["\<\
+See what properties are available to RigidBar. In addition to these, all \
+cells take \[OpenCurlyDoubleQuote]Shape\[CloseCurlyDoubleQuote], \
+\[OpenCurlyDoubleQuote]Style\[CloseCurlyDoubleQuote] and \
+\[OpenCurlyDoubleQuote]Label\[CloseCurlyDoubleQuote].\
+\>", "Text",ExpressionUUID->"b19a002c-4392-401c-842f-3742a76190a0"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"DefaultCellData", "[", "PinnedJoint", "]"}]], "Input",
+ CellLabel->"In[76]:=",ExpressionUUID->"94c3c1ba-b5fd-48cd-ad34-76593ff7732a"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"\<\"PinningStiffness\"\>", "\[Rule]", "\[Infinity]"}], ",", 
+   RowBox[{"\<\"ConstraintFunction\"\>", "\[Rule]", "Automatic"}]}], 
+  "}"}]], "Output",
+ CellLabel->"Out[76]=",ExpressionUUID->"e44433dd-a079-4c5e-974f-43120fdb5d77"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["\[OpenCurlyDoubleQuote]PinningStiffness\[CloseCurlyDoubleQuote]", \
+"Subsubsection",ExpressionUUID->"58bc9b15-ed5b-441d-970c-eccbe7440ceb"],
+
+Cell["\<\
+\[OpenCurlyDoubleQuote]PinningStiffness\[CloseCurlyDoubleQuote] is used to \
+set the stiffness of a pinned joint. The default is Infinity and will attempt \
+to fix the position of the vertex according to the provided constraint.\
+\>", "Text",ExpressionUUID->"44c3887d-2626-4be5-9112-1d1ec7d6827f"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["\[OpenCurlyDoubleQuote]ConstraintFunction\[CloseCurlyDoubleQuote]", \
+"Subsubsection",ExpressionUUID->"322db626-204b-47f4-973a-4a93f66b3b75"],
+
+Cell["\<\
+This property changes the constraint used for the pinned vertex. The function \
+takes a vector position.\
+\>", "Text",ExpressionUUID->"2235b645-9ff3-4bc4-a248-11e5bff3d15d"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"m", "=", 
+  RowBox[{"Linkage", "[", 
+   RowBox[{
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"0", ",", "0"}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"1", ",", "0"}], "}"}]}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"RigidBar", "[", 
+       RowBox[{"{", 
+        RowBox[{"1", ",", "2"}], "}"}], "]"}], ",", 
+      RowBox[{"Property", "[", 
+       RowBox[{
+        RowBox[{"PinnedJoint", "[", "1", "]"}], ",", 
+        RowBox[{"\"\<ConstraintFunction\>\"", "->", " ", 
+         RowBox[{"(", 
+          RowBox[{
+           RowBox[{"#", "[", 
+            RowBox[{"[", "1", "]"}], "]"}], "&"}], ")"}]}]}], "]"}]}], 
+     "}"}]}], "]"}]}]], "Input",
+ CellLabel->"In[96]:=",ExpressionUUID->"a65088db-00a6-40ee-8d8a-c1df3a6ebfab"],
+
+Cell[BoxData[
+ GraphicsBox[
+  TagBox[
+   DynamicModuleBox[{Typeset`mesh = {
+    MeshRegion, {
+     Properties -> {{0, 1} -> (
+         MeshCellShapeFunction -> (
+          Mechanisms`graphics`PinnedJointShape[][#, #2, #3]& )), {
+         0, Default} -> (MeshCellShapeFunction -> Automatic), {0, 1} -> (
+         MeshCellStyle -> Directive[
+           Directive[
+            GrayLevel[0]], 
+           Directive[
+            GrayLevel[0]]]), {0, 2} -> (MeshCellStyle -> Directive[
+           GrayLevel[0]]), {0, Default} -> (MeshCellStyle -> Automatic), {1, 
+         1} -> (MeshCellStyle -> Directive[
+           CapForm["Round"], 
+           GrayLevel[0]]), {1, Default} -> (MeshCellStyle -> Automatic)}, 
+      Method -> {
+       "DeleteDuplicateCoordinates" -> False, "CoplanarityTolerance" -> 
+        100}}}}, 
+    TagBox[GraphicsComplexBox[{{0., 0.}, {1., 0.}}, 
+      {Hue[0.6, 0.3, 0.75], 
+       TagBox[LineBox[{{1, 2}}],
+        Annotation[#, "Geometry"]& ], PointBox[{1, 2}], 
+       {GrayLevel[0], CapForm["Round"], LineBox[{{1, 2}}]}, {
+        {GrayLevel[0], CircleBox[{0., 0.}, 0.010000000000000002], 
+         LineBox[{{
+          0., -0.010000000000000002`}, {-0.05, -0.060000000000000005`}, {
+          0.05, -0.060000000000000005`}, {0., -0.010000000000000002`}}], 
+         LineBox[{{-0.1, -0.060000000000000005`}, {
+          0.1, -0.060000000000000005`}}]}, 
+        {GrayLevel[0], PointBox[2]}}}],
+     MouseAppearanceTag["LinkHand"]],
+    AllowKernelInitialization->False],
+   "MeshGraphics",
+   AutoDelete->True,
+   Editable->False,
+   Selectable->False],
+  DefaultBaseStyle->{
+   "MeshGraphics", FrontEnd`GraphicsHighlightColor -> 
+    Hue[0.1, 1, 0.7]}]], "Output",
+ CellLabel->"Out[96]=",ExpressionUUID->"546642f6-3a05-4f5f-bba4-7209f9600ca8"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"MechanismEnergy", "[", "m", "]"}]], "Input",
+ CellLabel->"In[97]:=",ExpressionUUID->"7df9920f-28f3-43b9-9c96-dfbb60656464"],
+
+Cell[BoxData[
+ RowBox[{
+  FractionBox[
+   SuperscriptBox[
+    RowBox[{"VertexPosition", "[", 
+     RowBox[{"1", ",", "\<\"x\"\>"}], "]"}], "2"], "20000"], "+", 
+  RowBox[{
+   FractionBox["1", "8"], " ", 
+   SuperscriptBox[
+    RowBox[{"(", 
+     RowBox[{
+      RowBox[{"-", "1"}], "+", 
+      SuperscriptBox[
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{"-", 
+          RowBox[{"VertexPosition", "[", 
+           RowBox[{"1", ",", "\<\"x\"\>"}], "]"}]}], "+", 
+         RowBox[{"VertexPosition", "[", 
+          RowBox[{"2", ",", "\<\"x\"\>"}], "]"}]}], ")"}], "2"], "+", 
+      SuperscriptBox[
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{"-", 
+          RowBox[{"VertexPosition", "[", 
+           RowBox[{"1", ",", "\<\"y\"\>"}], "]"}]}], "+", 
+         RowBox[{"VertexPosition", "[", 
+          RowBox[{"2", ",", "\<\"y\"\>"}], "]"}]}], ")"}], "2"]}], ")"}], 
+    "2"]}]}]], "Output",
+ CellLabel->"Out[97]=",ExpressionUUID->"45cb0046-0d97-4cad-8d40-1b7665eaac62"]
+}, Open  ]],
+
+Cell["\<\
+The constraint function takes a vector of positions and returns either a \
+scalar or a vector of constraint functions.\
+\>", "Text",ExpressionUUID->"760facdb-0fb6-4817-a0d1-07db6f67b1ea"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+ RowBox[{
+  RowBox[{"m", "=", 
+   RowBox[{"Linkage", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"0", ",", "0", ",", "0"}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"1", ",", "0", ",", "0"}], "}"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"RigidBar", "[", 
+        RowBox[{"{", 
+         RowBox[{"1", ",", "2"}], "}"}], "]"}], ",", 
+       RowBox[{"Property", "[", 
+        RowBox[{
+         RowBox[{"PinnedJoint", "[", "1", "]"}], ",", 
+         RowBox[{"\"\<ConstraintFunction\>\"", "->", " ", 
+          RowBox[{"(", 
+           RowBox[{
+            RowBox[{"{", 
+             RowBox[{
+              RowBox[{"#", "[", 
+               RowBox[{"[", "2", "]"}], "]"}], ",", 
+              RowBox[{"#", "[", 
+               RowBox[{"[", "1", "]"}], "]"}]}], "}"}], "&"}], ")"}]}]}], 
+        "]"}]}], "}"}]}], "]"}]}], ";"}], "\[IndentingNewLine]", 
+ RowBox[{"MechanismEnergy", "[", "m", "]"}]}], "Input",
+ CellLabel->
+  "In[102]:=",ExpressionUUID->"14c04c96-c133-4f64-acf3-7a7745eea2c1"],
+
+Cell[BoxData[
+ RowBox[{
+  FractionBox[
+   SuperscriptBox[
+    RowBox[{"VertexPosition", "[", 
+     RowBox[{"1", ",", "\<\"x\"\>"}], "]"}], "2"], "20000"], "+", 
+  FractionBox[
+   SuperscriptBox[
+    RowBox[{"VertexPosition", "[", 
+     RowBox[{"1", ",", "\<\"y\"\>"}], "]"}], "2"], "20000"], "+", 
+  RowBox[{
+   FractionBox["1", "8"], " ", 
+   SuperscriptBox[
+    RowBox[{"(", 
+     RowBox[{
+      RowBox[{"-", "1"}], "+", 
+      SuperscriptBox[
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{"-", 
+          RowBox[{"VertexPosition", "[", 
+           RowBox[{"1", ",", "\<\"x\"\>"}], "]"}]}], "+", 
+         RowBox[{"VertexPosition", "[", 
+          RowBox[{"2", ",", "\<\"x\"\>"}], "]"}]}], ")"}], "2"], "+", 
+      SuperscriptBox[
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{"-", 
+          RowBox[{"VertexPosition", "[", 
+           RowBox[{"1", ",", "\<\"y\"\>"}], "]"}]}], "+", 
+         RowBox[{"VertexPosition", "[", 
+          RowBox[{"2", ",", "\<\"y\"\>"}], "]"}]}], ")"}], "2"], "+", 
+      SuperscriptBox[
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{"-", 
+          RowBox[{"VertexPosition", "[", 
+           RowBox[{"1", ",", "\<\"z\"\>"}], "]"}]}], "+", 
+         RowBox[{"VertexPosition", "[", 
+          RowBox[{"2", ",", "\<\"z\"\>"}], "]"}]}], ")"}], "2"]}], ")"}], 
+    "2"]}]}]], "Output",
+ CellLabel->
+  "Out[103]=",ExpressionUUID->"cefdbe69-3875-4e79-936a-61c3ca906ba5"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["\[OpenCurlyDoubleQuote]Shape\[CloseCurlyDoubleQuote]", "Subsubsection",ExpressionUUID->"751a5719-b968-4b70-bd73-72eaec79c20d"],
+
+Cell["\<\
+The standard shape of a rigid bar can be set with the \
+\[OpenCurlyDoubleQuote]Shape\[CloseCurlyDoubleQuote] property and the \
+function PinnedJointShape[]. PinnedJointShape[] takes the following options.\
+\>", "Text",ExpressionUUID->"7f788bbb-182f-4675-90b3-2c9a5c75e3da"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Options", "[", "PinnedJointShape", "]"}]], "Input",
+ CellLabel->
+  "In[104]:=",ExpressionUUID->"1b93d5b2-cf4c-4d8c-b577-c741a683e43f"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"\<\"Diameter\"\>", "\[Rule]", "0.05`"}], ",", 
+   RowBox[{"\<\"Angle\"\>", "\[Rule]", "0"}], ",", 
+   RowBox[{"\<\"Thickness\"\>", "\[Rule]", "0.027`"}]}], "}"}]], "Output",
+ CellLabel->
+  "Out[104]=",ExpressionUUID->"a17c9d2e-50cf-4b2b-b257-3d1875e45b86"]
+}, Open  ]],
+
+Cell["\<\
+\[OpenCurlyDoubleQuote]Diameter\[CloseCurlyDoubleQuote] is the 2D diameter \
+and \[OpenCurlyDoubleQuote]Thickness\[CloseCurlyDoubleQuote] sets a size \
+along the z axis.\
+\>", "Text",ExpressionUUID->"dd23f7ea-ff7b-47fc-ae39-ec65d8e01121"],
+
+Cell["\<\
+\[OpenCurlyDoubleQuote]Angle\[CloseCurlyDoubleQuote] is used to set the \
+angular orientation of the pinned joint shape in two dimensions.\
+\>", "Text",ExpressionUUID->"cb3b8691-9c99-46e5-8668-323134b53169"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["\[OpenCurlyDoubleQuote]Style\[CloseCurlyDoubleQuote]", "Subsubsection",ExpressionUUID->"9873cb6c-6400-4be5-9d72-f0aa1665f702"],
+
+Cell["\[OpenCurlyDoubleQuote]Style\[CloseCurlyDoubleQuote] is used to set \
+standard Graphics style elements.", "Text",ExpressionUUID->"bde25a30-5e6c-\
+4003-bd4f-ef3aa3bb7038"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["\[OpenCurlyDoubleQuote]Label\[CloseCurlyDoubleQuote]", "Subsubsection",ExpressionUUID->"7c2816c3-ebc5-45e1-b917-9f022355f87d"],
+
+Cell["\<\
+\[OpenCurlyDoubleQuote]Label\[CloseCurlyDoubleQuote] is used to label a \
+pinned joint. You can use \
+\[OpenCurlyDoubleQuote]Index\[CloseCurlyDoubleQuote] as a label and it will \
+be replaced with the vertex number.\
+\>", "Text",ExpressionUUID->"1c8f00fa-4de1-486e-9a12-4768e87e92aa"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+},
+WindowSize->{808, 706},
+WindowMargins->{{Automatic, 230}, {19, Automatic}},
+FrontEndVersion->"12.3 for Mac OS X x86 (64-bit) (May 11, 2021)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"e17ec2a0-f65b-4ab0-9e24-e332bbbfcfc9"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 85, 0, 67, "Section",ExpressionUUID->"8a17468c-318a-42df-abd7-a3fbe46aaa0e"],
+Cell[668, 24, 159, 2, 51, "Text",ExpressionUUID->"763ab846-c398-4c6f-8ada-ea56cc278480"],
+Cell[CellGroupData[{
+Cell[852, 30, 91, 0, 54, "Subsection",ExpressionUUID->"117915f2-82d1-4fab-a496-fd5a2cbbb56d"],
+Cell[946, 32, 107, 0, 35, "Text",ExpressionUUID->"d3a20e2e-731f-4576-be54-bc3ddb5ab78d"],
+Cell[CellGroupData[{
+Cell[1078, 36, 536, 16, 30, "Input",ExpressionUUID->"05b3b061-5875-4131-97b3-25cf043d27da"],
+Cell[1617, 54, 1771, 42, 54, "Output",ExpressionUUID->"080d42b1-dc24-46aa-90dc-78acf569dc04"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[3437, 102, 87, 0, 54, "Subsection",ExpressionUUID->"a049e762-22d7-4067-ac3d-b01f28e1dfb9"],
+Cell[3527, 104, 333, 5, 35, "Text",ExpressionUUID->"b19a002c-4392-401c-842f-3742a76190a0"],
+Cell[CellGroupData[{
+Cell[3885, 113, 157, 2, 30, "Input",ExpressionUUID->"94c3c1ba-b5fd-48cd-ad34-76593ff7732a"],
+Cell[4045, 117, 281, 6, 34, "Output",ExpressionUUID->"e44433dd-a079-4c5e-974f-43120fdb5d77"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[4363, 128, 145, 1, 45, "Subsubsection",ExpressionUUID->"58bc9b15-ed5b-441d-970c-eccbe7440ceb"],
+Cell[4511, 131, 307, 4, 58, "Text",ExpressionUUID->"44c3887d-2626-4be5-9112-1d1ec7d6827f"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[4855, 140, 147, 1, 45, "Subsubsection",ExpressionUUID->"322db626-204b-47f4-973a-4a93f66b3b75"],
+Cell[5005, 143, 183, 3, 35, "Text",ExpressionUUID->"2235b645-9ff3-4bc4-a248-11e5bff3d15d"],
+Cell[CellGroupData[{
+Cell[5213, 150, 797, 24, 52, "Input",ExpressionUUID->"a65088db-00a6-40ee-8d8a-c1df3a6ebfab"],
+Cell[6013, 176, 1771, 42, 54, "Output",ExpressionUUID->"546642f6-3a05-4f5f-bba4-7209f9600ca8"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[7821, 223, 147, 2, 30, "Input",ExpressionUUID->"7df9920f-28f3-43b9-9c96-dfbb60656464"],
+Cell[7971, 227, 986, 29, 80, "Output",ExpressionUUID->"45cb0046-0d97-4cad-8d40-1b7665eaac62"]
+}, Open  ]],
+Cell[8972, 259, 197, 3, 58, "Text",ExpressionUUID->"760facdb-0fb6-4817-a0d1-07db6f67b1ea"],
+Cell[CellGroupData[{
+Cell[9194, 266, 1081, 31, 94, "Input",ExpressionUUID->"14c04c96-c133-4f64-acf3-7a7745eea2c1"],
+Cell[10278, 299, 1423, 42, 139, "Output",ExpressionUUID->"cefdbe69-3875-4e79-936a-61c3ca906ba5"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[11750, 347, 132, 0, 45, "Subsubsection",ExpressionUUID->"751a5719-b968-4b70-bd73-72eaec79c20d"],
+Cell[11885, 349, 283, 4, 58, "Text",ExpressionUUID->"7f788bbb-182f-4675-90b3-2c9a5c75e3da"],
+Cell[CellGroupData[{
+Cell[12193, 357, 158, 3, 30, "Input",ExpressionUUID->"1b93d5b2-cf4c-4d8c-b577-c741a683e43f"],
+Cell[12354, 362, 308, 7, 34, "Output",ExpressionUUID->"a17c9d2e-50cf-4b2b-b257-3d1875e45b86"]
+}, Open  ]],
+Cell[12677, 372, 248, 4, 35, "Text",ExpressionUUID->"dd23f7ea-ff7b-47fc-ae39-ec65d8e01121"],
+Cell[12928, 378, 217, 3, 35, "Text",ExpressionUUID->"cb3b8691-9c99-46e5-8668-323134b53169"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[13182, 386, 132, 0, 45, "Subsubsection",ExpressionUUID->"9873cb6c-6400-4be5-9d72-f0aa1665f702"],
+Cell[13317, 388, 176, 2, 35, "Text",ExpressionUUID->"bde25a30-5e6c-4003-bd4f-ef3aa3bb7038"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[13530, 395, 132, 0, 45, "Subsubsection",ExpressionUUID->"7c2816c3-ebc5-45e1-b917-9f022355f87d"],
+Cell[13665, 397, 294, 5, 58, "Text",ExpressionUUID->"1c8f00fa-4de1-486e-9a12-4768e87e92aa"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+

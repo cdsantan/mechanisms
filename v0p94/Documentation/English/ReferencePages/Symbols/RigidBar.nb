@@ -1,0 +1,404 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 12.1' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[     14516,        396]
+NotebookOptionsPosition[     11092,        328]
+NotebookOutlinePosition[     11485,        344]
+CellTagsIndexPosition[     11442,        341]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["RigidBar", "Section",ExpressionUUID->"8a17468c-318a-42df-abd7-a3fbe46aaa0e"],
+
+Cell["\<\
+RigidBar[{v1,v2}] represents a rigid bar joining vertex v1 to vertex v2.\
+\>", "Text",
+ Background->GrayLevel[
+  0.85],ExpressionUUID->"763ab846-c398-4c6f-8ada-ea56cc278480"],
+
+Cell[CellGroupData[{
+
+Cell["Basic examples", "Subsection",ExpressionUUID->"117915f2-82d1-4fab-a496-fd5a2cbbb56d"],
+
+Cell["Create a linkage with one rigid bar.", "Text",ExpressionUUID->"d3a20e2e-731f-4576-be54-bc3ddb5ab78d"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"m", "=", 
+  RowBox[{"Linkage", "[", 
+   RowBox[{
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"0", ",", "0"}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"1", ",", "0"}], "}"}]}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{"RigidBar", "[", 
+      RowBox[{"{", 
+       RowBox[{"1", ",", "2"}], "}"}], "]"}], "}"}]}], "]"}]}]], "Input",
+ CellLabel->"In[48]:=",ExpressionUUID->"05b3b061-5875-4131-97b3-25cf043d27da"],
+
+Cell[BoxData[
+ GraphicsBox[
+  TagBox[
+   DynamicModuleBox[{Typeset`mesh = {
+    MeshRegion, {Properties -> {{0, 1} -> (MeshCellStyle -> Directive[
+           GrayLevel[0]]), {0, 2} -> (MeshCellStyle -> Directive[
+           GrayLevel[0]]), {0, Default} -> (MeshCellStyle -> Automatic), {1, 
+         1} -> (MeshCellStyle -> Directive[
+           CapForm["Round"], 
+           GrayLevel[0]]), {1, Default} -> (MeshCellStyle -> Automatic)}, 
+      Method -> {
+       "DeleteDuplicateCoordinates" -> False, "CoplanarityTolerance" -> 
+        100}}}}, 
+    TagBox[GraphicsComplexBox[{{0., 0.}, {1., 0.}}, 
+      {Hue[0.6, 0.3, 0.75], 
+       TagBox[LineBox[{{1, 2}}],
+        Annotation[#, "Geometry"]& ], PointBox[{1, 2}], 
+       {GrayLevel[0], CapForm["Round"], LineBox[{{1, 2}}]}, 
+       {GrayLevel[0], PointBox[{1, 2}]}}],
+     MouseAppearanceTag["LinkHand"]],
+    AllowKernelInitialization->False],
+   "MeshGraphics",
+   AutoDelete->True,
+   Editable->False,
+   Selectable->False],
+  DefaultBaseStyle->{
+   "MeshGraphics", FrontEnd`GraphicsHighlightColor -> 
+    Hue[0.1, 1, 0.7]}]], "Output",
+ CellLabel->"Out[48]=",ExpressionUUID->"55b34097-b74c-410b-af17-296887de1557"]
+}, Open  ]]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["Properties", "Subsection",ExpressionUUID->"a049e762-22d7-4067-ac3d-b01f28e1dfb9"],
+
+Cell["\<\
+See what properties are available to RigidBar. In addition to these, all \
+cells take \[OpenCurlyDoubleQuote]Shape\[CloseCurlyDoubleQuote], \
+\[OpenCurlyDoubleQuote]Style\[CloseCurlyDoubleQuote] and \
+\[OpenCurlyDoubleQuote]Label\[CloseCurlyDoubleQuote].\
+\>", "Text",ExpressionUUID->"b19a002c-4392-401c-842f-3742a76190a0"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"DefaultCellData", "[", "RigidBar", "]"}]], "Input",
+ CellLabel->"In[47]:=",ExpressionUUID->"94c3c1ba-b5fd-48cd-ad34-76593ff7732a"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"\<\"EquilibriumLength\"\>", "\[Rule]", "Automatic"}], ",", 
+   RowBox[{"\<\"Stiffness\"\>", "\[Rule]", "\[Infinity]"}]}], "}"}]], "Output",\
+
+ CellLabel->"Out[47]=",ExpressionUUID->"03d728c0-2fe1-477b-9270-794d17032847"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["\[OpenCurlyDoubleQuote]EquilibriumLength\[CloseCurlyDoubleQuote]", \
+"Subsubsection",ExpressionUUID->"58bc9b15-ed5b-441d-970c-eccbe7440ceb"],
+
+Cell["\<\
+\[OpenCurlyDoubleQuote]EquilibriumLength\[CloseCurlyDoubleQuote] is used to \
+set the equilibrium length of a rigid bar. Use Automatic to set the \
+equilibrium length according to the vertex positions.\
+\>", "Text",ExpressionUUID->"44c3887d-2626-4be5-9112-1d1ec7d6827f"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"m", "=", 
+   RowBox[{"Linkage", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"0", ",", "0"}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"1", ",", "0"}], "}"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"Property", "[", 
+       RowBox[{
+        RowBox[{"RigidBar", "[", 
+         RowBox[{"{", 
+          RowBox[{"1", ",", "2"}], "}"}], "]"}], ",", 
+        RowBox[{"{", 
+         RowBox[{"\"\<EquilibriumLength\>\"", "->", "1"}], "}"}]}], "]"}], 
+      "}"}]}], "]"}]}], ";"}]], "Input",
+ CellLabel->"In[51]:=",ExpressionUUID->"e5ea4ae3-03ed-4a29-9748-4ae0141921c1"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["\[OpenCurlyDoubleQuote]Stiffness\[CloseCurlyDoubleQuote]", \
+"Subsubsection",ExpressionUUID->"322db626-204b-47f4-973a-4a93f66b3b75"],
+
+Cell["\<\
+This property sets the stiffness of a rigid bar. If the stiffness is \
+Infinity, Mechanisms will attempt to constraint the length.\
+\>", "Text",ExpressionUUID->"2235b645-9ff3-4bc4-a248-11e5bff3d15d"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"m", "=", 
+   RowBox[{"Linkage", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"0", ",", "0"}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"1", ",", "0"}], "}"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"Property", "[", 
+       RowBox[{
+        RowBox[{"RigidBar", "[", 
+         RowBox[{"{", 
+          RowBox[{"1", ",", "2"}], "}"}], "]"}], ",", 
+        RowBox[{"{", 
+         RowBox[{"\"\<Stiffness\>\"", "->", "k"}], "}"}]}], "]"}], "}"}]}], 
+    "]"}]}], ";"}]], "Input",
+ CellLabel->"In[54]:=",ExpressionUUID->"faf2a00f-c80c-4f77-9493-bcecf2b33008"],
+
+Cell["\<\
+For finite stiffness, the energy of the mechanism is based on the squared \
+length of the bar.\
+\>", "Text",ExpressionUUID->"a81fad50-3206-4c5b-b70b-106a253f618f"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"MechanismEnergy", "[", "m", "]"}]], "Input",
+ CellLabel->"In[55]:=",ExpressionUUID->"f5ad5dc6-0e53-47b8-9a89-0af7b63fa913"],
+
+Cell[BoxData[
+ RowBox[{
+  FractionBox["1", "8"], " ", "k", " ", 
+  SuperscriptBox[
+   RowBox[{"(", 
+    RowBox[{
+     RowBox[{"-", "1"}], "+", 
+     SuperscriptBox[
+      RowBox[{"(", 
+       RowBox[{
+        RowBox[{"-", 
+         RowBox[{"VertexPosition", "[", 
+          RowBox[{"1", ",", "\<\"x\"\>"}], "]"}]}], "+", 
+        RowBox[{"VertexPosition", "[", 
+         RowBox[{"2", ",", "\<\"x\"\>"}], "]"}]}], ")"}], "2"], "+", 
+     SuperscriptBox[
+      RowBox[{"(", 
+       RowBox[{
+        RowBox[{"-", 
+         RowBox[{"VertexPosition", "[", 
+          RowBox[{"1", ",", "\<\"y\"\>"}], "]"}]}], "+", 
+        RowBox[{"VertexPosition", "[", 
+         RowBox[{"2", ",", "\<\"y\"\>"}], "]"}]}], ")"}], "2"]}], ")"}], 
+   "2"]}]], "Output",
+ CellLabel->"Out[55]=",ExpressionUUID->"e45910af-fd6f-49a8-a37f-a4e710524724"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["\[OpenCurlyDoubleQuote]Shape\[CloseCurlyDoubleQuote]", "Subsubsection",ExpressionUUID->"751a5719-b968-4b70-bd73-72eaec79c20d"],
+
+Cell["\<\
+The standard shape of a rigid bar can be set with the \
+\[OpenCurlyDoubleQuote]Shape\[CloseCurlyDoubleQuote] property and the \
+function RigidBarShape[]. RigidBarShape[] takes the following options.\
+\>", "Text",ExpressionUUID->"7f788bbb-182f-4675-90b3-2c9a5c75e3da"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Options", "[", "RigidBarShape", "]"}]], "Input",
+ CellLabel->"In[57]:=",ExpressionUUID->"1b93d5b2-cf4c-4d8c-b577-c741a683e43f"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"\<\"Width\"\>", "\[Rule]", "0.03`"}], ",", 
+   RowBox[{"\<\"AspectRatio\"\>", "\[Rule]", "0.5`"}], ",", 
+   RowBox[{"\<\"Thickness\"\>", "\[Rule]", "0.025`"}], ",", 
+   RowBox[{"\<\"StartOffset\"\>", "\[Rule]", "0"}], ",", 
+   RowBox[{"\<\"EndOffset\"\>", "\[Rule]", "0"}], ",", 
+   RowBox[{"\<\"HeightOffset\"\>", "\[Rule]", "0"}]}], "}"}]], "Output",
+ CellLabel->"Out[57]=",ExpressionUUID->"04342bd6-30ef-4d7c-9133-7ac61f17e367"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"m", "=", 
+  RowBox[{"Linkage", "[", 
+   RowBox[{
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"0", ",", "0"}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"1", ",", "0"}], "}"}]}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{"Property", "[", 
+      RowBox[{
+       RowBox[{"RigidBar", "[", 
+        RowBox[{"{", 
+         RowBox[{"1", ",", "2"}], "}"}], "]"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\"\<Shape\>\"", "->", 
+         RowBox[{"RigidBarShape", "[", 
+          RowBox[{"\"\<Width\>\"", "->", "0.2"}], "]"}]}], "}"}]}], "]"}], 
+     "}"}]}], "]"}]}]], "Input",
+ CellLabel->"In[61]:=",ExpressionUUID->"a62197d2-18b6-48ea-823f-5275478d4de6"],
+
+Cell[BoxData[
+ GraphicsBox[
+  TagBox[
+   DynamicModuleBox[{Typeset`mesh = {
+    MeshRegion, {
+     Properties -> {{1, 1} -> (
+         MeshCellShapeFunction -> (Mechanisms`graphics`RigidBarShape[
+          "Width" -> 0.2][#, #2, #3]& )), {1, Default} -> (
+         MeshCellShapeFunction -> Automatic), {0, 1} -> (MeshCellStyle -> 
+         Directive[
+           GrayLevel[0]]), {0, 2} -> (MeshCellStyle -> Directive[
+           GrayLevel[0]]), {0, Default} -> (MeshCellStyle -> Automatic), {1, 
+         1} -> (MeshCellStyle -> Directive[
+           CapForm["Round"], 
+           GrayLevel[0]]), {1, Default} -> (MeshCellStyle -> Automatic)}, 
+      Method -> {
+       "DeleteDuplicateCoordinates" -> False, "CoplanarityTolerance" -> 
+        100}}}}, 
+    TagBox[GraphicsComplexBox[{{0., 0.}, {1., 0.}}, 
+      {Hue[0.6, 0.3, 0.75], 
+       TagBox[LineBox[{{1, 2}}],
+        Annotation[#, "Geometry"]& ], PointBox[{1, 2}], 
+       {GrayLevel[0], CapForm["Round"], 
+        PolygonBox[{{0., 0.1}, {0., -0.1}, {1., -0.1}, {1., 0.1}}], 
+        DiskBox[{0., 0.}, 0.1], DiskBox[{1., 0.}, 0.1]}, 
+       {GrayLevel[0], PointBox[{1, 2}]}}],
+     MouseAppearanceTag["LinkHand"]],
+    AllowKernelInitialization->False],
+   "MeshGraphics",
+   AutoDelete->True,
+   Editable->False,
+   Selectable->False],
+  DefaultBaseStyle->{
+   "MeshGraphics", FrontEnd`GraphicsHighlightColor -> 
+    Hue[0.1, 1, 0.7]}]], "Output",
+ CellLabel->"Out[61]=",ExpressionUUID->"97518994-f1db-488f-92cb-d8b5cfecaf01"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["\[OpenCurlyDoubleQuote]Style\[CloseCurlyDoubleQuote]", "Subsubsection",ExpressionUUID->"9873cb6c-6400-4be5-9d72-f0aa1665f702"],
+
+Cell["\[OpenCurlyDoubleQuote]Style\[CloseCurlyDoubleQuote] is used to set \
+standard Graphics style elements.", "Text",ExpressionUUID->"bde25a30-5e6c-\
+4003-bd4f-ef3aa3bb7038"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["\[OpenCurlyDoubleQuote]Label\[CloseCurlyDoubleQuote]", "Subsubsection",ExpressionUUID->"7c2816c3-ebc5-45e1-b917-9f022355f87d"],
+
+Cell["\[OpenCurlyDoubleQuote]Label\[CloseCurlyDoubleQuote] is used to label a \
+rigid bar.", "Text",ExpressionUUID->"1c8f00fa-4de1-486e-9a12-4768e87e92aa"]
+}, Open  ]]
+}, Closed]]
+}, Open  ]]
+},
+WindowSize->{808, 706},
+WindowMargins->{{Automatic, 230}, {19, Automatic}},
+FrontEndVersion->"12.3 for Mac OS X x86 (64-bit) (May 11, 2021)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"e17ec2a0-f65b-4ab0-9e24-e332bbbfcfc9"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 82, 0, 67, "Section",ExpressionUUID->"8a17468c-318a-42df-abd7-a3fbe46aaa0e"],
+Cell[665, 24, 184, 4, 51, "Text",ExpressionUUID->"763ab846-c398-4c6f-8ada-ea56cc278480"],
+Cell[CellGroupData[{
+Cell[874, 32, 91, 0, 54, "Subsection",ExpressionUUID->"117915f2-82d1-4fab-a496-fd5a2cbbb56d"],
+Cell[968, 34, 107, 0, 35, "Text",ExpressionUUID->"d3a20e2e-731f-4576-be54-bc3ddb5ab78d"],
+Cell[CellGroupData[{
+Cell[1100, 38, 465, 14, 30, "Input",ExpressionUUID->"05b3b061-5875-4131-97b3-25cf043d27da"],
+Cell[1568, 54, 1175, 28, 449, "Output",ExpressionUUID->"55b34097-b74c-410b-af17-296887de1557"]
+}, Open  ]]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[2792, 88, 87, 0, 38, "Subsection",ExpressionUUID->"a049e762-22d7-4067-ac3d-b01f28e1dfb9"],
+Cell[2882, 90, 333, 5, 35, "Text",ExpressionUUID->"b19a002c-4392-401c-842f-3742a76190a0"],
+Cell[CellGroupData[{
+Cell[3240, 99, 154, 2, 30, "Input",ExpressionUUID->"94c3c1ba-b5fd-48cd-ad34-76593ff7732a"],
+Cell[3397, 103, 272, 6, 34, "Output",ExpressionUUID->"03d728c0-2fe1-477b-9270-794d17032847"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[3706, 114, 146, 1, 45, "Subsubsection",ExpressionUUID->"58bc9b15-ed5b-441d-970c-eccbe7440ceb"],
+Cell[3855, 117, 280, 4, 58, "Text",ExpressionUUID->"44c3887d-2626-4be5-9112-1d1ec7d6827f"],
+Cell[4138, 123, 659, 20, 30, "Input",ExpressionUUID->"e5ea4ae3-03ed-4a29-9748-4ae0141921c1"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[4834, 148, 138, 1, 45, "Subsubsection",ExpressionUUID->"322db626-204b-47f4-973a-4a93f66b3b75"],
+Cell[4975, 151, 209, 3, 58, "Text",ExpressionUUID->"2235b645-9ff3-4bc4-a248-11e5bff3d15d"],
+Cell[5187, 156, 649, 20, 30, "Input",ExpressionUUID->"faf2a00f-c80c-4f77-9493-bcecf2b33008"],
+Cell[5839, 178, 173, 3, 35, "Text",ExpressionUUID->"a81fad50-3206-4c5b-b70b-106a253f618f"],
+Cell[CellGroupData[{
+Cell[6037, 185, 147, 2, 30, "Input",ExpressionUUID->"f5ad5dc6-0e53-47b8-9a89-0af7b63fa913"],
+Cell[6187, 189, 824, 24, 76, "Output",ExpressionUUID->"e45910af-fd6f-49a8-a37f-a4e710524724"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[7060, 219, 132, 0, 45, "Subsubsection",ExpressionUUID->"751a5719-b968-4b70-bd73-72eaec79c20d"],
+Cell[7195, 221, 277, 4, 58, "Text",ExpressionUUID->"7f788bbb-182f-4675-90b3-2c9a5c75e3da"],
+Cell[CellGroupData[{
+Cell[7497, 229, 151, 2, 30, "Input",ExpressionUUID->"1b93d5b2-cf4c-4d8c-b577-c741a683e43f"],
+Cell[7651, 233, 483, 9, 56, "Output",ExpressionUUID->"04342bd6-30ef-4d7c-9133-7ac61f17e367"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[8171, 247, 705, 21, 52, "Input",ExpressionUUID->"a62197d2-18b6-48ea-823f-5275478d4de6"],
+Cell[8879, 270, 1486, 35, 89, "Output",ExpressionUUID->"97518994-f1db-488f-92cb-d8b5cfecaf01"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[10414, 311, 132, 0, 45, "Subsubsection",ExpressionUUID->"9873cb6c-6400-4be5-9d72-f0aa1665f702"],
+Cell[10549, 313, 176, 2, 35, "Text",ExpressionUUID->"bde25a30-5e6c-4003-bd4f-ef3aa3bb7038"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[10762, 320, 132, 0, 45, "Subsubsection",ExpressionUUID->"7c2816c3-ebc5-45e1-b917-9f022355f87d"],
+Cell[10897, 322, 155, 1, 35, "Text",ExpressionUUID->"1c8f00fa-4de1-486e-9a12-4768e87e92aa"]
+}, Open  ]]
+}, Closed]]
+}, Open  ]]
+}
+]
+*)
+

@@ -1,0 +1,1950 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 12.1' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[     86021,       1942]
+NotebookOptionsPosition[     85422,       1922]
+NotebookOutlinePosition[     85815,       1938]
+CellTagsIndexPosition[     85772,       1935]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["Linkage", "Section",ExpressionUUID->"8a17468c-318a-42df-abd7-a3fbe46aaa0e"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"?", "Linkage"}]], "Input",
+ CellLabel->"In[41]:=",ExpressionUUID->"aaa9e56e-2422-4249-914d-c347740722e0"],
+
+Cell[BoxData[
+ InterpretationBox[
+  StyleBox[
+   FrameBox[
+    DynamicModuleBox[{System`InformationDump`open$$ = False, 
+     System`InformationDump`mouseOver$$ = False}, 
+     PaneSelectorBox[{True->
+      TagBox[GridBox[{
+         {
+          ItemBox[
+           PaneBox[
+            StyleBox["\<\" Symbol\"\>", "InformationTitleText",
+             StripOnInput->False,
+             BaseStyle -> None],
+            FrameMargins->{{4, 0}, {-1, 1}}],
+           BaseStyle->"InformationTitleBackground",
+           StripOnInput->False], 
+          ItemBox["\<\"\"\>",
+           BaseStyle->"InformationTitleBackground",
+           StripOnInput->False]},
+         {
+          ItemBox[
+           PaneBox[
+            
+            StyleBox["\<\"Linkage[ { {x1, y1}, ...}, {cell1[ {i1, i2, ..} ], \
+... } ] returns a linkage in 2D with vertices at {{x1, y1}, ..} and made from \
+the specified cells.\\nLinkage[ { {x1, y1, z1}, ...}, {cell1[ {i1, i2, ..} ], \
+... } ] returns a linkage in 3D with vertices at {{x1, y1}, ..} and made from \
+the specified cells.\\n\\nProperties:\\n\\nCell properties can be specified \
+by Property[ cell1[ {i1, ...} ], {property1 -> value1, ... } ].\\nProperties \
+are \\\"Style\\\", \\\"Shape\\\" (to specify a shape function), \
+\\\"Label\\\". DefaultCellData[cell] will list additional properties that can \
+be specified.\\n\\nOptions:\\n\\nLinkage[] takes the option \
+\\\"OverlapPrecision\\\" which determines how close vertices need to be in \
+order to be mapped onto each other. This could be set to 0 (or None).\"\>", 
+             "InformationUsageText",
+             StripOnInput->False,
+             LineSpacing->{1.5, 1.5, 3.}],
+            FrameMargins->{{10, 10}, {8, 10}}],
+           BaseStyle->"InformationUsageSubtitleBackground",
+           StripOnInput->False], 
+          ItemBox["\<\"\"\>",
+           BaseStyle->"InformationUsageSubtitleBackground",
+           StripOnInput->False]},
+         {
+          PaneBox[
+           TagBox[GridBox[{
+              {
+               StyleBox[
+                TagBox[
+                 TooltipBox[
+                  
+                  StyleBox["\<\" UpValue Definitions\"\>", 
+                   "InformationRowLabel",
+                   StripOnInput->False],
+                  "\"UpValues\"",
+                  TooltipStyle->"TextStyling"],
+                 Annotation[#, "UpValues", "Tooltip"]& ], "DialogStyle",
+                StripOnInput->False]},
+              {
+               TemplateBox[{"\"\[ThinSpace]\"", 
+                 GridBox[{{
+                    RowBox[{
+                    RowBox[{"Mechanisms`Private`f_", "/@", 
+                    RowBox[{"(", 
+                    RowBox[{"Mechanisms`Private`m", ":", 
+                    RowBox[{"Linkage", "[", 
+                    
+                    RowBox[{"Mechanisms`Private`coordinates_", ",", "_", ",", 
+                    
+                    RowBox[{"Mechanisms`Private`cells", ":", 
+                    RowBox[{"{", 
+                    RowBox[{
+                    RowBox[{"_", "[", 
+                    RowBox[{"_", ",", "_"}], "]"}], "..."}], "}"}]}], ",", 
+                    "Mechanisms`Private`labels_"}], "]"}]}], ")"}]}], "^:=", 
+                    RowBox[{"With", "[", 
+                    RowBox[{
+                    RowBox[{"{", 
+                    RowBox[{"Mechanisms`Private`newCoordinates", "=", 
+                    
+                    RowBox[{"Mechanisms`Private`f", "/@", 
+                    "Mechanisms`Private`coordinates"}]}], "}"}], ",", 
+                    RowBox[{
+                    RowBox[{"Linkage", "[", 
+                    RowBox[{"Mechanisms`Private`newCoordinates", ",", 
+                    RowBox[{"{", "}"}], ",", "Mechanisms`Private`cells", ",", 
+                    "Mechanisms`Private`labels"}], "]"}], "/;", 
+                    RowBox[{"Mechanisms`Private`mapTestCoordinatesQ", "[", 
+                    
+                    RowBox[{"Mechanisms`Private`newCoordinates", ",", 
+                    "Mechanisms`Private`coordinates"}], "]"}]}]}], "]"}]}]}, {
+                   " "}, {
+                    RowBox[{
+                    
+                    RowBox[{
+                    "Mechanisms`Private`f_Linkage", "/.", "\[VeryThinSpace]", 
+                    "Mechanisms`Private`rule_"}], "^:=", 
+                    RowBox[{"Mechanisms`Private`replaceElement", "[", 
+                    
+                    RowBox[{
+                    "Mechanisms`Private`f", ",", "Mechanisms`Private`rule"}], 
+                    "]"}]}]}, {" "}, {
+                    RowBox[{
+                    
+                    RowBox[{
+                    "Precision", "[", "Mechanisms`Private`f_Linkage", "]"}], 
+                    "^:=", 
+                    RowBox[{"Precision", "[", 
+                    
+                    RowBox[{
+                    "Mechanisms`Private`f", "[", "\"positions\"", "]"}], 
+                    "]"}]}]}, {" "}, {
+                    RowBox[{
+                    RowBox[{"Rationalize", "[", 
+                    
+                    RowBox[{
+                    "Mechanisms`Private`f_Linkage", ",", 
+                    "Mechanisms`Private`dx___"}], "]"}], "^:=", 
+                    RowBox[{"ReplacePart", "[", 
+                    RowBox[{"Mechanisms`Private`f", ",", 
+                    RowBox[{"1", "\[Rule]", 
+                    RowBox[{"ToPackedArray", "[", 
+                    RowBox[{"Rationalize", "[", 
+                    RowBox[{
+                    
+                    RowBox[{"Mechanisms`Private`f", "\[LeftDoubleBracket]", 
+                    "1", "\[RightDoubleBracket]"}], ",", 
+                    "Mechanisms`Private`dx"}], "]"}], "]"}]}]}], "]"}]}]}, {
+                   " "}, {
+                    RowBox[{
+                    
+                    RowBox[{
+                    "RegionEmbeddingDimension", "[", 
+                    "Mechanisms`geometry`Private`o_Linkage", "]"}], "^:=", 
+                    
+                    RowBox[{
+                    "MechanismEmbeddingDimension", "[", 
+                    "Mechanisms`geometry`Private`o", "]"}]}]}, {" "}, {
+                    RowBox[{
+                    
+                    RowBox[{
+                    "RegionDimension", "[", 
+                    "Mechanisms`geometry`Private`o_Linkage", "]"}], "^:=", 
+                    RowBox[{"RegionDimension", "[", 
+                    
+                    RowBox[{
+                    "Mechanisms`geometry`Private`o", "[", "\"mesh\"", "]"}], 
+                    "]"}]}]}, {" "}, {
+                    RowBox[{
+                    RowBox[{"MeshCellCount", "[", 
+                    
+                    RowBox[{
+                    "Mechanisms`geometry`Private`o_Linkage", ",", 
+                    "Mechanisms`geometry`Private`d___"}], "]"}], "^:=", 
+                    RowBox[{"MeshCellCount", "[", 
+                    RowBox[{
+                    
+                    RowBox[{
+                    "Mechanisms`geometry`Private`o", "[", "\"mesh\"", "]"}], 
+                    ",", "Mechanisms`geometry`Private`d"}], "]"}]}]}, {" "}, {
+                   
+                    RowBox[{
+                    RowBox[{"FindGeometricTransform", "[", 
+                    
+                    RowBox[{
+                    "Mechanisms`geometry`Private`m1_Linkage", ",", 
+                    "Mechanisms`geometry`Private`m2_Linkage", ",", 
+                    "Mechanisms`geometry`Private`r___"}], "]"}], "^:=", 
+                    RowBox[{"FindGeometricTransform", "[", 
+                    RowBox[{
+                    
+                    RowBox[{
+                    "Mechanisms`geometry`Private`m1", "[", "\"positions\"", 
+                    "]"}], ",", 
+                    
+                    RowBox[{
+                    "Mechanisms`geometry`Private`m2", "[", "\"positions\"", 
+                    "]"}], ",", "Mechanisms`geometry`Private`r"}], "]"}]}]}, {
+                   " "}, {
+                    RowBox[{
+                    RowBox[{"FindGeometricTransform", "[", 
+                    
+                    RowBox[{
+                    "Mechanisms`geometry`Private`pts_", ",", 
+                    "Mechanisms`geometry`Private`m_Linkage", ",", 
+                    "Mechanisms`geometry`Private`r___"}], "]"}], "^:=", 
+                    RowBox[{"FindGeometricTransform", "[", 
+                    RowBox[{"Mechanisms`geometry`Private`pts", ",", 
+                    
+                    RowBox[{
+                    "Mechanisms`geometry`Private`m", "[", "\"positions\"", 
+                    "]"}], ",", "Mechanisms`geometry`Private`r"}], "]"}]}]}, {
+                   " "}, {
+                    RowBox[{
+                    RowBox[{"BoundingRegion", "[", 
+                    
+                    RowBox[{
+                    "Mechanisms`geometry`Private`o_Linkage", ",", 
+                    "Mechanisms`geometry`Private`r___"}], "]"}], "^:=", 
+                    RowBox[{"BoundingRegion", "[", 
+                    RowBox[{
+                    
+                    RowBox[{
+                    "Mechanisms`geometry`Private`o", "[", "\"positions\"", 
+                    "]"}], ",", "Mechanisms`geometry`Private`r"}], "]"}]}]}, {
+                   " "}, {
+                    RowBox[{
+                    RowBox[{"RegionNearest", "[", 
+                    
+                    RowBox[{
+                    "Mechanisms`geometry`Private`f_Linkage", ",", 
+                    "Mechanisms`geometry`Private`pt_"}], "]"}], "^:=", 
+                    RowBox[{"RegionNearest", "[", 
+                    RowBox[{
+                    
+                    RowBox[{
+                    "Mechanisms`geometry`Private`f", "[", "\"mesh\"", "]"}], 
+                    ",", "Mechanisms`geometry`Private`pt"}], "]"}]}]}, {" "}, {
+                    RowBox[{
+                    
+                    RowBox[{
+                    "RegionNearest", "[", 
+                    "Mechanisms`geometry`Private`f_Linkage", "]"}], "^:=", 
+                    RowBox[{"RegionNearest", "[", 
+                    
+                    RowBox[{
+                    "Mechanisms`geometry`Private`f", "[", "\"mesh\"", "]"}], 
+                    "]"}]}]}, {" "}, {
+                    RowBox[{
+                    RowBox[{"RegionMember", "[", 
+                    
+                    RowBox[{
+                    "Mechanisms`geometry`Private`f_Linkage", ",", 
+                    "Mechanisms`geometry`Private`pt_"}], "]"}], "^:=", 
+                    RowBox[{"RegionMember", "[", 
+                    RowBox[{
+                    
+                    RowBox[{
+                    "Mechanisms`geometry`Private`f", "[", "\"mesh\"", "]"}], 
+                    ",", "Mechanisms`geometry`Private`pt"}], "]"}]}]}, {" "}, {
+                    RowBox[{
+                    
+                    RowBox[{
+                    "RegionMember", "[", 
+                    "Mechanisms`geometry`Private`f_Linkage", "]"}], "^:=", 
+                    RowBox[{"RegionMember", "[", 
+                    
+                    RowBox[{
+                    "Mechanisms`geometry`Private`f", "[", "\"mesh\"", "]"}], 
+                    "]"}]}]}, {" "}, {
+                    RowBox[{
+                    RowBox[{"RegionBounds", "[", 
+                    
+                    RowBox[{
+                    "Mechanisms`geometry`Private`f_Linkage", ",", 
+                    "Mechanisms`geometry`Private`type___"}], "]"}], "^:=", 
+                    RowBox[{"RegionBounds", "[", 
+                    RowBox[{
+                    
+                    RowBox[{
+                    "Mechanisms`geometry`Private`f", "[", "\"mesh\"", "]"}], 
+                    ",", "Mechanisms`geometry`Private`type"}], "]"}]}]}, {
+                   " "}, {
+                    RowBox[{
+                    RowBox[{"RandomPoint", "[", 
+                    
+                    RowBox[{
+                    "Mechanisms`geometry`Private`f_Linkage", ",", 
+                    "Mechanisms`geometry`Private`reg___"}], "]"}], "^:=", 
+                    RowBox[{"RandomPoint", "[", 
+                    RowBox[{
+                    
+                    RowBox[{
+                    "Mechanisms`geometry`Private`f", "[", "\"mesh\"", "]"}], 
+                    ",", "Mechanisms`geometry`Private`reg"}], "]"}]}]}, {
+                   " "}, {
+                    RowBox[{
+                    
+                    RowBox[{
+                    "RegionCentroid", "[", 
+                    "Mechanisms`geometry`Private`f_Linkage", "]"}], "^:=", 
+                    RowBox[{"RegionCentroid", "[", 
+                    
+                    RowBox[{
+                    "Mechanisms`geometry`Private`f", "[", "\"mesh\"", "]"}], 
+                    "]"}]}]}, {" "}, {
+                    RowBox[{
+                    RowBox[{"RegionDistance", "[", 
+                    
+                    RowBox[{
+                    "Mechanisms`geometry`Private`f_Linkage", ",", 
+                    "Mechanisms`geometry`Private`p___"}], "]"}], "^:=", 
+                    RowBox[{"RegionDistance", "[", 
+                    RowBox[{
+                    
+                    RowBox[{
+                    "Mechanisms`geometry`Private`f", "[", "\"mesh\"", "]"}], 
+                    ",", "Mechanisms`geometry`Private`p"}], "]"}]}]}, {" "}, {
+                   
+                    RowBox[{
+                    RowBox[{"SignedRegionDistance", "[", 
+                    
+                    RowBox[{
+                    "Mechanisms`geometry`Private`f_Linkage", ",", 
+                    "Mechanisms`geometry`Private`p___"}], "]"}], "^:=", 
+                    RowBox[{"SignedRegionDistance", "[", 
+                    RowBox[{
+                    
+                    RowBox[{
+                    "Mechanisms`geometry`Private`f", "[", "\"mesh\"", "]"}], 
+                    ",", "Mechanisms`geometry`Private`p"}], "]"}]}]}, {" "}}, 
+                  GridBoxAlignment -> {"Columns" -> {{Left}}}, 
+                  DefaultBaseStyle -> "Column", 
+                  GridBoxItemSize -> {
+                   "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}]},
+                "RowDefault"]},
+              {
+               StyleBox[
+                TagBox[
+                 TooltipBox[
+                  
+                  StyleBox["\<\" SubValue Definitions\"\>", 
+                   "InformationRowLabel",
+                   StripOnInput->False],
+                  "\"SubValues\"",
+                  TooltipStyle->"TextStyling"],
+                 Annotation[#, "SubValues", "Tooltip"]& ], "DialogStyle",
+                StripOnInput->False]},
+              {
+               TemplateBox[{"\"\[ThinSpace]\"", 
+                 GridBox[{{
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"Linkage", "[", 
+                    RowBox[{
+                    
+                    RowBox[{"Mechanisms`Private`coordinates_", "?", 
+                    "MatrixQ"}], ",", 
+                    RowBox[{"Mechanisms`Private`mr", ":", 
+                    RowBox[{"_MeshRegion", "|", 
+                    RowBox[{"{", "}"}]}]}], ",", 
+                    RowBox[{"{", 
+                    RowBox[{
+                    RowBox[{"_", "[", 
+                    RowBox[{"_", ",", "_"}], "]"}], "..."}], "}"}], ",", 
+                    RowBox[{"{", "___Rule", "}"}]}], "]"}], "[", 
+                    "\"Methods\"", "]"}], ":=", 
+                    RowBox[{"{", 
+                    
+                    RowBox[{
+                    "\"type\"", ",", "\"positions\"", ",", "\"mesh\"", ",", 
+                    "\"cells\"", ",", "\"labels\"", ",", 
+                    "\"labeledVertices\"", ",", "\"EmbeddingDimension\"", ",",
+                     "\"DisplayDimension\"", ",", "\"VertexNumber\"", ",", 
+                    "\"edges\"", ",", "\"faces\""}], "}"}]}]}, {" "}, {
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"Linkage", "[", 
+                    RowBox[{
+                    
+                    RowBox[{"Mechanisms`Private`coordinates_", "?", 
+                    "MatrixQ"}], ",", "_", ",", 
+                    RowBox[{"{", 
+                    RowBox[{
+                    RowBox[{"_", "[", 
+                    RowBox[{"_", ",", "_"}], "]"}], "..."}], "}"}], ",", 
+                    RowBox[{"{", "___Rule", "}"}]}], "]"}], "[", "\"type\"", 
+                    "]"}], ":=", "Linkage"}]}, {" "}, {
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"Linkage", "[", 
+                    RowBox[{
+                    
+                    RowBox[{"Mechanisms`Private`coordinates_", "?", 
+                    "MatrixQ"}], ",", "_", ",", 
+                    RowBox[{"{", 
+                    RowBox[{
+                    RowBox[{"_", "[", 
+                    RowBox[{"_", ",", "_"}], "]"}], "..."}], "}"}], ",", 
+                    RowBox[{"{", "___Rule", "}"}]}], "]"}], "[", 
+                    "\"positions\"", "]"}], ":=", 
+                    "Mechanisms`Private`coordinates"}]}, {" "}, {
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"Linkage", "[", 
+                    RowBox[{
+                    
+                    RowBox[{"Mechanisms`Private`coordinates_", "?", 
+                    "MatrixQ"}], ",", "_", ",", 
+                    RowBox[{"Mechanisms`Private`cells", ":", 
+                    RowBox[{"{", 
+                    RowBox[{
+                    RowBox[{"_", "[", 
+                    RowBox[{"_", ",", "_"}], "]"}], "..."}], "}"}]}], ",", 
+                    RowBox[{"{", "___Rule", "}"}]}], "]"}], "[", "\"cells\"", 
+                    "]"}], ":=", "Mechanisms`Private`cells"}]}, {" "}, {
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"Linkage", "[", 
+                    RowBox[{
+                    
+                    RowBox[{"Mechanisms`Private`coordinates_", "?", 
+                    "MatrixQ"}], ",", "_", ",", 
+                    RowBox[{"{", 
+                    RowBox[{
+                    RowBox[{"_", "[", 
+                    RowBox[{"_", ",", "_"}], "]"}], "..."}], "}"}], ",", 
+                    RowBox[{"Mechanisms`Private`labels", ":", 
+                    RowBox[{"{", "___Rule", "}"}]}]}], "]"}], "[", 
+                    "\"labels\"", "]"}], ":=", 
+                    "Mechanisms`Private`labels"}]}, {" "}, {
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"Linkage", "[", 
+                    RowBox[{
+                    
+                    RowBox[{"Mechanisms`Private`coordinates_", "?", 
+                    "MatrixQ"}], ",", "Mechanisms`Private`mr_MeshRegion", ",", 
+                    RowBox[{"{", 
+                    RowBox[{
+                    RowBox[{"_", "[", 
+                    RowBox[{"_", ",", "_"}], "]"}], "..."}], "}"}], ",", 
+                    RowBox[{"{", "___Rule", "}"}]}], "]"}], "[", "\"mesh\"", 
+                    "]"}], ":=", "Mechanisms`Private`mr"}]}, {" "}, {
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"Linkage", "[", 
+                    RowBox[{
+                    
+                    RowBox[{"Mechanisms`Private`coordinates_", "?", 
+                    "MatrixQ"}], ",", 
+                    RowBox[{"{", "}"}], ",", 
+                    RowBox[{"Mechanisms`Private`cells", ":", 
+                    RowBox[{"{", 
+                    RowBox[{
+                    RowBox[{"_", "[", 
+                    RowBox[{"_", ",", "_"}], "]"}], "..."}], "}"}]}], ",", 
+                    RowBox[{"Mechanisms`Private`labels", ":", 
+                    RowBox[{"{", "___Rule", "}"}]}]}], "]"}], "[", "\"mesh\"",
+                     "]"}], ":=", 
+                    RowBox[{"With", "[", 
+                    RowBox[{
+                    RowBox[{"{", 
+                    RowBox[{"Mechanisms`Private`mesh", "=", 
+                    RowBox[{"Mechanisms`Private`createMeshRegion", "[", 
+                    
+                    RowBox[{"Linkage", ",", "Mechanisms`Private`coordinates", 
+                    ",", "Mechanisms`Private`cells", ",", 
+                    RowBox[{"{", "}"}]}], "]"}]}], "}"}], ",", 
+                    RowBox[{"If", "[", 
+                    RowBox[{
+                    
+                    RowBox[{"MeshRegionQ", "[", "Mechanisms`Private`mesh", 
+                    "]"}], ",", "Mechanisms`Private`mesh", ",", 
+                    RowBox[{
+                    RowBox[{"Message", "[", 
+                    RowBox[{
+                    StyleBox[
+                    RowBox[{"Mechanism", "::", "meshfail"}], "MessageName"], 
+                    ",", "Linkage"}], "]"}], ";", "$Failed"}]}], "]"}]}], 
+                    "]"}]}]}, {" "}, {
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"Linkage", "[", 
+                    RowBox[{
+                    
+                    RowBox[{"Mechanisms`Private`coordinates_", "?", 
+                    "MatrixQ"}], ",", "_", ",", 
+                    RowBox[{"{", 
+                    RowBox[{
+                    RowBox[{"_", "[", 
+                    RowBox[{"_", ",", "_"}], "]"}], "..."}], "}"}], ",", 
+                    RowBox[{"Mechanisms`Private`labels", ":", 
+                    RowBox[{"{", "___Rule", "}"}]}]}], "]"}], "[", 
+                    "\"labeledVertices\"", "]"}], ":=", 
+                    RowBox[{"ReplacePart", "[", 
+                    RowBox[{
+                    RowBox[{"ConstantArray", "[", 
+                    RowBox[{"None", ",", 
+                    
+                    RowBox[{"Length", "[", "Mechanisms`Private`coordinates", 
+                    "]"}]}], "]"}], ",", 
+                    RowBox[{"Reverse", "/@", "Mechanisms`Private`labels"}]}], 
+                    "]"}]}]}, {" "}, {
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"Linkage", "[", 
+                    RowBox[{
+                    
+                    RowBox[{"Mechanisms`Private`coordinates_", "?", 
+                    "MatrixQ"}], ",", "_", ",", 
+                    RowBox[{"{", 
+                    RowBox[{
+                    RowBox[{"_", "[", 
+                    RowBox[{"_", ",", "_"}], "]"}], "..."}], "}"}], ",", 
+                    RowBox[{"{", "___Rule", "}"}]}], "]"}], "[", 
+                    "\"EmbeddingDimension\"", "]"}], ":=", 
+                    RowBox[{"Length", "[", 
+                    
+                    RowBox[{
+                    "Mechanisms`Private`coordinates", "\[LeftDoubleBracket]", 
+                    "1", "\[RightDoubleBracket]"}], "]"}]}]}, {" "}, {
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"Linkage", "[", 
+                    RowBox[{
+                    
+                    RowBox[{"Mechanisms`Private`coordinates_", "?", 
+                    "MatrixQ"}], ",", "Mechanisms`Private`mr_MeshRegion", ",", 
+                    RowBox[{"{", 
+                    RowBox[{
+                    RowBox[{"_", "[", 
+                    RowBox[{"_", ",", "_"}], "]"}], "..."}], "}"}], ",", 
+                    RowBox[{"{", "___Rule", "}"}]}], "]"}], "[", 
+                    "\"DisplayDimension\"", "]"}], ":=", 
+                    RowBox[{"Last", "[", 
+                    RowBox[{"Dimensions", "[", 
+                    
+                    RowBox[{
+                    "MeshCoordinates", "[", "Mechanisms`Private`mr", "]"}], 
+                    "]"}], "]"}]}]}, {" "}, {
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"Linkage", "[", 
+                    RowBox[{
+                    
+                    RowBox[{"Mechanisms`Private`coordinates_", "?", 
+                    "MatrixQ"}], ",", 
+                    RowBox[{"{", "}"}], ",", 
+                    RowBox[{"Mechanisms`Private`cells", ":", 
+                    RowBox[{"{", 
+                    RowBox[{
+                    RowBox[{"_", "[", 
+                    RowBox[{"_", ",", "_"}], "]"}], "..."}], "}"}]}], ",", 
+                    RowBox[{"Mechanisms`Private`labels", ":", 
+                    RowBox[{"{", "___Rule", "}"}]}]}], "]"}], "[", 
+                    "\"DisplayDimension\"", "]"}], ":=", 
+                    RowBox[{"Length", "[", 
+                    
+                    RowBox[{
+                    "Mechanisms`Private`coordinates", "\[LeftDoubleBracket]", 
+                    "1", "\[RightDoubleBracket]"}], "]"}]}]}, {" "}, {
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"Linkage", "[", 
+                    RowBox[{
+                    
+                    RowBox[{"Mechanisms`Private`coordinates_", "?", 
+                    "MatrixQ"}], ",", "_", ",", 
+                    RowBox[{"{", 
+                    RowBox[{
+                    RowBox[{"_", "[", 
+                    RowBox[{"_", ",", "_"}], "]"}], "..."}], "}"}], ",", 
+                    RowBox[{"{", "___Rule", "}"}]}], "]"}], "[", 
+                    "\"VertexNumber\"", "]"}], ":=", 
+                    
+                    RowBox[{
+                    "Length", "[", "Mechanisms`Private`coordinates", 
+                    "]"}]}]}, {" "}, {
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"Linkage", "[", 
+                    RowBox[{
+                    RowBox[{"Mechanisms`Private`coordinates_", "?", 
+                    RowBox[{"(", 
+                    RowBox[{
+                    RowBox[{"MatrixQ", "[", 
+                    RowBox[{"#1", ",", "NumericQ"}], "]"}], "&"}], ")"}]}], 
+                    ",", 
+                    RowBox[{"{", "}"}], ",", 
+                    RowBox[{"Mechanisms`Private`cells", ":", 
+                    RowBox[{"{", 
+                    RowBox[{
+                    RowBox[{"_", "[", 
+                    RowBox[{"_", ",", "_"}], "]"}], "..."}], "}"}]}], ",", 
+                    RowBox[{"{", "___Rule", "}"}]}], "]"}], "[", "\"edges\"", 
+                    "]"}], ":=", 
+                    RowBox[{"ToPackedArray", "[", 
+                    RowBox[{
+                    RowBox[{"MeshCells", "[", 
+                    RowBox[{
+                    RowBox[{"Mechanisms`Private`createMeshRegion", "[", 
+                    RowBox[{"Linkage", ",", 
+                    RowBox[{"PadRight", "[", 
+                    RowBox[{"Mechanisms`Private`coordinates", ",", 
+                    RowBox[{"{", 
+                    RowBox[{
+                    
+                    RowBox[{"Length", "[", "Mechanisms`Private`coordinates", 
+                    "]"}], ",", 
+                    
+                    RowBox[{"Mechanisms`Private`chooseDimension", "[", 
+                    "Mechanisms`Private`coordinates", "]"}]}], "}"}]}], "]"}],
+                     ",", "Mechanisms`Private`cells", ",", 
+                    RowBox[{"{", "}"}]}], "]"}], ",", "1"}], "]"}], 
+                    "\[LeftDoubleBracket]", 
+                    RowBox[{"All", ",", "1"}], "\[RightDoubleBracket]"}], 
+                    "]"}]}]}, {" "}, {
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"Linkage", "[", 
+                    RowBox[{
+                    
+                    RowBox[{"Mechanisms`Private`coordinates_", "?", 
+                    "MatrixQ"}], ",", 
+                    RowBox[{"{", "}"}], ",", 
+                    RowBox[{"Mechanisms`Private`cells", ":", 
+                    RowBox[{"{", 
+                    RowBox[{
+                    RowBox[{"_", "[", 
+                    RowBox[{"_", ",", "_"}], "]"}], "..."}], "}"}]}], ",", 
+                    RowBox[{"{", "___Rule", "}"}]}], "]"}], "[", "\"edges\"", 
+                    "]"}], ":=", 
+                    RowBox[{"ToPackedArray", "[", 
+                    RowBox[{"DeleteDuplicatesBy", "[", 
+                    RowBox[{
+                    RowBox[{"Flatten", "[", 
+                    RowBox[{
+                    RowBox[{"Select", "[", 
+                    RowBox[{
+                    
+                    RowBox[{"Mechanisms`Private`cells", 
+                    "\[LeftDoubleBracket]", 
+                    RowBox[{"All", ",", "1"}], "\[RightDoubleBracket]"}], ",", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"MatrixQ", "[", "#1", "]"}], "&&", 
+                    RowBox[{
+                    RowBox[{"Last", "[", 
+                    RowBox[{"Dimensions", "[", "#1", "]"}], "]"}], "\[Equal]",
+                     "2"}]}], "&"}]}], "]"}], ",", "1"}], "]"}], ",", 
+                    "Sort"}], "]"}], "]"}]}]}, {" "}, {
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"Linkage", "[", 
+                    RowBox[{
+                    
+                    RowBox[{"Mechanisms`Private`coordinates_", "?", 
+                    "MatrixQ"}], ",", "Mechanisms`Private`m_MeshRegion", ",", 
+                    
+                    RowBox[{"{", 
+                    RowBox[{
+                    RowBox[{"_", "[", 
+                    RowBox[{"_", ",", "_"}], "]"}], "..."}], "}"}], ",", 
+                    RowBox[{"{", "___Rule", "}"}]}], "]"}], "[", "\"edges\"", 
+                    "]"}], ":=", 
+                    RowBox[{"ToPackedArray", "[", 
+                    RowBox[{
+                    RowBox[{"MeshCells", "[", 
+                    RowBox[{"Mechanisms`Private`m", ",", "1"}], "]"}], 
+                    "\[LeftDoubleBracket]", 
+                    RowBox[{"All", ",", "1"}], "\[RightDoubleBracket]"}], 
+                    "]"}]}]}, {" "}, {
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"Linkage", "[", 
+                    RowBox[{
+                    RowBox[{"Mechanisms`Private`coordinates_", "?", 
+                    RowBox[{"(", 
+                    RowBox[{
+                    RowBox[{"MatrixQ", "[", 
+                    RowBox[{"#1", ",", "NumericQ"}], "]"}], "&"}], ")"}]}], 
+                    ",", 
+                    RowBox[{"{", "}"}], ",", 
+                    RowBox[{"Mechanisms`Private`cells", ":", 
+                    RowBox[{"{", 
+                    RowBox[{
+                    RowBox[{"_", "[", 
+                    RowBox[{"_", ",", "_"}], "]"}], "..."}], "}"}]}], ",", 
+                    RowBox[{"Mechanisms`Private`labels", ":", 
+                    RowBox[{"{", "___Rule", "}"}]}]}], "]"}], "[", 
+                    "\"faces\"", "]"}], ":=", 
+                    RowBox[{"ToPackedArray", "[", 
+                    RowBox[{
+                    RowBox[{"MeshCells", "[", 
+                    RowBox[{
+                    RowBox[{"Mechanisms`Private`createMeshRegion", "[", 
+                    
+                    RowBox[{"Linkage", ",", "Mechanisms`Private`coordinates", 
+                    ",", "Mechanisms`Private`cells", ",", 
+                    RowBox[{"{", "}"}]}], "]"}], ",", "2"}], "]"}], 
+                    "\[LeftDoubleBracket]", 
+                    RowBox[{"All", ",", "1"}], "\[RightDoubleBracket]"}], 
+                    "]"}]}]}, {" "}, {
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"Linkage", "[", 
+                    RowBox[{
+                    
+                    RowBox[{"Mechanisms`Private`coordinates_", "?", 
+                    "MatrixQ"}], ",", 
+                    RowBox[{"{", "}"}], ",", 
+                    RowBox[{"Mechanisms`Private`cells", ":", 
+                    RowBox[{"{", 
+                    RowBox[{
+                    RowBox[{"_", "[", 
+                    RowBox[{"_", ",", "_"}], "]"}], "..."}], "}"}]}], ",", 
+                    RowBox[{"Mechanisms`Private`labels", ":", 
+                    RowBox[{"{", "___Rule", "}"}]}]}], "]"}], "[", 
+                    "\"faces\"", "]"}], ":=", 
+                    RowBox[{"ToPackedArray", "[", 
+                    RowBox[{"DeleteDuplicatesBy", "[", 
+                    RowBox[{
+                    RowBox[{"Flatten", "[", 
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"Cases", "[", 
+                    RowBox[{"Mechanisms`Private`cells", ",", 
+                    
+                    RowBox[{"_Face", "|", 
+                    "_Mechanisms`Private`ElasticFace"}]}], "]"}], 
+                    "\[LeftDoubleBracket]", 
+                    RowBox[{"All", ",", "1"}], "\[RightDoubleBracket]"}], ",",
+                     "1"}], "]"}], ",", "Sort"}], "]"}], "]"}]}]}, {" "}, {
+                    RowBox[{
+                    RowBox[{
+                    RowBox[{"Linkage", "[", 
+                    RowBox[{
+                    
+                    RowBox[{"Mechanisms`Private`coordinates_", "?", 
+                    "MatrixQ"}], ",", "Mechanisms`Private`m_MeshRegion", ",", 
+                    
+                    RowBox[{"{", 
+                    RowBox[{
+                    RowBox[{"_", "[", 
+                    RowBox[{"_", ",", "_"}], "]"}], "..."}], "}"}], ",", 
+                    RowBox[{"{", "___Rule", "}"}]}], "]"}], "[", "\"faces\"", 
+                    "]"}], ":=", 
+                    RowBox[{"ToPackedArray", "[", 
+                    RowBox[{
+                    RowBox[{"MeshCells", "[", 
+                    RowBox[{"Mechanisms`Private`m", ",", "2"}], "]"}], 
+                    "\[LeftDoubleBracket]", 
+                    RowBox[{"All", ",", "1"}], "\[RightDoubleBracket]"}], 
+                    "]"}]}]}, {" "}}, 
+                  GridBoxAlignment -> {"Columns" -> {{Left}}}, 
+                  DefaultBaseStyle -> "Column", 
+                  GridBoxItemSize -> {
+                   "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}]},
+                "RowDefault"]},
+              {
+               StyleBox[
+                TagBox[
+                 TooltipBox[
+                  
+                  StyleBox["\<\" DownValue Definitions\"\>", 
+                   "InformationRowLabel",
+                   StripOnInput->False],
+                  "\"DownValues\"",
+                  TooltipStyle->"TextStyling"],
+                 Annotation[#, "DownValues", "Tooltip"]& ], "DialogStyle",
+                StripOnInput->False]},
+              {
+               TemplateBox[{"\"\[ThinSpace]\"", 
+                 GridBox[{{
+                    RowBox[{
+                    RowBox[{"Linkage", "[", 
+                    RowBox[{
+                    RowBox[{"Mechanisms`Private`f", ":", 
+                    RowBox[{"Linkage", "[", 
+                    RowBox[{
+                    RowBox[{"_", "?", "MatrixQ"}], ",", "_", ",", 
+                    RowBox[{"{", 
+                    RowBox[{
+                    RowBox[{"_", "[", 
+                    RowBox[{"_", ",", "_"}], "]"}], "..."}], "}"}], ",", 
+                    RowBox[{"{", "___Rule", "}"}]}], "]"}]}], ",", 
+                    RowBox[{"Mechanisms`Private`opt", ":", 
+                    RowBox[{"OptionsPattern", "[", "]"}]}]}], "]"}], ":=", 
+                    RowBox[{"With", "[", 
+                    RowBox[{
+                    RowBox[{"{", 
+                    RowBox[{"Mechanisms`Private`meshOptions", "=", 
+                    RowBox[{"FilterRules", "[", 
+                    RowBox[{
+                    RowBox[{"{", "Mechanisms`Private`opt", "}"}], ",", 
+                    RowBox[{"Options", "[", "MeshRegion", "]"}]}], "]"}]}], 
+                    "}"}], ",", 
+                    RowBox[{"Mechanisms`Private`addMeshRegion", "[", 
+                    RowBox[{
+                    
+                    RowBox[{
+                    "Mechanisms`Private`deleteDegenerateCellsFromMechanism", 
+                    "[", 
+                    
+                    RowBox[{"Mechanisms`Private`removeOverlappingCoordinates",
+                     "[", 
+                    RowBox[{"Mechanisms`Private`f", ",", 
+                    RowBox[{"OptionValue", "[", "OverlapPrecision", "]"}]}], 
+                    "]"}], "]"}], ",", "Automatic", ",", 
+                    "Mechanisms`Private`meshOptions"}], "]"}]}], "]"}]}]}, {
+                   " "}, {
+                    RowBox[{
+                    RowBox[{"Linkage", "[", 
+                    
+                    RowBox[{
+                    "Mechanisms`Private`coordinateSpec_", ",", 
+                    "Mechanisms`Private`cellSpec_", ",", 
+                    RowBox[{"Mechanisms`Private`opt", ":", 
+                    RowBox[{"OptionsPattern", "[", "]"}]}]}], "]"}], ":=", 
+                    RowBox[{
+                    RowBox[{"Module", "[", 
+                    RowBox[{
+                    RowBox[{"{", 
+                    RowBox[{
+                    RowBox[{"Mechanisms`Private`meshOptions", "=", 
+                    RowBox[{"FilterRules", "[", 
+                    RowBox[{
+                    RowBox[{"{", "Mechanisms`Private`opt", "}"}], ",", 
+                    RowBox[{"Options", "[", "MeshRegion", "]"}]}], "]"}]}], 
+                    ",", 
+                    RowBox[{"Mechanisms`Private`intermediateParsing", "=", 
+                    RowBox[{"Mechanisms`Private`parseCells", "[", 
+                    RowBox[{
+                    RowBox[{"{", 
+                    RowBox[{"Mechanisms`Private`coordinateSpec", ",", 
+                    RowBox[{"{", "}"}], ",", 
+                    RowBox[{"{", "}"}]}], "}"}], ",", 
+                    RowBox[{"{", "Mechanisms`Private`cellSpec", "}"}]}], 
+                    "]"}]}], ",", "Mechanisms`Private`numberOfCoordinates", 
+                    ",", "Mechanisms`Private`coordinates", ",", 
+                    "Mechanisms`Private`cells", ",", 
+                    "Mechanisms`Private`labels"}], "}"}], ",", 
+                    RowBox[{
+                    RowBox[{"Mechanisms`Private`numberOfCoordinates", "=", 
+                    RowBox[{"Length", "[", 
+                    
+                    RowBox[{"Mechanisms`Private`intermediateParsing", 
+                    "\[LeftDoubleBracket]", "1", "\[RightDoubleBracket]"}], 
+                    "]"}]}], ";", 
+                    RowBox[{
+                    RowBox[{"{", 
+                    
+                    RowBox[{"Mechanisms`Private`coordinates", ",", 
+                    "Mechanisms`Private`cells", ",", 
+                    "Mechanisms`Private`labels"}], "}"}], "=", 
+                    RowBox[{"Mechanisms`Private`parseCells", "[", 
+                    RowBox[{"Mechanisms`Private`intermediateParsing", ",", 
+                    RowBox[{"FreeJoint", "/@", 
+                    RowBox[{"Mechanisms`Private`missingVertices", "[", 
+                    RowBox[{"Mechanisms`Private`numberOfCoordinates", ",", 
+                    
+                    RowBox[{"Mechanisms`Private`intermediateParsing", 
+                    "\[LeftDoubleBracket]", "2", "\[RightDoubleBracket]"}]}], 
+                    "]"}]}]}], "]"}]}], ";", 
+                    RowBox[{"Mechanisms`Private`addMeshRegion", "[", 
+                    RowBox[{
+                    
+                    RowBox[{
+                    "Mechanisms`Private`deleteDegenerateCellsFromMechanism", 
+                    "[", 
+                    
+                    RowBox[{"Mechanisms`Private`removeOverlappingCoordinates",
+                     "[", 
+                    RowBox[{
+                    RowBox[{"Linkage", "[", 
+                    RowBox[{"Mechanisms`Private`coordinates", ",", 
+                    RowBox[{"{", "}"}], ",", "Mechanisms`Private`cells", ",", 
+                    "Mechanisms`Private`labels"}], "]"}], ",", 
+                    RowBox[{"OptionValue", "[", "OverlapPrecision", "]"}]}], 
+                    "]"}], "]"}], ",", "Automatic", ",", 
+                    "Mechanisms`Private`meshOptions"}], "]"}]}]}], "]"}], 
+                    "/;", 
+                    RowBox[{"Mechanisms`Private`LinkagePrecisionQ", "[", 
+                    RowBox[{"OptionValue", "[", "OverlapPrecision", "]"}], 
+                    "]"}]}]}]}, {" "}}, 
+                  GridBoxAlignment -> {"Columns" -> {{Left}}}, 
+                  DefaultBaseStyle -> "Column", 
+                  GridBoxItemSize -> {
+                   "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}]},
+                "RowDefault"]},
+              {
+               StyleBox[
+                TagBox[
+                 TooltipBox[
+                  
+                  StyleBox["\<\" Numeric Definitions\"\>", 
+                   "InformationRowLabel",
+                   StripOnInput->False],
+                  "\"NValues\"",
+                  TooltipStyle->"TextStyling"],
+                 Annotation[#, "NValues", "Tooltip"]& ], "DialogStyle",
+                StripOnInput->False]},
+              {
+               TemplateBox[{"\"\[ThinSpace]\"", 
+                 GridBox[{{
+                    RowBox[{
+                    RowBox[{"N", "[", 
+                    
+                    RowBox[{
+                    "Mechanisms`Private`f_Linkage", ",", 
+                    "Mechanisms`Private`dx___"}], "]"}], ":=", 
+                    RowBox[{"ReplacePart", "[", 
+                    RowBox[{"Mechanisms`Private`f", ",", 
+                    RowBox[{"1", "\[Rule]", 
+                    RowBox[{"ToPackedArray", "[", 
+                    RowBox[{"N", "[", 
+                    RowBox[{
+                    
+                    RowBox[{"Mechanisms`Private`f", "\[LeftDoubleBracket]", 
+                    "1", "\[RightDoubleBracket]"}], ",", 
+                    "Mechanisms`Private`dx"}], "]"}], "]"}]}]}], "]"}]}]}, {
+                   " "}}, GridBoxAlignment -> {"Columns" -> {{Left}}}, 
+                  DefaultBaseStyle -> "Column", 
+                  GridBoxItemSize -> {
+                   "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}]},
+                "RowDefault"]},
+              {
+               StyleBox[
+                TagBox[
+                 TooltipBox[
+                  
+                  StyleBox["\<\" Format Definitions\"\>", 
+                   "InformationRowLabel",
+                   StripOnInput->False],
+                  "\"FormatValues\"",
+                  TooltipStyle->"TextStyling"],
+                 Annotation[#, "FormatValues", "Tooltip"]& ], "DialogStyle",
+                StripOnInput->False]},
+              {
+               TemplateBox[{"\"\[ThinSpace]\"", 
+                 GridBox[{{
+                    StyleBox[
+                    "Linkage /: \
+MakeBoxes[Mechanisms`Private`f:Linkage[(Mechanisms`Private`coordinates_)?(\
+MatrixQ[#1, NumericQ] & ), Mechanisms`Private`mr_, \
+Mechanisms`Private`cells:{_[_, _]...}, {___Rule}], StandardForm] := \
+RowBox[{\"If\", \"[\", RowBox[{RowBox[{\"MeshRegionQ\", \"[\", \
+\"Mechanisms`Private`mr\", \"]\"}], \",\", \"Mechanisms`Private`mr\", \",\", \
+RowBox[{\"Mechanisms`Private`createMeshRegion\", \"[\", RowBox[{\"Linkage\", \
+\",\", \"Mechanisms`Private`coordinates\", \",\", \
+\"Mechanisms`Private`cells\", \",\", RowBox[{\"{\", \"}\"}]}], \"]\"}]}], \"]\
+\"}]", ShowStringCharacters -> True, NumberMarks -> True]}, {" "}, {
+                    StyleBox[
+                    "Linkage /: \
+MakeBoxes[Mechanisms`Private`f:Linkage[Mechanisms`Private`coordinates_, \
+Mechanisms`Private`mr_, Mechanisms`Private`cells:{_[_, _]...}, {___Rule}], \
+StandardForm] := RowBox[{\"If\", \"[\", RowBox[{RowBox[{\"MeshRegionQ\", \
+\"[\", \"Mechanisms`Private`mr\", \"]\"}], \",\", \"Mechanisms`Private`mr\", \
+\",\", RowBox[{\"\\\"Nondisplayable Linkage\\\"\", \"[\", \
+RowBox[{\"\\\"Number Vertices = \\\"\", \"<>\", RowBox[{\"ToString\", \"[\", \
+RowBox[{\"Length\", \"[\", \"Mechanisms`Private`coordinates\", \"]\"}], \
+\"]\"}]}], \"]\"}]}], \"]\"}]", ShowStringCharacters -> True, NumberMarks -> 
+                    True]}, {" "}}, ColumnAlignments -> Left, 
+                  GridBaseline -> {Baseline, {1, 1}}]},
+                "RowDefault"]}
+             },
+             DefaultBaseStyle->"Column",
+             GridBoxAlignment->{"Columns" -> {{Left}}},
+             
+             GridBoxItemSize->{
+              "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+            "Column"],
+           FrameMargins->{{6, 0}, {3, 6}}], "\<\"\"\>"},
+         {
+          PaneBox[GridBox[{
+             {
+              
+              DynamicModuleBox[{System`InformationDump`open$$ = {
+               False, False, False, False, False, False}}, 
+               StyleBox[GridBox[{
+                  {
+                   PaneSelectorBox[{True->
+                    ButtonBox[
+                    PaneSelectorBox[{False->
+                    TemplateBox[{"\[ThickSpace]", "\"\[ThickSpace]\"", 
+                    StyleBox[
+                    "\"Options\"", "InformationRowLabel", StripOnInput -> 
+                    False], 
+                    DynamicBox[
+                    FEPrivate`FrontEndResource[
+                    "FEBitmaps", "DownPointerOpener"]]},
+                    "RowWithSeparators"], True->
+                    TemplateBox[{"\[ThickSpace]", "\"\[ThickSpace]\"", 
+                    StyleBox[
+                    "\"Options\"", "InformationRowLabel", StripOnInput -> 
+                    False], 
+                    DynamicBox[
+                    FEPrivate`FrontEndResource[
+                    "FEBitmaps", "DownPointerOpenerHot"]]},
+                    "RowWithSeparators"]}, Dynamic[
+                    CurrentValue["MouseOver"]],
+                    FrameMargins->0,
+                    ImageSize->Automatic],
+                    Appearance->None,
+                    BaseStyle->None,
+                    
+                    ButtonFunction:>(Part[System`InformationDump`open$$, 3] = 
+                    False),
+                    Evaluator->Automatic,
+                    FrameMargins->0,
+                    ImageMargins->0,
+                    Method->"Preemptive"], False->
+                    ButtonBox[
+                    PaneSelectorBox[{False->
+                    TemplateBox[{"\[ThickSpace]", "\"\[ThickSpace]\"", 
+                    StyleBox[
+                    "\"Options\"", "InformationRowLabel", StripOnInput -> 
+                    False], 
+                    DynamicBox[
+                    FEPrivate`FrontEndResource[
+                    "FEBitmaps", "RightPointerOpener"]]},
+                    "RowWithSeparators"], True->
+                    TemplateBox[{"\[ThickSpace]", "\"\[ThickSpace]\"", 
+                    StyleBox[
+                    "\"Options\"", "InformationRowLabel", StripOnInput -> 
+                    False], 
+                    DynamicBox[
+                    FEPrivate`FrontEndResource[
+                    "FEBitmaps", "RightPointerOpenerHot"]]},
+                    "RowWithSeparators"]}, Dynamic[
+                    CurrentValue["MouseOver"]],
+                    FrameMargins->0,
+                    ImageSize->Automatic],
+                    Appearance->None,
+                    BaseStyle->None,
+                    
+                    ButtonFunction:>(Part[System`InformationDump`open$$, 3] = 
+                    True),
+                    Evaluator->Automatic,
+                    FrameMargins->0,
+                    ImageMargins->0,
+                    Method->"Preemptive"]}, Dynamic[
+                    FEPrivate`Part[System`InformationDump`open$$, 3]]], 
+                   PaneSelectorBox[{True->GridBox[{
+                    {
+                    RowBox[{"OverlapPrecision", "\[Rule]", 
+                    FractionBox["1", "1000000000000"]}]},
+                    {
+                    RowBox[{"AlignmentPoint", "\[Rule]", "Center"}]},
+                    {
+                    RowBox[{"AnnotationRules", "\[Rule]", 
+                    RowBox[{"{", "}"}]}]},
+                    {
+                    RowBox[{"AspectRatio", "\[Rule]", "Automatic"}]},
+                    {
+                    RowBox[{"AutomaticImageSize", "\[Rule]", "False"}]},
+                    {
+                    RowBox[{"Axes", "\[Rule]", "False"}]},
+                    {
+                    RowBox[{"AxesEdge", "\[Rule]", "Automatic"}]},
+                    {
+                    RowBox[{"AxesLabel", "\[Rule]", "None"}]},
+                    {
+                    RowBox[{"AxesOrigin", "\[Rule]", "Automatic"}]},
+                    {
+                    RowBox[{"AxesStyle", "\[Rule]", 
+                    RowBox[{"{", "}"}]}]},
+                    {
+                    RowBox[{"Background", "\[Rule]", "None"}]},
+                    {
+                    RowBox[{"BaselinePosition", "\[Rule]", "Automatic"}]},
+                    {
+                    RowBox[{"BaseStyle", "\[Rule]", 
+                    RowBox[{"{", "}"}]}]},
+                    {
+                    RowBox[{"Boxed", "\[Rule]", "False"}]},
+                    {
+                    RowBox[{"BoxRatios", "\[Rule]", "Automatic"}]},
+                    {
+                    RowBox[{"BoxStyle", "\[Rule]", 
+                    RowBox[{"{", "}"}]}]},
+                    {
+                    RowBox[{"ControllerLinking", "\[Rule]", "False"}]},
+                    {
+                    RowBox[{"ControllerMethod", "\[Rule]", "Automatic"}]},
+                    {
+                    RowBox[{"ControllerPath", "\[Rule]", "Automatic"}]},
+                    {
+                    RowBox[{
+                    "DisplayFunction", "\[RuleDelayed]", "$DisplayFunction"}]},
+                    {
+                    RowBox[{"Epilog", "\[Rule]", 
+                    RowBox[{"{", "}"}]}]},
+                    {
+                    RowBox[{"FaceGrids", "\[Rule]", "None"}]},
+                    {
+                    RowBox[{"FaceGridsStyle", "\[Rule]", 
+                    RowBox[{"{", "}"}]}]},
+                    {
+                    RowBox[{"Frame", "\[Rule]", "False"}]},
+                    {
+                    RowBox[{"FrameLabel", "\[Rule]", "None"}]},
+                    {
+                    RowBox[{"FrameStyle", "\[Rule]", 
+                    RowBox[{"{", "}"}]}]},
+                    {
+                    RowBox[{"FrameTicks", "\[Rule]", "None"}]},
+                    {
+                    RowBox[{"FrameTicksStyle", "\[Rule]", 
+                    RowBox[{"{", "}"}]}]},
+                    {
+                    RowBox[{"GridLines", "\[Rule]", "None"}]},
+                    {
+                    RowBox[{"GridLinesStyle", "\[Rule]", 
+                    RowBox[{"{", "}"}]}]},
+                    {
+                    RowBox[{"ImageMargins", "\[Rule]", "0.`"}]},
+                    {
+                    RowBox[{"ImagePadding", "\[Rule]", "All"}]},
+                    {
+                    RowBox[{"ImageSize", "\[Rule]", "Automatic"}]},
+                    {
+                    RowBox[{"LabelStyle", "\[Rule]", 
+                    RowBox[{"{", "}"}]}]},
+                    {
+                    RowBox[{"Lighting", "\[Rule]", "Automatic"}]},
+                    {
+                    RowBox[{"MeshCellHighlight", "\[Rule]", 
+                    RowBox[{"{", "}"}]}]},
+                    {
+                    RowBox[{"MeshCellLabel", "\[Rule]", "Automatic"}]},
+                    {
+                    RowBox[{"MeshCellMarker", "\[Rule]", "0"}]},
+                    {
+                    RowBox[{"MeshCellShapeFunction", "\[Rule]", "Automatic"}]},
+                    {
+                    RowBox[{"MeshCellStyle", "\[Rule]", "Automatic"}]},
+                    {
+                    RowBox[{"Method", "\[Rule]", "Automatic"}]},
+                    {
+                    RowBox[{
+                    "PerformanceGoal", "\[RuleDelayed]", "$PerformanceGoal"}]},
+                    {
+                    RowBox[{"PlotLabel", "\[Rule]", "None"}]},
+                    {
+                    RowBox[{"PlotRange", "\[Rule]", "All"}]},
+                    {
+                    RowBox[{"PlotRangeClipping", "\[Rule]", "False"}]},
+                    {
+                    RowBox[{"PlotRangePadding", "\[Rule]", "Automatic"}]},
+                    {
+                    RowBox[{"PlotRegion", "\[Rule]", "Automatic"}]},
+                    {
+                    RowBox[{"PlotTheme", "\[Rule]", "Automatic"}]},
+                    {
+                    RowBox[{"Prolog", "\[Rule]", 
+                    RowBox[{"{", "}"}]}]},
+                    {
+                    RowBox[{"Properties", "\[Rule]", 
+                    RowBox[{"{", "}"}]}]},
+                    {
+                    RowBox[{"RotateLabel", "\[Rule]", "True"}]},
+                    {
+                    RowBox[{"RotationAction", "\[Rule]", "Fit"}]},
+                    {
+                    RowBox[{"SphericalRegion", "\[Rule]", "Automatic"}]},
+                    {
+                    RowBox[{"Ticks", "\[Rule]", "Automatic"}]},
+                    {
+                    RowBox[{"TicksStyle", "\[Rule]", 
+                    RowBox[{"{", "}"}]}]},
+                    {
+                    RowBox[{"TouchscreenAutoZoom", "\[Rule]", "Automatic"}]},
+                    {
+                    RowBox[{"ViewAngle", "\[Rule]", "Automatic"}]},
+                    {
+                    RowBox[{"ViewCenter", "\[Rule]", "Automatic"}]},
+                    {
+                    RowBox[{"ViewMatrix", "\[Rule]", "Automatic"}]},
+                    {
+                    RowBox[{"ViewPoint", "\[Rule]", 
+                    RowBox[{"{", 
+                    RowBox[{"1.3`", ",", 
+                    RowBox[{"-", "2.4`"}], ",", "2.`"}], "}"}]}]},
+                    {
+                    RowBox[{"ViewProjection", "\[Rule]", "Automatic"}]},
+                    {
+                    RowBox[{"ViewRange", "\[Rule]", "All"}]},
+                    {
+                    RowBox[{"ViewVector", "\[Rule]", "Automatic"}]},
+                    {
+                    RowBox[{"ViewVertical", "\[Rule]", 
+                    RowBox[{"{", 
+                    RowBox[{"0", ",", "0", ",", "1"}], "}"}]}]},
+                    {
+                    StyleBox[
+                    
+                    TemplateBox[{
+                    "\"(\"", "\"\[InvisibleSpace]\"", "64", "\" total)\""},
+                    "RowDefault"], "InformationRowOpener",
+                    StripOnInput->False]}
+                    },
+                    BaselinePosition->{Baseline, {1, 1}},
+                    DefaultBaseStyle->"Column",
+                    GridBoxAlignment->{"Columns" -> {{Left}}},
+                    
+                    GridBoxItemSize->{
+                    "Columns" -> {{Automatic}}, "Rows" -> {{1.}}}], False->
+                    RowBox[{
+                    RowBox[{"OverlapPrecision", "\[Rule]", 
+                    FractionBox["1", "1000000000000"]}], "\[ThinSpace]", 
+                    StyleBox["\<\"\[Ellipsis]\"\>", "InformationRowOpener",
+                    StripOnInput->False], "\[ThinSpace]", 
+                    StyleBox[
+                    
+                    TemplateBox[{
+                    "\"(\"", "\"\[InvisibleSpace]\"", "64", "\" total)\""},
+                    "RowDefault"], "InformationRowOpener",
+                    StripOnInput->False]}]}, Dynamic[
+                    FEPrivate`Part[System`InformationDump`open$$, 3]],
+                    BaselinePosition->Baseline,
+                    ImageSize->Automatic]},
+                  {
+                   TagBox[
+                    TooltipBox[
+                    StyleBox["\<\" Attributes\"\>", "InformationRowLabel",
+                    StripOnInput->False],
+                    "\"Attributes\"",
+                    TooltipStyle->"TextStyling"],
+                    Annotation[#, "Attributes", "Tooltip"]& ], 
+                   RowBox[{"{", "NHoldAll", "}"}]},
+                  {
+                   TagBox[
+                    TooltipBox[
+                    StyleBox["\<\" Full Name\"\>", "InformationRowLabel",
+                    StripOnInput->False],
+                    "\"FullName\"",
+                    TooltipStyle->"TextStyling"],
+                    
+                    Annotation[#, "FullName", 
+                    "Tooltip"]& ], "\<\"Mechanisms`Linkage\"\>"}
+                 },
+                 AutoDelete->False,
+                 GridBoxAlignment->{"Columns" -> {Right, Left}},
+                 GridBoxDividers->None,
+                 GridBoxItemSize->{"Columns" -> {Automatic, Automatic}},
+                 GridBoxSpacings->{"Columns" -> {
+                    Offset[0.27999999999999997`], {
+                    Offset[0.5599999999999999]}, 
+                    Offset[0.27999999999999997`]}, "Rows" -> {
+                    Offset[0.2], {
+                    Offset[0.8]}, 
+                    Offset[0.2]}}], "DialogStyle",
+                StripOnInput->False],
+               DynamicModuleValues:>{}]}
+            },
+            DefaultBaseStyle->"Column",
+            GridBoxAlignment->{"Columns" -> {{Left}}},
+            GridBoxDividers->{"Columns" -> {{False}}, "Rows" -> {{False}}},
+            
+            GridBoxItemSize->{
+             "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+            GridBoxSpacings->{"Columns" -> {
+                Offset[0.27999999999999997`], {
+                 Offset[0.5599999999999999]}, 
+                Offset[0.27999999999999997`]}, "Rows" -> {
+                Offset[0.2], {
+                 Offset[3.6]}, 
+                Offset[0.2]}}],
+           FrameMargins->{{6, 6}, {6, 3}}], ""},
+         {
+          ItemBox[
+           TagBox[
+            ButtonBox[
+             PaneSelectorBox[{False->
+              
+              DynamicBox[FEPrivate`FrontEndResource[
+               "FEBitmaps", "UpPointerOpener"]], True->
+              
+              DynamicBox[FEPrivate`FrontEndResource[
+               "FEBitmaps", "UpPointerOpenerHot"]]}, Dynamic[
+              System`InformationDump`mouseOver$$]],
+             Alignment->Left,
+             Appearance->{"Default" -> None},
+             
+             ButtonFunction:>FEPrivate`Set[
+              System`InformationDump`open$$, False],
+             Evaluator->Automatic,
+             FrameMargins->{{9, 0}, {0, 0}},
+             ImageMargins->0,
+             ImageSize->Full,
+             Method->"Preemptive"],
+            
+            EventHandlerTag[{
+             "MouseEntered" :> 
+              FEPrivate`Set[System`InformationDump`mouseOver$$, True], 
+              "MouseExited" :> 
+              FEPrivate`Set[System`InformationDump`mouseOver$$, False], 
+              Method -> "Preemptive", PassEventsDown -> Automatic, 
+              PassEventsUp -> True}]],
+           BaseStyle->"InformationTitleBackground",
+           StripOnInput->False], "\[SpanFromLeft]"}
+        },
+        AutoDelete->False,
+        FrameStyle->Directive[
+          GrayLevel[0.8], 
+          Thickness[Tiny]],
+        GridBoxAlignment->{"Columns" -> {Left, Right}, "Rows" -> {{Center}}},
+        GridBoxDividers->{
+         "Columns" -> {{None}}, "Rows" -> {False, {True}, False}},
+        GridBoxItemSize->{
+         "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+       "Grid"], False->
+      TagBox[GridBox[{
+         {
+          ItemBox[
+           PaneBox[
+            StyleBox["\<\" Symbol\"\>", "InformationTitleText",
+             StripOnInput->False],
+            FrameMargins->{{4, 0}, {-1, 1}}],
+           BaseStyle->"InformationTitleBackground",
+           StripOnInput->False], 
+          ItemBox["\<\"\"\>",
+           BaseStyle->"InformationTitleBackground",
+           StripOnInput->False]},
+         {
+          ItemBox[
+           PaneBox[
+            
+            StyleBox["\<\"Linkage[ { {x1, y1}, ...}, {cell1[ {i1, i2, ..} ], \
+... } ] returns a linkage in 2D with vertices at {{x1, y1}, ..} and made from \
+the specified cells.\\nLinkage[ { {x1, y1, z1}, ...}, {cell1[ {i1, i2, ..} ], \
+... } ] returns a linkage in 3D with vertices at {{x1, y1}, ..} and made from \
+the specified cells.\\n\\nProperties:\\n\\nCell properties can be specified \
+by Property[ cell1[ {i1, ...} ], {property1 -> value1, ... } ].\\nProperties \
+are \\\"Style\\\", \\\"Shape\\\" (to specify a shape function), \
+\\\"Label\\\". DefaultCellData[cell] will list additional properties that can \
+be specified.\\n\\nOptions:\\n\\nLinkage[] takes the option \
+\\\"OverlapPrecision\\\" which determines how close vertices need to be in \
+order to be mapped onto each other. This could be set to 0 (or None).\"\>", 
+             "InformationUsageText",
+             StripOnInput->False,
+             LineSpacing->{1.5, 1.5, 3.}],
+            FrameMargins->{{10, 10}, {8, 10}}],
+           BaseStyle->"InformationUsageSubtitleBackground",
+           StripOnInput->False], 
+          ItemBox["\<\"\"\>",
+           BaseStyle->"InformationUsageSubtitleBackground",
+           StripOnInput->False]},
+         {
+          ItemBox[
+           TagBox[
+            ButtonBox[
+             PaneSelectorBox[{False->
+              
+              DynamicBox[FEPrivate`FrontEndResource[
+               "FEBitmaps", "DownPointerOpener"],
+               ImageSizeCache->{10., {2., 8.}}], True->
+              
+              DynamicBox[FEPrivate`FrontEndResource[
+               "FEBitmaps", "DownPointerOpenerHot"],
+               ImageSizeCache->{10., {2., 8.}}]}, Dynamic[
+              System`InformationDump`mouseOver$$]],
+             Alignment->Left,
+             Appearance->{"Default" -> None},
+             
+             ButtonFunction:>FEPrivate`Set[
+              System`InformationDump`open$$, True],
+             Evaluator->Automatic,
+             FrameMargins->{{9, 0}, {0, 0}},
+             ImageMargins->0,
+             ImageSize->Full,
+             Method->"Preemptive"],
+            
+            EventHandlerTag[{
+             "MouseEntered" :> 
+              FEPrivate`Set[System`InformationDump`mouseOver$$, True], 
+              "MouseExited" :> 
+              FEPrivate`Set[System`InformationDump`mouseOver$$, False], 
+              Method -> "Preemptive", PassEventsDown -> Automatic, 
+              PassEventsUp -> True}]],
+           BaseStyle->"InformationTitleBackground",
+           StripOnInput->False], "\[SpanFromLeft]"}
+        },
+        AutoDelete->False,
+        FrameStyle->Directive[
+          GrayLevel[0.8], 
+          Thickness[Tiny]],
+        GridBoxAlignment->{"Columns" -> {Left, Right}, "Rows" -> {{Center}}},
+        GridBoxDividers->{
+         "Columns" -> {{None}}, "Rows" -> {False, {True}, False}},
+        GridBoxItemSize->{
+         "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+       "Grid"]}, Dynamic[System`InformationDump`open$$],
+      BaselinePosition->Baseline,
+      FrameMargins->0,
+      ImageSize->Automatic],
+     DynamicModuleValues:>{}],
+    BaseStyle->"InformationGridFrame",
+    StripOnInput->False], "InformationGridPlain",
+   StripOnInput->False],
+  InformationData[
+   Association[
+   "ObjectType" -> "Symbol", "Usage" -> 
+    "Linkage[ { {x1, y1}, ...}, {cell1[ {i1, i2, ..} ], ... } ] returns a \
+linkage in 2D with vertices at {{x1, y1}, ..} and made from the specified \
+cells.\nLinkage[ { {x1, y1, z1}, ...}, {cell1[ {i1, i2, ..} ], ... } ] \
+returns a linkage in 3D with vertices at {{x1, y1}, ..} and made from the \
+specified cells.\n\nProperties:\n\nCell properties can be specified by \
+Property[ cell1[ {i1, ...} ], {property1 -> value1, ... } ].\nProperties are \
+\"Style\", \"Shape\" (to specify a shape function), \"Label\". \
+DefaultCellData[cell] will list additional properties that can be specified.\n\
+\nOptions:\n\nLinkage[] takes the option \"OverlapPrecision\" which \
+determines how close vertices need to be in order to be mapped onto each \
+other. This could be set to 0 (or None).", "Documentation" -> None, 
+    "OwnValues" -> None, "UpValues" -> 
+    Information`InformationValueForm[UpValues, Mechanisms`Linkage, {Map[
+         Pattern[Mechanisms`Private`f, 
+          Blank[]], 
+         Pattern[Mechanisms`Private`m, 
+          Mechanisms`Linkage[
+           Pattern[Mechanisms`Private`coordinates, 
+            Blank[]], 
+           Blank[], 
+           Pattern[Mechanisms`Private`cells, {
+             RepeatedNull[
+              Blank[][
+               Blank[], 
+               Blank[]]]}], 
+           Pattern[Mechanisms`Private`labels, 
+            Blank[]]]]] :> 
+       With[{
+         Mechanisms`Private`newCoordinates = 
+          Map[Mechanisms`Private`f, Mechanisms`Private`coordinates]}, 
+         Condition[
+          Mechanisms`Linkage[
+          Mechanisms`Private`newCoordinates, {}, Mechanisms`Private`cells, 
+           Mechanisms`Private`labels], 
+          Mechanisms`Private`mapTestCoordinatesQ[
+          Mechanisms`Private`newCoordinates, 
+           Mechanisms`Private`coordinates]]], ReplaceAll[
+         Pattern[Mechanisms`Private`f, 
+          Blank[Mechanisms`Linkage]], 
+         Pattern[Mechanisms`Private`rule, 
+          Blank[]]] :> 
+       Mechanisms`Private`replaceElement[
+        Mechanisms`Private`f, Mechanisms`Private`rule], Precision[
+         Pattern[Mechanisms`Private`f, 
+          Blank[Mechanisms`Linkage]]] :> Precision[
+         Mechanisms`Private`f["positions"]], Rationalize[
+         Pattern[Mechanisms`Private`f, 
+          Blank[Mechanisms`Linkage]], 
+         Pattern[Mechanisms`Private`dx, 
+          BlankNullSequence[]]] :> 
+       ReplacePart[Mechanisms`Private`f, 1 -> Developer`ToPackedArray[
+           Rationalize[
+            Part[Mechanisms`Private`f, 1], Mechanisms`Private`dx]]], 
+       RegionEmbeddingDimension[
+         Pattern[Mechanisms`geometry`Private`o, 
+          Blank[Mechanisms`Linkage]]] :> 
+       Mechanisms`geometry`MechanismEmbeddingDimension[
+        Mechanisms`geometry`Private`o], RegionDimension[
+         Pattern[Mechanisms`geometry`Private`o, 
+          Blank[Mechanisms`Linkage]]] :> RegionDimension[
+         Mechanisms`geometry`Private`o["mesh"]], MeshCellCount[
+         Pattern[Mechanisms`geometry`Private`o, 
+          Blank[Mechanisms`Linkage]], 
+         Pattern[Mechanisms`geometry`Private`d, 
+          BlankNullSequence[]]] :> MeshCellCount[
+         Mechanisms`geometry`Private`o["mesh"], 
+         Mechanisms`geometry`Private`d], FindGeometricTransform[
+         Pattern[Mechanisms`geometry`Private`m1, 
+          Blank[Mechanisms`Linkage]], 
+         Pattern[Mechanisms`geometry`Private`m2, 
+          Blank[Mechanisms`Linkage]], 
+         Pattern[Mechanisms`geometry`Private`r, 
+          BlankNullSequence[]]] :> FindGeometricTransform[
+         Mechanisms`geometry`Private`m1["positions"], 
+         Mechanisms`geometry`Private`m2["positions"], 
+         Mechanisms`geometry`Private`r], FindGeometricTransform[
+         Pattern[Mechanisms`geometry`Private`pts, 
+          Blank[]], 
+         Pattern[Mechanisms`geometry`Private`m, 
+          Blank[Mechanisms`Linkage]], 
+         Pattern[Mechanisms`geometry`Private`r, 
+          BlankNullSequence[]]] :> 
+       FindGeometricTransform[Mechanisms`geometry`Private`pts, 
+         Mechanisms`geometry`Private`m["positions"], 
+         Mechanisms`geometry`Private`r], BoundingRegion[
+         Pattern[Mechanisms`geometry`Private`o, 
+          Blank[Mechanisms`Linkage]], 
+         Pattern[Mechanisms`geometry`Private`r, 
+          BlankNullSequence[]]] :> BoundingRegion[
+         Mechanisms`geometry`Private`o["positions"], 
+         Mechanisms`geometry`Private`r], RegionNearest[
+         Pattern[Mechanisms`geometry`Private`f, 
+          Blank[Mechanisms`Linkage]], 
+         Pattern[Mechanisms`geometry`Private`pt, 
+          Blank[]]] :> RegionNearest[
+         Mechanisms`geometry`Private`f["mesh"], 
+         Mechanisms`geometry`Private`pt], RegionNearest[
+         Pattern[Mechanisms`geometry`Private`f, 
+          Blank[Mechanisms`Linkage]]] :> RegionNearest[
+         Mechanisms`geometry`Private`f["mesh"]], RegionMember[
+         Pattern[Mechanisms`geometry`Private`f, 
+          Blank[Mechanisms`Linkage]], 
+         Pattern[Mechanisms`geometry`Private`pt, 
+          Blank[]]] :> RegionMember[
+         Mechanisms`geometry`Private`f["mesh"], 
+         Mechanisms`geometry`Private`pt], RegionMember[
+         Pattern[Mechanisms`geometry`Private`f, 
+          Blank[Mechanisms`Linkage]]] :> RegionMember[
+         Mechanisms`geometry`Private`f["mesh"]], RegionBounds[
+         Pattern[Mechanisms`geometry`Private`f, 
+          Blank[Mechanisms`Linkage]], 
+         Pattern[Mechanisms`geometry`Private`type, 
+          BlankNullSequence[]]] :> RegionBounds[
+         Mechanisms`geometry`Private`f["mesh"], 
+         Mechanisms`geometry`Private`type], RandomPoint[
+         Pattern[Mechanisms`geometry`Private`f, 
+          Blank[Mechanisms`Linkage]], 
+         Pattern[Mechanisms`geometry`Private`reg, 
+          BlankNullSequence[]]] :> RandomPoint[
+         Mechanisms`geometry`Private`f["mesh"], 
+         Mechanisms`geometry`Private`reg], RegionCentroid[
+         Pattern[Mechanisms`geometry`Private`f, 
+          Blank[Mechanisms`Linkage]]] :> RegionCentroid[
+         Mechanisms`geometry`Private`f["mesh"]], RegionDistance[
+         Pattern[Mechanisms`geometry`Private`f, 
+          Blank[Mechanisms`Linkage]], 
+         Pattern[Mechanisms`geometry`Private`p, 
+          BlankNullSequence[]]] :> RegionDistance[
+         Mechanisms`geometry`Private`f["mesh"], 
+         Mechanisms`geometry`Private`p], SignedRegionDistance[
+         Pattern[Mechanisms`geometry`Private`f, 
+          Blank[Mechanisms`Linkage]], 
+         Pattern[Mechanisms`geometry`Private`p, 
+          BlankNullSequence[]]] :> SignedRegionDistance[
+         Mechanisms`geometry`Private`f["mesh"], 
+         Mechanisms`geometry`Private`p]}], "DownValues" -> 
+    Information`InformationValueForm[
+     DownValues, Mechanisms`Linkage, {Mechanisms`Linkage[
+         Pattern[Mechanisms`Private`f, 
+          Mechanisms`Linkage[
+           PatternTest[
+            Blank[], MatrixQ], 
+           Blank[], {
+            RepeatedNull[
+             Blank[][
+              Blank[], 
+              Blank[]]]}, {
+            BlankNullSequence[Rule]}]], 
+         Pattern[Mechanisms`Private`opt, 
+          OptionsPattern[]]] :> 
+       With[{Mechanisms`Private`meshOptions = 
+          FilterRules[{Mechanisms`Private`opt}, 
+            Options[MeshRegion]]}, 
+         Mechanisms`Private`addMeshRegion[
+          Mechanisms`Private`deleteDegenerateCellsFromMechanism[
+           Mechanisms`Private`removeOverlappingCoordinates[
+           Mechanisms`Private`f, 
+            OptionValue[Mechanisms`OverlapPrecision]]], Automatic, 
+          Mechanisms`Private`meshOptions]], Mechanisms`Linkage[
+         Pattern[Mechanisms`Private`coordinateSpec, 
+          Blank[]], 
+         Pattern[Mechanisms`Private`cellSpec, 
+          Blank[]], 
+         Pattern[Mechanisms`Private`opt, 
+          OptionsPattern[]]] :> Condition[
+         Module[{
+          Mechanisms`Private`meshOptions = 
+           FilterRules[{Mechanisms`Private`opt}, 
+             Options[MeshRegion]], Mechanisms`Private`intermediateParsing = 
+           Mechanisms`Private`parseCells[{
+             Mechanisms`Private`coordinateSpec, {}, {}}, {
+             Mechanisms`Private`cellSpec}], 
+           Mechanisms`Private`numberOfCoordinates, 
+           Mechanisms`Private`coordinates, Mechanisms`Private`cells, 
+           Mechanisms`Private`labels}, 
+          Mechanisms`Private`numberOfCoordinates = Length[
+             Part[Mechanisms`Private`intermediateParsing, 1]]; {
+            Mechanisms`Private`coordinates, Mechanisms`Private`cells, 
+             Mechanisms`Private`labels} = 
+           Mechanisms`Private`parseCells[
+            Mechanisms`Private`intermediateParsing, 
+             Map[Mechanisms`FreeJoint, 
+              Mechanisms`Private`missingVertices[
+              Mechanisms`Private`numberOfCoordinates, 
+               Part[Mechanisms`Private`intermediateParsing, 2]]]]; 
+          Mechanisms`Private`addMeshRegion[
+            Mechanisms`Private`deleteDegenerateCellsFromMechanism[
+             Mechanisms`Private`removeOverlappingCoordinates[
+              Mechanisms`Linkage[
+              Mechanisms`Private`coordinates, {}, Mechanisms`Private`cells, 
+               Mechanisms`Private`labels], 
+              OptionValue[Mechanisms`OverlapPrecision]]], Automatic, 
+            Mechanisms`Private`meshOptions]], 
+         Mechanisms`Private`LinkagePrecisionQ[
+          OptionValue[Mechanisms`OverlapPrecision]]]}], "SubValues" -> 
+    Information`InformationValueForm[
+     SubValues, Mechanisms`Linkage, {Mechanisms`Linkage[
+         PatternTest[
+          Pattern[Mechanisms`Private`coordinates, 
+           Blank[]], MatrixQ], 
+         Pattern[Mechanisms`Private`mr, 
+          Alternatives[
+           Blank[MeshRegion], {}]], {
+          RepeatedNull[
+           Blank[][
+            Blank[], 
+            Blank[]]]}, {
+          BlankNullSequence[Rule]}]["Methods"] :> {
+        "type", "positions", "mesh", "cells", "labels", "labeledVertices", 
+         "EmbeddingDimension", "DisplayDimension", "VertexNumber", "edges", 
+         "faces"}, Mechanisms`Linkage[
+         PatternTest[
+          Pattern[Mechanisms`Private`coordinates, 
+           Blank[]], MatrixQ], 
+         Blank[], {
+          RepeatedNull[
+           Blank[][
+            Blank[], 
+            Blank[]]]}, {
+          BlankNullSequence[Rule]}]["type"] :> Mechanisms`Linkage, 
+       Mechanisms`Linkage[
+         PatternTest[
+          Pattern[Mechanisms`Private`coordinates, 
+           Blank[]], MatrixQ], 
+         Blank[], {
+          RepeatedNull[
+           Blank[][
+            Blank[], 
+            Blank[]]]}, {
+          BlankNullSequence[Rule]}]["positions"] :> 
+       Mechanisms`Private`coordinates, Mechanisms`Linkage[
+         PatternTest[
+          Pattern[Mechanisms`Private`coordinates, 
+           Blank[]], MatrixQ], 
+         Blank[], 
+         Pattern[Mechanisms`Private`cells, {
+           RepeatedNull[
+            Blank[][
+             Blank[], 
+             Blank[]]]}], {
+          BlankNullSequence[Rule]}]["cells"] :> Mechanisms`Private`cells, 
+       Mechanisms`Linkage[
+         PatternTest[
+          Pattern[Mechanisms`Private`coordinates, 
+           Blank[]], MatrixQ], 
+         Blank[], {
+          RepeatedNull[
+           Blank[][
+            Blank[], 
+            Blank[]]]}, 
+         Pattern[Mechanisms`Private`labels, {
+           BlankNullSequence[Rule]}]]["labels"] :> Mechanisms`Private`labels, 
+       Mechanisms`Linkage[
+         PatternTest[
+          Pattern[Mechanisms`Private`coordinates, 
+           Blank[]], MatrixQ], 
+         Pattern[Mechanisms`Private`mr, 
+          Blank[MeshRegion]], {
+          RepeatedNull[
+           Blank[][
+            Blank[], 
+            Blank[]]]}, {
+          BlankNullSequence[Rule]}]["mesh"] :> Mechanisms`Private`mr, 
+       Mechanisms`Linkage[
+         PatternTest[
+          Pattern[Mechanisms`Private`coordinates, 
+           Blank[]], MatrixQ], {}, 
+         Pattern[Mechanisms`Private`cells, {
+           RepeatedNull[
+            Blank[][
+             Blank[], 
+             Blank[]]]}], 
+         Pattern[Mechanisms`Private`labels, {
+           BlankNullSequence[Rule]}]]["mesh"] :> 
+       With[{Mechanisms`Private`mesh = 
+          Mechanisms`Private`createMeshRegion[
+           Mechanisms`Linkage, Mechanisms`Private`coordinates, 
+            Mechanisms`Private`cells, {}]}, 
+         If[
+          MeshRegionQ[Mechanisms`Private`mesh], Mechanisms`Private`mesh, 
+          Message[
+            MessageName[Mechanisms`Mechanism, "meshfail"], 
+            Mechanisms`Linkage]; $Failed]], Mechanisms`Linkage[
+         PatternTest[
+          Pattern[Mechanisms`Private`coordinates, 
+           Blank[]], MatrixQ], 
+         Blank[], {
+          RepeatedNull[
+           Blank[][
+            Blank[], 
+            Blank[]]]}, 
+         Pattern[Mechanisms`Private`labels, {
+           BlankNullSequence[Rule]}]]["labeledVertices"] :> ReplacePart[
+         ConstantArray[None, 
+          Length[Mechanisms`Private`coordinates]], 
+         Map[Reverse, Mechanisms`Private`labels]], Mechanisms`Linkage[
+         PatternTest[
+          Pattern[Mechanisms`Private`coordinates, 
+           Blank[]], MatrixQ], 
+         Blank[], {
+          RepeatedNull[
+           Blank[][
+            Blank[], 
+            Blank[]]]}, {
+          BlankNullSequence[Rule]}]["EmbeddingDimension"] :> Length[
+         Part[Mechanisms`Private`coordinates, 1]], Mechanisms`Linkage[
+         PatternTest[
+          Pattern[Mechanisms`Private`coordinates, 
+           Blank[]], MatrixQ], 
+         Pattern[Mechanisms`Private`mr, 
+          Blank[MeshRegion]], {
+          RepeatedNull[
+           Blank[][
+            Blank[], 
+            Blank[]]]}, {
+          BlankNullSequence[Rule]}]["DisplayDimension"] :> Last[
+         Dimensions[
+          MeshCoordinates[Mechanisms`Private`mr]]], Mechanisms`Linkage[
+         PatternTest[
+          Pattern[Mechanisms`Private`coordinates, 
+           Blank[]], MatrixQ], {}, 
+         Pattern[Mechanisms`Private`cells, {
+           RepeatedNull[
+            Blank[][
+             Blank[], 
+             Blank[]]]}], 
+         Pattern[Mechanisms`Private`labels, {
+           BlankNullSequence[Rule]}]]["DisplayDimension"] :> Length[
+         Part[Mechanisms`Private`coordinates, 1]], Mechanisms`Linkage[
+         PatternTest[
+          Pattern[Mechanisms`Private`coordinates, 
+           Blank[]], MatrixQ], 
+         Blank[], {
+          RepeatedNull[
+           Blank[][
+            Blank[], 
+            Blank[]]]}, {
+          BlankNullSequence[Rule]}]["VertexNumber"] :> 
+       Length[Mechanisms`Private`coordinates], Mechanisms`Linkage[
+         PatternTest[
+          Pattern[Mechanisms`Private`coordinates, 
+           Blank[]], MatrixQ[#, NumericQ]& ], {}, 
+         Pattern[Mechanisms`Private`cells, {
+           RepeatedNull[
+            Blank[][
+             Blank[], 
+             Blank[]]]}], {
+          BlankNullSequence[Rule]}]["edges"] :> Developer`ToPackedArray[
+         Part[
+          MeshCells[
+           Mechanisms`Private`createMeshRegion[Mechanisms`Linkage, 
+            PadRight[Mechanisms`Private`coordinates, {
+              Length[Mechanisms`Private`coordinates], 
+              Mechanisms`Private`chooseDimension[
+              Mechanisms`Private`coordinates]}], 
+            Mechanisms`Private`cells, {}], 1], All, 1]], Mechanisms`Linkage[
+         PatternTest[
+          Pattern[Mechanisms`Private`coordinates, 
+           Blank[]], MatrixQ], {}, 
+         Pattern[Mechanisms`Private`cells, {
+           RepeatedNull[
+            Blank[][
+             Blank[], 
+             Blank[]]]}], {
+          BlankNullSequence[Rule]}]["edges"] :> Developer`ToPackedArray[
+         DeleteDuplicatesBy[
+          Flatten[
+           Select[
+            Part[Mechanisms`Private`cells, All, 1], And[
+             MatrixQ[#], Last[
+               Dimensions[#]] == 2]& ], 1], Sort]], Mechanisms`Linkage[
+         PatternTest[
+          Pattern[Mechanisms`Private`coordinates, 
+           Blank[]], MatrixQ], 
+         Pattern[Mechanisms`Private`m, 
+          Blank[MeshRegion]], {
+          RepeatedNull[
+           Blank[][
+            Blank[], 
+            Blank[]]]}, {
+          BlankNullSequence[Rule]}]["edges"] :> Developer`ToPackedArray[
+         Part[
+          MeshCells[Mechanisms`Private`m, 1], All, 1]], Mechanisms`Linkage[
+         PatternTest[
+          Pattern[Mechanisms`Private`coordinates, 
+           Blank[]], MatrixQ[#, NumericQ]& ], {}, 
+         Pattern[Mechanisms`Private`cells, {
+           RepeatedNull[
+            Blank[][
+             Blank[], 
+             Blank[]]]}], 
+         Pattern[Mechanisms`Private`labels, {
+           BlankNullSequence[Rule]}]]["faces"] :> Developer`ToPackedArray[
+         Part[
+          MeshCells[
+           Mechanisms`Private`createMeshRegion[
+           Mechanisms`Linkage, Mechanisms`Private`coordinates, 
+            Mechanisms`Private`cells, {}], 2], All, 1]], Mechanisms`Linkage[
+         PatternTest[
+          Pattern[Mechanisms`Private`coordinates, 
+           Blank[]], MatrixQ], {}, 
+         Pattern[Mechanisms`Private`cells, {
+           RepeatedNull[
+            Blank[][
+             Blank[], 
+             Blank[]]]}], 
+         Pattern[Mechanisms`Private`labels, {
+           BlankNullSequence[Rule]}]]["faces"] :> Developer`ToPackedArray[
+         DeleteDuplicatesBy[
+          Flatten[
+           Part[
+            Cases[Mechanisms`Private`cells, 
+             Alternatives[
+              Blank[Mechanisms`Face], 
+              Blank[Mechanisms`Private`ElasticFace]]], All, 1], 1], Sort]], 
+       Mechanisms`Linkage[
+         PatternTest[
+          Pattern[Mechanisms`Private`coordinates, 
+           Blank[]], MatrixQ], 
+         Pattern[Mechanisms`Private`m, 
+          Blank[MeshRegion]], {
+          RepeatedNull[
+           Blank[][
+            Blank[], 
+            Blank[]]]}, {
+          BlankNullSequence[Rule]}]["faces"] :> Developer`ToPackedArray[
+         Part[
+          MeshCells[Mechanisms`Private`m, 2], All, 1]]}], "DefaultValues" -> 
+    None, "NValues" -> 
+    Information`InformationValueForm[NValues, Mechanisms`Linkage, {N[
+         Pattern[Mechanisms`Private`f, 
+          Blank[Mechanisms`Linkage]], 
+         Pattern[Mechanisms`Private`dx, 
+          BlankNullSequence[]]] :> 
+       ReplacePart[Mechanisms`Private`f, 1 -> Developer`ToPackedArray[
+           N[
+            Part[Mechanisms`Private`f, 1], Mechanisms`Private`dx]]]}], 
+    "FormatValues" -> 
+    Information`InformationValueForm[
+     FormatValues, Mechanisms`Linkage, {MakeBoxes[
+         Pattern[Mechanisms`Private`f, 
+          Mechanisms`Linkage[
+           PatternTest[
+            Pattern[Mechanisms`Private`coordinates, 
+             Blank[]], MatrixQ[#, NumericQ]& ], 
+           Pattern[Mechanisms`Private`mr, 
+            Blank[]], 
+           Pattern[Mechanisms`Private`cells, {
+             RepeatedNull[
+              Blank[][
+               Blank[], 
+               Blank[]]]}], {
+            BlankNullSequence[Rule]}]], StandardForm] :> Format[
+         If[
+          MeshRegionQ[Mechanisms`Private`mr], Mechanisms`Private`mr, 
+          Mechanisms`Private`createMeshRegion[
+          Mechanisms`Linkage, Mechanisms`Private`coordinates, 
+           Mechanisms`Private`cells, {}]], StandardForm], MakeBoxes[
+         Pattern[Mechanisms`Private`f, 
+          Mechanisms`Linkage[
+           Pattern[Mechanisms`Private`coordinates, 
+            Blank[]], 
+           Pattern[Mechanisms`Private`mr, 
+            Blank[]], 
+           Pattern[Mechanisms`Private`cells, {
+             RepeatedNull[
+              Blank[][
+               Blank[], 
+               Blank[]]]}], {
+            BlankNullSequence[Rule]}]], StandardForm] :> Format[
+         If[
+          MeshRegionQ[Mechanisms`Private`mr], Mechanisms`Private`mr, 
+          "Nondisplayable Linkage"[
+           StringJoin["Number Vertices = ", 
+            ToString[
+             Length[Mechanisms`Private`coordinates]]]]], StandardForm]}], 
+    "Options" -> {
+     Mechanisms`OverlapPrecision -> Rational[1, 1000000000000], 
+      AlignmentPoint -> Center, AnnotationRules -> {}, AspectRatio -> 
+      Automatic, AutomaticImageSize -> False, Axes -> False, AxesEdge -> 
+      Automatic, AxesLabel -> None, AxesOrigin -> Automatic, AxesStyle -> {}, 
+      Background -> None, BaselinePosition -> Automatic, BaseStyle -> {}, 
+      Boxed -> False, BoxRatios -> Automatic, BoxStyle -> {}, 
+      ControllerLinking -> False, ControllerMethod -> Automatic, 
+      ControllerPath -> Automatic, DisplayFunction :> $DisplayFunction, 
+      Epilog -> {}, FaceGrids -> None, FaceGridsStyle -> {}, Frame -> False, 
+      FrameLabel -> None, FrameStyle -> {}, FrameTicks -> None, 
+      FrameTicksStyle -> {}, GridLines -> None, GridLinesStyle -> {}, 
+      ImageMargins -> 0., ImagePadding -> All, ImageSize -> Automatic, 
+      LabelStyle -> {}, Lighting -> Automatic, MeshCellHighlight -> {}, 
+      MeshCellLabel -> Automatic, MeshCellMarker -> 0, MeshCellShapeFunction -> 
+      Automatic, MeshCellStyle -> Automatic, Method -> Automatic, 
+      PerformanceGoal :> $PerformanceGoal, PlotLabel -> None, PlotRange -> 
+      All, PlotRangeClipping -> False, PlotRangePadding -> Automatic, 
+      PlotRegion -> Automatic, PlotTheme -> Automatic, Prolog -> {}, 
+      Properties -> {}, RotateLabel -> True, RotationAction -> Fit, 
+      SphericalRegion -> Automatic, Ticks -> Automatic, TicksStyle -> {}, 
+      TouchscreenAutoZoom -> Automatic, ViewAngle -> Automatic, ViewCenter -> 
+      Automatic, ViewMatrix -> Automatic, ViewPoint -> {1.3, -2.4, 2.}, 
+      ViewProjection -> Automatic, ViewRange -> All, ViewVector -> Automatic, 
+      ViewVertical -> {0, 0, 1}}, "Attributes" -> {NHoldAll}, "FullName" -> 
+    "Mechanisms`Linkage"], False]]], "Output",
+ CellLabel->"Out[41]=",ExpressionUUID->"a2a0d48b-9347-4468-b2fe-f959dc5f5c75"]
+}, Open  ]]
+}, Open  ]]
+},
+WindowSize->{808, 706},
+WindowMargins->{{Automatic, 230}, {19, Automatic}},
+FrontEndVersion->"12.3 for Mac OS X x86 (64-bit) (May 11, 2021)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"e17ec2a0-f65b-4ab0-9e24-e332bbbfcfc9"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 81, 0, 67, "Section",ExpressionUUID->"8a17468c-318a-42df-abd7-a3fbe46aaa0e"],
+Cell[CellGroupData[{
+Cell[686, 26, 129, 2, 30, "Input",ExpressionUUID->"aaa9e56e-2422-4249-914d-c347740722e0"],
+Cell[818, 30, 84576, 1888, 424, "Output",ExpressionUUID->"a2a0d48b-9347-4468-b2fe-f959dc5f5c75"]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+

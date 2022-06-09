@@ -1,0 +1,625 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 12.1' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[     25273,        617]
+NotebookOptionsPosition[     21290,        540]
+NotebookOutlinePosition[     21683,        556]
+CellTagsIndexPosition[     21640,        553]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["Spring", "Section",ExpressionUUID->"8a17468c-318a-42df-abd7-a3fbe46aaa0e"],
+
+Cell["\<\
+Spring[{v1,v2}] represents an elastic spring joining vertex v1 to vertex v2.\
+\>", "Text",
+ Background->GrayLevel[
+  0.85],ExpressionUUID->"763ab846-c398-4c6f-8ada-ea56cc278480"],
+
+Cell[CellGroupData[{
+
+Cell["Basic examples", "Subsection",ExpressionUUID->"117915f2-82d1-4fab-a496-fd5a2cbbb56d"],
+
+Cell["Create a linkage with one rigid bar.", "Text",ExpressionUUID->"d3a20e2e-731f-4576-be54-bc3ddb5ab78d"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"m", "=", 
+  RowBox[{"Linkage", "[", 
+   RowBox[{
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"0", ",", "0"}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"1", ",", "0"}], "}"}]}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{"Spring", "[", 
+      RowBox[{"{", 
+       RowBox[{"1", ",", "2"}], "}"}], "]"}], "}"}]}], "]"}]}]], "Input",
+ CellLabel->"In[62]:=",ExpressionUUID->"05b3b061-5875-4131-97b3-25cf043d27da"],
+
+Cell[BoxData[
+ GraphicsBox[
+  TagBox[
+   DynamicModuleBox[{Typeset`mesh = {
+    MeshRegion, {
+     Properties -> {{1, 1} -> (
+         MeshCellShapeFunction -> (
+          Mechanisms`graphics`SpringShape[][#, #2, #3]& )), {1, Default} -> (
+         MeshCellShapeFunction -> Automatic), {0, 1} -> (MeshCellStyle -> 
+         Directive[
+           GrayLevel[0]]), {0, 2} -> (MeshCellStyle -> Directive[
+           GrayLevel[0]]), {0, Default} -> (MeshCellStyle -> Automatic), {1, 
+         1} -> (MeshCellStyle -> Directive[
+           GrayLevel[0]]), {1, Default} -> (MeshCellStyle -> Automatic)}, 
+      Method -> {
+       "DeleteDuplicateCoordinates" -> False, "CoplanarityTolerance" -> 
+        100}}}}, 
+    TagBox[GraphicsComplexBox[{{0., 0.}, {1., 0.}}, 
+      {Hue[0.6, 0.3, 0.75], 
+       TagBox[LineBox[{{1, 2}}],
+        Annotation[#, "Geometry"]& ], PointBox[{1, 2}], 
+       {GrayLevel[0], BezierCurveBox[CompressedData["
+1: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
+         "]]}, 
+       {GrayLevel[0], PointBox[{1, 2}]}}],
+     MouseAppearanceTag["LinkHand"]],
+    AllowKernelInitialization->False],
+   "MeshGraphics",
+   AutoDelete->True,
+   Editable->False,
+   Selectable->False],
+  DefaultBaseStyle->{
+   "MeshGraphics", FrontEnd`GraphicsHighlightColor -> 
+    Hue[0.1, 1, 0.7]}]], "Output",
+ CellLabel->"Out[62]=",ExpressionUUID->"e0cf291a-1bc3-4427-a3cd-a2128aaf8399"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Properties", "Subsection",ExpressionUUID->"a049e762-22d7-4067-ac3d-b01f28e1dfb9"],
+
+Cell["\<\
+See what properties are available to RigidBar. In addition to these, all \
+cells take \[OpenCurlyDoubleQuote]Shape\[CloseCurlyDoubleQuote], \
+\[OpenCurlyDoubleQuote]Style\[CloseCurlyDoubleQuote] and \
+\[OpenCurlyDoubleQuote]Label\[CloseCurlyDoubleQuote].\
+\>", "Text",ExpressionUUID->"b19a002c-4392-401c-842f-3742a76190a0"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"DefaultCellData", "[", "Spring", "]"}]], "Input",
+ CellLabel->"In[63]:=",ExpressionUUID->"94c3c1ba-b5fd-48cd-ad34-76593ff7732a"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"\<\"EquilibriumLength\"\>", "\[Rule]", "Automatic"}], ",", 
+   RowBox[{"\<\"Stiffness\"\>", "\[Rule]", "\[Infinity]"}], ",", 
+   RowBox[{"\<\"Strain\"\>", "\[Rule]", "\<\"LinearStrain\"\>"}]}], 
+  "}"}]], "Output",
+ CellLabel->"Out[63]=",ExpressionUUID->"7c694bd7-a013-41fc-bf0a-526aa0e5a84f"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["\[OpenCurlyDoubleQuote]EquilibriumLength\[CloseCurlyDoubleQuote]", \
+"Subsubsection",ExpressionUUID->"58bc9b15-ed5b-441d-970c-eccbe7440ceb"],
+
+Cell["\<\
+\[OpenCurlyDoubleQuote]EquilibriumLength\[CloseCurlyDoubleQuote] is used to \
+set the equilibrium length of the spring. Use Automatic to set the \
+equilibrium length according to the vertex positions.\
+\>", "Text",ExpressionUUID->"44c3887d-2626-4be5-9112-1d1ec7d6827f"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"m", "=", 
+   RowBox[{"Linkage", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"0", ",", "0"}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"1", ",", "0"}], "}"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"Property", "[", 
+       RowBox[{
+        RowBox[{"Spring", "[", 
+         RowBox[{"{", 
+          RowBox[{"1", ",", "2"}], "}"}], "]"}], ",", 
+        RowBox[{"{", 
+         RowBox[{"\"\<EquilibriumLength\>\"", "->", "1"}], "}"}]}], "]"}], 
+      "}"}]}], "]"}]}], ";"}]], "Input",
+ CellLabel->"In[64]:=",ExpressionUUID->"e5ea4ae3-03ed-4a29-9748-4ae0141921c1"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["\[OpenCurlyDoubleQuote]Stiffness\[CloseCurlyDoubleQuote]", \
+"Subsubsection",ExpressionUUID->"322db626-204b-47f4-973a-4a93f66b3b75"],
+
+Cell["\<\
+This property sets the stiffness of a spring. If the stiffness is Infinity, \
+Mechanisms will attempt to constraint the length.\
+\>", "Text",ExpressionUUID->"2235b645-9ff3-4bc4-a248-11e5bff3d15d"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"m", "=", 
+   RowBox[{"Linkage", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"0", ",", "0"}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"1", ",", "0"}], "}"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"Property", "[", 
+       RowBox[{
+        RowBox[{"Spring", "[", 
+         RowBox[{"{", 
+          RowBox[{"1", ",", "2"}], "}"}], "]"}], ",", 
+        RowBox[{"{", 
+         RowBox[{
+          RowBox[{"\"\<EquilibriumLength\>\"", "->", "l"}], ",", 
+          RowBox[{"\"\<Stiffness\>\"", "->", "k"}]}], "}"}]}], "]"}], "}"}]}],
+     "]"}]}], ";"}]], "Input",
+ CellLabel->"In[67]:=",ExpressionUUID->"faf2a00f-c80c-4f77-9493-bcecf2b33008"],
+
+Cell["\<\
+For finite stiffness, the default energy of the mechanism is based on the \
+length of the bar according to the energy
+
+k ( -1 + l/l0)^2
+
+where l0 is the equilibrium length and k is the stiffness.\
+\>", "Text",ExpressionUUID->"a81fad50-3206-4c5b-b70b-106a253f618f"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"MechanismEnergy", "[", "m", "]"}]], "Input",
+ CellLabel->"In[69]:=",ExpressionUUID->"f5ad5dc6-0e53-47b8-9a89-0af7b63fa913"],
+
+Cell[BoxData[
+ RowBox[{
+  FractionBox["1", 
+   SuperscriptBox["l", "2"]], 
+  RowBox[{"k", " ", 
+   SuperscriptBox[
+    RowBox[{"(", 
+     RowBox[{
+      RowBox[{"-", "l"}], "+", 
+      RowBox[{"\[Sqrt]", 
+       RowBox[{"(", 
+        RowBox[{
+         SuperscriptBox[
+          RowBox[{"(", 
+           RowBox[{
+            RowBox[{"-", 
+             RowBox[{"VertexPosition", "[", 
+              RowBox[{"1", ",", "\<\"x\"\>"}], "]"}]}], "+", 
+            RowBox[{"VertexPosition", "[", 
+             RowBox[{"2", ",", "\<\"x\"\>"}], "]"}]}], ")"}], "2"], "+", 
+         SuperscriptBox[
+          RowBox[{"(", 
+           RowBox[{
+            RowBox[{"-", 
+             RowBox[{"VertexPosition", "[", 
+              RowBox[{"1", ",", "\<\"y\"\>"}], "]"}]}], "+", 
+            RowBox[{"VertexPosition", "[", 
+             RowBox[{"2", ",", "\<\"y\"\>"}], "]"}]}], ")"}], "2"]}], 
+        ")"}]}]}], ")"}], "2"]}]}]], "Output",
+ CellLabel->"Out[69]=",ExpressionUUID->"8347dc4f-be45-4d2e-ab50-343a95496548"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["\[OpenCurlyDoubleQuote]Strain\[CloseCurlyDoubleQuote]", "Subsubsection",ExpressionUUID->"1406e183-d830-4902-94f0-23dfaa88387d"],
+
+Cell["\<\
+Is a property that allows you to change the form of the strain. The energy is \
+always given by the square of the strain normalized by the stiffness.\
+\>", "Text",ExpressionUUID->"0171b9bd-0f9d-4d4a-a4ee-3dab816b8466"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"m", "=", 
+   RowBox[{"Linkage", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"0", ",", "0"}], "}"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"1", ",", "0"}], "}"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"Property", "[", 
+       RowBox[{
+        RowBox[{"Spring", "[", 
+         RowBox[{"{", 
+          RowBox[{"1", ",", "2"}], "}"}], "]"}], ",", 
+        RowBox[{"{", 
+         RowBox[{
+          RowBox[{"\"\<Strain\>\"", "->", 
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{"(", 
+              RowBox[{
+               RowBox[{"#", "/", "a"}], "-", "2"}], ")"}], "&"}], ")"}]}], 
+          ",", 
+          RowBox[{"\"\<Stiffness\>\"", "->", "k"}]}], "}"}]}], "]"}], "}"}]}],
+     "]"}]}], ";"}]], "Input",
+ CellLabel->"In[79]:=",ExpressionUUID->"2b8f7d95-175a-4722-91fd-68558731a521"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"MechanismEnergy", "[", "m", "]"}]], "Input",
+ CellLabel->"In[80]:=",ExpressionUUID->"d641e0c5-631a-498c-9520-620035b05944"],
+
+Cell[BoxData[
+ RowBox[{"k", " ", 
+  SuperscriptBox[
+   RowBox[{"(", 
+    RowBox[{
+     RowBox[{"-", "2"}], "+", 
+     RowBox[{
+      FractionBox["1", "a"], 
+      RowBox[{"(", 
+       RowBox[{"\[Sqrt]", 
+        RowBox[{"(", 
+         RowBox[{
+          SuperscriptBox[
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{"-", 
+              RowBox[{"VertexPosition", "[", 
+               RowBox[{"1", ",", "\<\"x\"\>"}], "]"}]}], "+", 
+             RowBox[{"VertexPosition", "[", 
+              RowBox[{"2", ",", "\<\"x\"\>"}], "]"}]}], ")"}], "2"], "+", 
+          SuperscriptBox[
+           RowBox[{"(", 
+            RowBox[{
+             RowBox[{"-", 
+              RowBox[{"VertexPosition", "[", 
+               RowBox[{"1", ",", "\<\"y\"\>"}], "]"}]}], "+", 
+             RowBox[{"VertexPosition", "[", 
+              RowBox[{"2", ",", "\<\"y\"\>"}], "]"}]}], ")"}], "2"]}], 
+         ")"}]}], ")"}]}]}], ")"}], "2"]}]], "Output",
+ CellLabel->"Out[80]=",ExpressionUUID->"b0064c94-492e-4b16-81b3-64d47bd669a4"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["\[OpenCurlyDoubleQuote]Shape\[CloseCurlyDoubleQuote]", "Subsubsection",ExpressionUUID->"751a5719-b968-4b70-bd73-72eaec79c20d"],
+
+Cell["\<\
+The standard shape of a rigid bar can be set with the \
+\[OpenCurlyDoubleQuote]Shape\[CloseCurlyDoubleQuote] property and the \
+function SpringShape[]. SpringShape[] takes the following options.\
+\>", "Text",ExpressionUUID->"7f788bbb-182f-4675-90b3-2c9a5c75e3da"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Options", "[", "SpringShape", "]"}]], "Input",
+ CellLabel->"In[70]:=",ExpressionUUID->"1b93d5b2-cf4c-4d8c-b577-c741a683e43f"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"\<\"Width\"\>", "\[Rule]", "0.005`"}], ",", 
+   RowBox[{"\<\"number\"\>", "\[Rule]", "10"}], ",", 
+   RowBox[{"\<\"resolution\"\>", "\[Rule]", "26"}]}], "}"}]], "Output",
+ CellLabel->"Out[70]=",ExpressionUUID->"06f1c92c-c43f-4ece-b4d5-45141df7909a"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"m", "=", 
+  RowBox[{"Linkage", "[", 
+   RowBox[{
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"0", ",", "0"}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"1", ",", "0"}], "}"}]}], "}"}], ",", 
+    RowBox[{"{", 
+     RowBox[{"Property", "[", 
+      RowBox[{
+       RowBox[{"Spring", "[", 
+        RowBox[{"{", 
+         RowBox[{"1", ",", "2"}], "}"}], "]"}], ",", 
+       RowBox[{"{", 
+        RowBox[{"\"\<Shape\>\"", "->", 
+         RowBox[{"SpringShape", "[", 
+          RowBox[{"\"\<Width\>\"", "->", "0.02"}], "]"}]}], "}"}]}], "]"}], 
+     "}"}]}], "]"}]}]], "Input",
+ CellLabel->"In[74]:=",ExpressionUUID->"a62197d2-18b6-48ea-823f-5275478d4de6"],
+
+Cell[BoxData[
+ GraphicsBox[
+  TagBox[
+   DynamicModuleBox[{Typeset`mesh = {
+    MeshRegion, {
+     Properties -> {{1, 1} -> (
+         MeshCellShapeFunction -> (Mechanisms`graphics`SpringShape[
+          "Width" -> 0.02][#, #2, #3]& )), {1, Default} -> (
+         MeshCellShapeFunction -> Automatic), {0, 1} -> (MeshCellStyle -> 
+         Directive[
+           GrayLevel[0]]), {0, 2} -> (MeshCellStyle -> Directive[
+           GrayLevel[0]]), {0, Default} -> (MeshCellStyle -> Automatic), {1, 
+         1} -> (MeshCellStyle -> Directive[
+           GrayLevel[0]]), {1, Default} -> (MeshCellStyle -> Automatic)}, 
+      Method -> {
+       "DeleteDuplicateCoordinates" -> False, "CoplanarityTolerance" -> 
+        100}}}}, 
+    TagBox[GraphicsComplexBox[{{0., 0.}, {1., 0.}}, 
+      {Hue[0.6, 0.3, 0.75], 
+       TagBox[LineBox[{{1, 2}}],
+        Annotation[#, "Geometry"]& ], PointBox[{1, 2}], 
+       {GrayLevel[0], BezierCurveBox[CompressedData["
+1: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
+Hjsm33GG9jC+r0z+KjAM5O8D/wMyhy6v
+         "]]}, 
+       {GrayLevel[0], PointBox[{1, 2}]}}],
+     MouseAppearanceTag["LinkHand"]],
+    AllowKernelInitialization->False],
+   "MeshGraphics",
+   AutoDelete->True,
+   Editable->False,
+   Selectable->False],
+  DefaultBaseStyle->{
+   "MeshGraphics", FrontEnd`GraphicsHighlightColor -> 
+    Hue[0.1, 1, 0.7]}]], "Output",
+ CellLabel->"Out[74]=",ExpressionUUID->"add47872-be46-4270-85bb-5daf357ec119"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["\[OpenCurlyDoubleQuote]Style\[CloseCurlyDoubleQuote]", "Subsubsection",ExpressionUUID->"9873cb6c-6400-4be5-9d72-f0aa1665f702"],
+
+Cell["\[OpenCurlyDoubleQuote]Style\[CloseCurlyDoubleQuote] is used to set \
+standard Graphics style elements.", "Text",ExpressionUUID->"bde25a30-5e6c-\
+4003-bd4f-ef3aa3bb7038"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["\[OpenCurlyDoubleQuote]Label\[CloseCurlyDoubleQuote]", "Subsubsection",ExpressionUUID->"7c2816c3-ebc5-45e1-b917-9f022355f87d"],
+
+Cell["\[OpenCurlyDoubleQuote]Label\[CloseCurlyDoubleQuote] is used to label a \
+spring.", "Text",ExpressionUUID->"1c8f00fa-4de1-486e-9a12-4768e87e92aa"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+},
+WindowSize->{808, 706},
+WindowMargins->{{Automatic, 230}, {19, Automatic}},
+FrontEndVersion->"12.3 for Mac OS X x86 (64-bit) (May 11, 2021)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"e17ec2a0-f65b-4ab0-9e24-e332bbbfcfc9"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 80, 0, 67, "Section",ExpressionUUID->"8a17468c-318a-42df-abd7-a3fbe46aaa0e"],
+Cell[663, 24, 188, 4, 51, "Text",ExpressionUUID->"763ab846-c398-4c6f-8ada-ea56cc278480"],
+Cell[CellGroupData[{
+Cell[876, 32, 91, 0, 54, "Subsection",ExpressionUUID->"117915f2-82d1-4fab-a496-fd5a2cbbb56d"],
+Cell[970, 34, 107, 0, 35, "Text",ExpressionUUID->"d3a20e2e-731f-4576-be54-bc3ddb5ab78d"],
+Cell[CellGroupData[{
+Cell[1102, 38, 463, 14, 30, "Input",ExpressionUUID->"05b3b061-5875-4131-97b3-25cf043d27da"],
+Cell[1568, 54, 5049, 94, 38, "Output",ExpressionUUID->"e0cf291a-1bc3-4427-a3cd-a2128aaf8399"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[6666, 154, 87, 0, 54, "Subsection",ExpressionUUID->"a049e762-22d7-4067-ac3d-b01f28e1dfb9"],
+Cell[6756, 156, 333, 5, 35, "Text",ExpressionUUID->"b19a002c-4392-401c-842f-3742a76190a0"],
+Cell[CellGroupData[{
+Cell[7114, 165, 152, 2, 30, "Input",ExpressionUUID->"94c3c1ba-b5fd-48cd-ad34-76593ff7732a"],
+Cell[7269, 169, 345, 7, 34, "Output",ExpressionUUID->"7c694bd7-a013-41fc-bf0a-526aa0e5a84f"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[7651, 181, 146, 1, 45, "Subsubsection",ExpressionUUID->"58bc9b15-ed5b-441d-970c-eccbe7440ceb"],
+Cell[7800, 184, 279, 4, 58, "Text",ExpressionUUID->"44c3887d-2626-4be5-9112-1d1ec7d6827f"],
+Cell[8082, 190, 657, 20, 30, "Input",ExpressionUUID->"e5ea4ae3-03ed-4a29-9748-4ae0141921c1"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[8776, 215, 138, 1, 45, "Subsubsection",ExpressionUUID->"322db626-204b-47f4-973a-4a93f66b3b75"],
+Cell[8917, 218, 206, 3, 58, "Text",ExpressionUUID->"2235b645-9ff3-4bc4-a248-11e5bff3d15d"],
+Cell[9126, 223, 734, 22, 52, "Input",ExpressionUUID->"faf2a00f-c80c-4f77-9493-bcecf2b33008"],
+Cell[9863, 247, 274, 7, 150, "Text",ExpressionUUID->"a81fad50-3206-4c5b-b70b-106a253f618f"],
+Cell[CellGroupData[{
+Cell[10162, 258, 147, 2, 30, "Input",ExpressionUUID->"f5ad5dc6-0e53-47b8-9a89-0af7b63fa913"],
+Cell[10312, 262, 1005, 29, 78, "Output",ExpressionUUID->"8347dc4f-be45-4d2e-ab50-343a95496548"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[11366, 297, 133, 0, 45, "Subsubsection",ExpressionUUID->"1406e183-d830-4902-94f0-23dfaa88387d"],
+Cell[11502, 299, 228, 3, 58, "Text",ExpressionUUID->"0171b9bd-0f9d-4d4a-a4ee-3dab816b8466"],
+Cell[11733, 304, 899, 28, 52, "Input",ExpressionUUID->"2b8f7d95-175a-4722-91fd-68558731a521"],
+Cell[CellGroupData[{
+Cell[12657, 336, 147, 2, 30, "Input",ExpressionUUID->"d641e0c5-631a-498c-9520-620035b05944"],
+Cell[12807, 340, 1030, 29, 90, "Output",ExpressionUUID->"b0064c94-492e-4b16-81b3-64d47bd669a4"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[13886, 375, 132, 0, 45, "Subsubsection",ExpressionUUID->"751a5719-b968-4b70-bd73-72eaec79c20d"],
+Cell[14021, 377, 273, 4, 58, "Text",ExpressionUUID->"7f788bbb-182f-4675-90b3-2c9a5c75e3da"],
+Cell[CellGroupData[{
+Cell[14319, 385, 149, 2, 30, "Input",ExpressionUUID->"1b93d5b2-cf4c-4d8c-b577-c741a683e43f"],
+Cell[14471, 389, 301, 6, 34, "Output",ExpressionUUID->"06f1c92c-c43f-4ece-b4d5-45141df7909a"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[14809, 400, 702, 21, 52, "Input",ExpressionUUID->"a62197d2-18b6-48ea-823f-5275478d4de6"],
+Cell[15514, 423, 5052, 94, 45, "Output",ExpressionUUID->"add47872-be46-4270-85bb-5daf357ec119"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[20615, 523, 132, 0, 45, "Subsubsection",ExpressionUUID->"9873cb6c-6400-4be5-9d72-f0aa1665f702"],
+Cell[20750, 525, 176, 2, 35, "Text",ExpressionUUID->"bde25a30-5e6c-4003-bd4f-ef3aa3bb7038"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[20963, 532, 132, 0, 45, "Subsubsection",ExpressionUUID->"7c2816c3-ebc5-45e1-b917-9f022355f87d"],
+Cell[21098, 534, 152, 1, 35, "Text",ExpressionUUID->"1c8f00fa-4de1-486e-9a12-4768e87e92aa"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+

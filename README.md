@@ -2,7 +2,7 @@
 
 The mechanisms package is now a Paclet. I don't have a Paclet server set up so the easiest way to install it is to open a Mathematica notebook and run the following commands:
 
-location=FileNameJoin[{"Downloads", "mechanisms-master","v0v94"}];
+location=FileNameJoin[{"Downloads", "mechanisms-master","v1p0"}];
 PacletInstall[
  CreatePacletArchive[
   location
